@@ -46,6 +46,7 @@ desktop.ini
 
 .env
 .env.*
+!.env.example
 *.local.properties
 local.properties
 application-local.properties
