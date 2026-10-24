@@ -40,6 +40,12 @@ tasks.withType<JavaCompile>().configureEach {
 	options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
+springBoot {
+	buildInfo {
+		excludes = setOf("time")
+	}
+}
+
 tasks.processResources {
 	from("contracts/graphql") {
 		into("graphql")
@@ -48,6 +54,7 @@ tasks.processResources {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	systemProperty("matchmap.buildVersion", project.version.toString())
 }
 
 val coverageExclusions = listOf("com/matchmap/api/MatchmapApiApplication.class")

@@ -19,7 +19,7 @@
 ## 4. API version (specs/api-version)
 
 - [x] 4.1 Write `GraphqlSchemaIT.rejectsUnknownField` (scenario "Unknown field is rejected") and show it failing; add `contracts/graphql/schema.graphqls` with `apiVersion: String!` and copy it into the build (design D3); verify the test passes
-- [ ] 4.2 Write `ApiVersionQueryIT.returnsBuildVersion` (scenario "Client requests the API version") and show it failing; add build info and the `apiVersion` resolver (design D4); verify the test passes
+- [x] 4.2 Write `ApiVersionQueryIT.returnsBuildVersion` (scenario "Client requests the API version") and show it failing; add build info and the `apiVersion` resolver (design D4); verify the test passes
 
 ## 5. Request correlation (specs/request-correlation)
 
