@@ -1,0 +1,23 @@
+schema: spec-driven
+
+context: |
+  Backend only for MatchMap, a travel app where users pin countries and cities (VISITED, WANT_TO_GO, LIVED), see them on a world map and compare maps with friends. Web and mobile live in other repositories and consume this API only through the contracts in contracts/.
+  Stack: Java 25, Spring Boot, Spring for GraphQL, Gradle wrapper, PostgreSQL with PostGIS, Flyway, JUnit and Testcontainers, Docker.
+  Contracts are schema-first and live in this repository: contracts/graphql/ for domain operations (default), contracts/openapi/ (OpenAPI 3.1) only for HTTP endpoints where GraphQL does not fit.
+  Flyway migrations are append-only; an applied migration is never edited.
+  Development host is Windows without WSL; every command is written for PowerShell (.\gradlew.bat).
+  The MVP runs locally only; nothing is deployed.
+  Write every artifact in English.
+  Never guess: mark any missing or ambiguous requirement, value or decision with [NEEDS CLARIFICATION: <question>] instead of choosing a default.
+
+rules:
+  proposal:
+    - Always include an Out of scope section
+    - Always include a Depends on section listing the existing specs or changes this change builds on, or None
+  specs:
+    - Every scenario must be concrete enough to map to at least one automated test
+    - "Mark any ambiguity with [NEEDS CLARIFICATION: <question>]"
+  tasks:
+    - Follow TDD in every task, naming the failing test to write first and then the production code that makes it pass
+    - Each task is one commit
+    - Name the test that covers each spec scenario
