@@ -10,6 +10,9 @@ management:
   endpoint:
     health:
       show-components: always
+      show-details: never
+      probes:
+        enabled: false
   health:
     defaults:
       enabled: false

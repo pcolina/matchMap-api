@@ -13,7 +13,7 @@
 ## 3. Service health (specs/service-health)
 
 - [x] 3.1 Write `HealthEndpointIT.reportsUpWhenDatabaseAvailable` (scenario "Application and database available") and show it failing; expose only the health endpoint with the `application` and `database` indicators (design D5); verify the test passes
-- [ ] 3.2 Write `HealthEndpointIT.exposesOnlyStatuses` (scenario "Response contains only statuses") and show it failing if details are visible; hide details and connection data; verify the test passes
+- [x] 3.2 Write `HealthEndpointIT.exposesOnlyStatuses` (scenario "Response contains only statuses") and show it failing if details are visible; hide details and connection data; verify the test passes
 - [ ] 3.3 Write `HealthEndpointDatabaseDownIT.reportsDatabaseDown` (scenario "Database unavailable") with its own container stopped after startup, and show it failing; confirm the overall status is `DOWN` with HTTP 503; verify the test passes
 
 ## 4. API version (specs/api-version)

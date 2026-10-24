@@ -30,4 +30,22 @@ class HealthEndpointIT {
         .isEqualTo("UP");
     assertThat(response).bodyJson().extractingPath("$.components.database.status").isEqualTo("UP");
   }
+
+  @Test
+  void exposesOnlyStatuses() {
+    var response = mockMvc.get().uri("/actuator/health").exchange();
+
+    assertThat(response)
+        .bodyJson()
+        .isStrictlyEqualTo(
+            """
+            {
+              "status": "UP",
+              "components": {
+                "application": { "status": "UP" },
+                "database": { "status": "UP" }
+              }
+            }
+            """);
+  }
 }
