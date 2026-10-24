@@ -1,6 +1,10 @@
 spring:
   application:
     name: matchmap-api
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
 
 logging:
   pattern:

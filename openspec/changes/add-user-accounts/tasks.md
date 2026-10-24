@@ -4,7 +4,7 @@
 
 - [x] 1.1 Write `PublicEndpointsIT.publicOperationsStayPublic` and `PublicEndpointsIT.unknownPathRequiresToken` (scenarios "Public operations stay public" and "Unknown path requires a token") and show the second failing; add the dependencies from design D14 and the `SecurityFilterChain` from D7, plus the test-only chain from D13; verify both tests and all existing tests pass
 - [x] 1.2 Write `docs/adr/0001-persistence-with-spring-data-jpa.md` (D1) and `docs/adr/0002-token-based-authentication.md` (D4, D5); verify both files exist and state context, decision, alternatives and consequences
-- [ ] 1.3 Write `AccountSchemaIT.createsAccountAndRefreshTokenTables` and show it failing; add `V2__create_user_accounts.sql` (D2), the JPA settings from D1 and the `UserAccount` and `RefreshToken` entities; verify the test passes with Hibernate schema validation enabled
+- [x] 1.3 Write `AccountSchemaIT.createsAccountAndRefreshTokenTables` and show it failing; add `V2__create_user_accounts.sql` (D2), the JPA settings from D1 and the `UserAccount` and `RefreshToken` entities; verify the test passes with Hibernate schema validation enabled
 
 ## 2. Contracts
 

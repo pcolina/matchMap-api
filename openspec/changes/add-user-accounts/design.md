@@ -30,7 +30,7 @@ Use Spring Data JPA with Hibernate. Flyway owns the schema; Hibernate only valid
 ### D2. Schema (`V2__create_user_accounts.sql`)
 
 - `user_account`: `id uuid` primary key, `email varchar(254)` unique, `username varchar(30)` unique, `display_name varchar(50)`, `password_hash varchar(255)` nullable, `google_subject varchar(255)` unique nullable, `created_at timestamptz`. Email and username are stored already lowercased, so plain unique constraints enforce case-insensitive uniqueness.
-- `refresh_token`: `id uuid` primary key, `account_id uuid` referencing `user_account`, `session_id uuid` (indexed), `token_hash char(64)` unique, `created_at`, `expires_at`, `used_at` nullable, `revoked_at` nullable.
+- `refresh_token`: `id uuid` primary key, `account_id uuid` referencing `user_account`, `session_id uuid` (indexed), `token_hash varchar(64)` unique, `created_at`, `expires_at`, `used_at` nullable, `revoked_at` nullable.
 - Future tables such as a user profile reference `user_account.id`.
 
 ### D3. Password hashing with Argon2id
