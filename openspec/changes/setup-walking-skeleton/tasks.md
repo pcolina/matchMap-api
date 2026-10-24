@@ -8,7 +8,7 @@
 
 ## 2. Database and migrations
 
-- [ ] 2.1 Write `PostgisMigrationIT.enablesPostgisExtension` against a shared PostGIS Testcontainers container and show it failing; add Flyway with `V1__enable_postgis.sql` (design D7); verify the test passes
+- [x] 2.1 Write `PostgisMigrationIT.enablesPostgisExtension` against a shared PostGIS Testcontainers container and show it failing; add Flyway with `V1__enable_postgis.sql` (design D7); verify the test passes
 
 ## 3. Service health (specs/service-health)
 
