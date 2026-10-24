@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ class CorrelationIdFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     String correlationId = request.getHeader(HEADER);
+    if (correlationId == null) {
+      correlationId = UUID.randomUUID().toString();
+    }
     response.setHeader(HEADER, correlationId);
     filterChain.doFilter(request, response);
   }
