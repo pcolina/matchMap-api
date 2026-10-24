@@ -36,7 +36,7 @@
 
 ## 7. Integration check
 
-- [ ] 7.1 From a clean clone, run `.\gradlew.bat check` with Docker running and confirm format, lint, tests and coverage pass; update the Commands table in `CLAUDE.md` if any command differs from what was built
+- [x] 7.1 From a clean clone, run `.\gradlew.bat check` with Docker running and confirm format, lint, tests and coverage pass; update the Commands table in `CLAUDE.md` if any command differs from what was built
 
 ## Workflow follow-up
 
