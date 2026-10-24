@@ -23,7 +23,7 @@
 
 ## 5. Request correlation (specs/request-correlation)
 
-- [ ] 5.1 Write `CorrelationIdFilterTest.reusesClientId` (scenario "Client sends a correlation ID") and show it failing; add the correlation filter (design D6); verify the test passes
+- [x] 5.1 Write `CorrelationIdFilterTest.reusesClientId` (scenario "Client sends a correlation ID") and show it failing; add the correlation filter (design D6); verify the test passes
 - [ ] 5.2 Write `CorrelationIdFilterTest.generatesUuidWhenAbsent` and `CorrelationIdFilterTest.generatesDifferentIdsPerRequest` (scenarios "Client sends no correlation ID" and "Each request gets its own ID") and show them failing; generate UUIDs for missing headers; verify both tests pass
 - [ ] 5.3 Write `CorrelationIdFilterTest.replacesInvalidId` and `CorrelationIdFilterTest.replacesOverLongId` (scenarios "Client sends an invalid correlation ID" and "Client sends an over-long correlation ID") and show them failing; accept only 1 to 64 characters from `A-Z`, `a-z`, `0-9` and `-`; verify both tests pass
 - [ ] 5.4 Write `CorrelationIdLoggingIT.logLinesContainId` and `CorrelationIdLoggingIT.idDoesNotLeakToNextRequest` (scenarios "Log lines carry the request's ID" and "ID does not leak into the next request") and show them failing; add the MDC key to the log pattern and clear it after each request; verify both tests pass
