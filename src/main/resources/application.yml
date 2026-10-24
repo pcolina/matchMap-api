@@ -2,6 +2,10 @@ spring:
   application:
     name: matchmap-api
 
+logging:
+  pattern:
+    correlation: "[%X{correlationId:-}] "
+
 management:
   endpoints:
     web:
