@@ -40,6 +40,12 @@ tasks.withType<JavaCompile>().configureEach {
 	options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
+tasks.processResources {
+	from("contracts/graphql") {
+		into("graphql")
+	}
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
