@@ -4,7 +4,7 @@
 
 - [x] 1.1 Generate the project from Spring Initializr as described in design D1 and D2, pin every version, declare the Java 25 toolchain and the `0.1.0-SNAPSHOT` version; verify that the generated `ApplicationContextTest.contextLoads` runs and passes with `.\gradlew.bat test`
 - [x] 1.2 Add Spotless with google-java-format and `-Xlint:all -Werror` to `check` (design D9); verify `.\gradlew.bat spotlessCheck` fails on a deliberately misformatted file, then passes after `.\gradlew.bat spotlessApply`
-- [ ] 1.3 Add the JaCoCo report and `jacocoTestCoverageVerification` with an 80% line coverage threshold to `check` (design D9); verify `.\gradlew.bat check` runs the verification and prints the coverage result
+- [x] 1.3 Add the JaCoCo report and `jacocoTestCoverageVerification` with an 80% line coverage threshold to `check` (design D9); verify `.\gradlew.bat check` runs the verification and prints the coverage result
 
 ## 2. Database and migrations
 
