@@ -22,6 +22,7 @@ bin/
 gen/
 
 .gradle/
+!gradle/wrapper/gradle-wrapper.jar
 .mvn/wrapper/maven-wrapper.jar
 
 .classpath
@@ -45,6 +46,7 @@ desktop.ini
 
 .env
 .env.*
+!.env.example
 *.local.properties
 local.properties
 application-local.properties

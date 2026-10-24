@@ -51,15 +51,13 @@ matchmap-api/
 └── src/                     # Application code and tests
 ```
 
-The layout is created by the walking-skeleton change. Until then, only `openspec/` and this file exist.
-
 ## 5. Development environment (Windows, no WSL)
 
 Write every shell command for PowerShell: `.\gradlew.bat`, `\` paths, `$env:VAR`. Do not use bash-only syntax.
 
 Prerequisites, checked once at the start of the walking-skeleton change:
 
-- JDK 25 (`java -version`).
+- JDK 25 in `JAVA_HOME` (`& "$env:JAVA_HOME\bin\java" -version`). Gradle uses `JAVA_HOME`; `java` on `PATH` may point to another JDK.
 - Docker Desktop running (`docker info`). Local PostGIS and Testcontainers need it. If it is missing, stop and ask the user.
 - Node, only for the OpenSpec CLI (`openspec --version`).
 
@@ -71,14 +69,17 @@ Run from the repo root.
 
 | Purpose | Command |
 |---|---|
+| Create the local env file (once) | `Copy-Item infra\docker\.env.example infra\docker\.env` |
 | Start DB, API and contract viewer | `docker compose -f infra/docker/docker-compose.yml up -d --build` |
 | Stop | `docker compose -f infra/docker/docker-compose.yml down` |
-| Run | `.\gradlew.bat bootRun` |
+| Run API with a throwaway PostGIS (Testcontainers) | `.\gradlew.bat bootTestRun` |
 | Test | `.\gradlew.bat test` |
 | Full check (format, lint, tests, coverage) | `.\gradlew.bat check` |
 | Format | `.\gradlew.bat spotlessApply` |
 
-The walking-skeleton change creates these commands. If one is missing or fails, report it. Do not improvise an alternative.
+Once running, the API listens on `http://localhost:8080`: health at `/actuator/health`, GraphQL at `/graphql`, and GraphiQL at `/graphiql` (Docker Compose only). PostGIS is published on the host port set by `POSTGRES_PORT` in `infra/docker/.env`.
+
+If a command is missing or fails, report it. Do not improvise an alternative.
 
 Before marking any task done, run the full check and paste a summary of the result.
 
