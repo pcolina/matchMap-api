@@ -14,7 +14,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -85,6 +90,14 @@ class CorrelationIdLoggingIT {
 
   @TestConfiguration(proxyBeanMethods = false)
   static class ProbeConfiguration {
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    SecurityFilterChain probeSecurityFilterChain(HttpSecurity http) throws Exception {
+      return http.securityMatcher("/test/**")
+          .authorizeHttpRequests(requests -> requests.anyRequest().permitAll())
+          .build();
+    }
 
     @RestController
     static class LogProbeController {
