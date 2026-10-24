@@ -32,7 +32,7 @@
 
 - [x] 6.1 Add `infra/docker/docker-compose.yml` with the `db` service, `infra/docker/.env.example`, and git-ignore `infra/docker/.env` (design D7, D10); verify `docker compose -f infra/docker/docker-compose.yml up -d db` reports the database healthy
 - [x] 6.2 Add the root `Dockerfile` and the `api` service with GraphiQL enabled (design D10); verify `docker compose -f infra/docker/docker-compose.yml up -d --build` starts both services, `GET http://localhost:8080/actuator/health` returns `UP` with an `X-Correlation-Id` header, and `/graphiql` runs `{ apiVersion }`
-- [ ] 6.3 Verify scenario "Application not running" manually: stop the `api` service and confirm `GET http://localhost:8080/actuator/health` is refused; record the result in the PR description
+- [x] 6.3 Verify scenario "Application not running" manually: stop the `api` service and confirm `GET http://localhost:8080/actuator/health` is refused; record the result in the PR description
 
 ## 7. Integration check
 
