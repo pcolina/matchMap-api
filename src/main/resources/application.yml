@@ -1,3 +1,15 @@
 spring:
   application:
     name: matchmap-api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-components: always
+  health:
+    defaults:
+      enabled: false
