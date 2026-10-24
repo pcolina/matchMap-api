@@ -8,7 +8,7 @@
 
 ## 2. Contracts
 
-- [ ] 2.1 Write `AuthContractTest.declaresAuthEndpoints` (parses `contracts/openapi/auth.yaml` and asserts OpenAPI 3.1 with the four `/api/auth/` paths and their status codes) and show it failing; write `contracts/openapi/auth.yaml` and `contracts/graphql/account.graphqls` (D9); verify the test and `GraphqlSchemaIT` pass
+- [x] 2.1 Write `AuthContractTest.declaresAuthEndpoints` (parses `contracts/openapi/auth.yaml` and asserts OpenAPI 3.1 with the four `/api/auth/` paths and their status codes) and show it failing; write `contracts/openapi/auth.yaml` and `contracts/graphql/account.graphqls` (D9); verify the test and `GraphqlSchemaIT` pass
 
 ## 3. Registration (specs/user-accounts)
 
