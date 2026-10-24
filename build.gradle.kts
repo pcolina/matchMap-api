@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "4.1.2"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("com.diffplug.spotless") version "8.10.4"
 }
 
 group = "com.matchmap"
@@ -34,6 +35,17 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.withType<JavaCompile>().configureEach {
+	options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+spotless {
+	lineEndings = com.diffplug.spotless.LineEnding.UNIX
+	java {
+		googleJavaFormat("1.36.1")
+	}
 }

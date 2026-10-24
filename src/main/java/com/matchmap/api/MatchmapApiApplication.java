@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MatchmapApiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MatchmapApiApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(MatchmapApiApplication.class, args);
+  }
 }
