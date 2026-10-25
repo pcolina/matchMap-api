@@ -32,4 +32,39 @@ public class UserAccount {
   private Instant createdAt;
 
   protected UserAccount() {}
+
+  UserAccount(
+      UUID id,
+      String email,
+      String username,
+      String displayName,
+      String passwordHash,
+      Instant createdAt) {
+    this.id = id;
+    this.email = email;
+    this.username = username;
+    this.displayName = displayName;
+    this.passwordHash = passwordHash;
+    this.createdAt = createdAt;
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
 }
