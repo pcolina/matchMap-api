@@ -36,7 +36,12 @@ class SecurityConfiguration {
                 requests
                     .requestMatchers(HttpMethod.GET, "/actuator/health")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/**")
+                    .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/auth/login",
+                        "/api/auth/google",
+                        "/api/auth/refresh",
+                        "/api/auth/logout")
                     .permitAll()
                     .requestMatchers("/graphql", "/graphiql/**", "/error")
                     .permitAll()

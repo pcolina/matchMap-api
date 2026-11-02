@@ -42,4 +42,11 @@ class PublicEndpointsIT {
 
     assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
   }
+
+  @Test
+  void unlistedAuthPathRequiresToken() {
+    var response = mockMvc.post().uri("/api/auth/anything").exchange();
+
+    assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
+  }
 }
