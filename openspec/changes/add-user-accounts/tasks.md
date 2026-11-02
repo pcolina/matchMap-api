@@ -44,7 +44,7 @@
 
 ## 8. Configuration and local runtime
 
-- [ ] 8.1 Write `AuthPropertiesTest.refusesMissingOrShortJwtSecret` and show it failing; validate `matchmap.auth.*` properties at startup (D12); verify the test passes
+- [x] 8.1 Write `AuthPropertiesTest.refusesMissingOrShortJwtSecret` and show it failing; validate `matchmap.auth.*` properties at startup (D12); verify the test passes
 - [ ] 8.2 Add the new variables to `infra/docker/.env.example` and pass them to the `api` service; verify with `docker compose -f infra/docker/docker-compose.yml up -d --build` that register, login and `me` work end to end with `curl.exe`, and record the commands and results for the PR
 
 ## 9. Integration check
