@@ -36,6 +36,19 @@ class RefreshTokenService {
     return token;
   }
 
+  @Transactional
+  Rotation rotate(String presented) {
+    var now = Instant.now();
+    var current =
+        refreshTokens
+            .findByTokenHash(hash(presented))
+            .filter(token -> token.getExpiresAt().isAfter(now))
+            .orElseThrow(AuthException::invalidRefreshToken);
+    current.markUsed(now);
+    var account = current.getAccount();
+    return new Rotation(account, issue(account, current.getSessionId()));
+  }
+
   private static String hash(String token) {
     try {
       return HexFormat.of()
@@ -44,4 +57,6 @@ class RefreshTokenService {
       throw new IllegalStateException(e);
     }
   }
+
+  record Rotation(UserAccount account, String refreshToken) {}
 }

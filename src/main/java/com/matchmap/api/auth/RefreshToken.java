@@ -41,6 +41,22 @@ public class RefreshToken {
 
   protected RefreshToken() {}
 
+  UserAccount getAccount() {
+    return account;
+  }
+
+  UUID getSessionId() {
+    return sessionId;
+  }
+
+  Instant getExpiresAt() {
+    return expiresAt;
+  }
+
+  void markUsed(Instant now) {
+    this.usedAt = now;
+  }
+
   RefreshToken(
       UUID id,
       UserAccount account,

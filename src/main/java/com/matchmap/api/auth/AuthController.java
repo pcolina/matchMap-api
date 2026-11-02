@@ -51,9 +51,21 @@ class AuthController {
     }
     loginThrottle.reset(throttleKey);
     var account = found.get();
-    var accessToken = accessTokens.issue(account.getId());
-    var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
-    return new TokenResponse("Bearer", accessToken, accessTokens.ttl().getSeconds(), refreshToken);
+    return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
+  }
+
+  @PostMapping("/refresh")
+  public TokenResponse refresh(@RequestBody RefreshRequest request) {
+    var rotation = refreshTokens.rotate(request.refreshToken());
+    return tokenResponse(rotation.account(), rotation.refreshToken());
+  }
+
+  private TokenResponse tokenResponse(UserAccount account, String refreshToken) {
+    return new TokenResponse(
+        "Bearer",
+        accessTokens.issue(account.getId()),
+        accessTokens.ttl().getSeconds(),
+        refreshToken);
   }
 
   private boolean passwordMatches(UserAccount account, String password) {
@@ -62,6 +74,8 @@ class AuthController {
   }
 
   record LoginRequest(String email, String password) {}
+
+  record RefreshRequest(String refreshToken) {}
 
   record TokenResponse(String tokenType, String accessToken, long expiresIn, String refreshToken) {}
 }
