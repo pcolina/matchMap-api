@@ -64,6 +64,7 @@ tasks.processResources {
 tasks.withType<Test> {
 	useJUnitPlatform()
 	systemProperty("matchmap.buildVersion", project.version.toString())
+	environment("MATCHMAP_JWT_SECRET", "YfPr5v3GeQV9r4/c22g2kEdvPGShk0Yz9P4o2Myt8Xg=")
 }
 
 val coverageExclusions = listOf("com/matchmap/api/MatchmapApiApplication.class")

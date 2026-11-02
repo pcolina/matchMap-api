@@ -165,7 +165,9 @@ class RegisterIT {
     String suffix = uniqueSuffix();
 
     var response =
-        graphql(registerBody("short" + suffix + "@example.com", "short_" + suffix, "Ana", "a".repeat(11)));
+        graphql(
+            registerBody(
+                "short" + suffix + "@example.com", "short_" + suffix, "Ana", "a".repeat(11)));
 
     assertValidationFailed(response, "password");
   }
@@ -175,7 +177,9 @@ class RegisterIT {
     String suffix = uniqueSuffix();
 
     var response =
-        graphql(registerBody("long" + suffix + "@example.com", "long_" + suffix, "Ana", "a".repeat(129)));
+        graphql(
+            registerBody(
+                "long" + suffix + "@example.com", "long_" + suffix, "Ana", "a".repeat(129)));
 
     assertValidationFailed(response, "password");
   }

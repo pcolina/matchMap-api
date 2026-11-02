@@ -11,7 +11,6 @@ class PasswordEncoderTest {
   void defaultEncoderIsArgon2id() {
     PasswordEncoder encoder = new PasswordEncoderConfiguration().passwordEncoder();
 
-    assertThat(encoder.encode("correct horse battery"))
-        .startsWith("{argon2@SpringSecurity_v5_8}");
+    assertThat(encoder.encode("correct horse battery")).startsWith("{argon2@SpringSecurity_v5_8}");
   }
 }

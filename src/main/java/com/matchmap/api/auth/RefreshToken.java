@@ -40,4 +40,19 @@ public class RefreshToken {
   private Instant revokedAt;
 
   protected RefreshToken() {}
+
+  RefreshToken(
+      UUID id,
+      UserAccount account,
+      UUID sessionId,
+      String tokenHash,
+      Instant createdAt,
+      Instant expiresAt) {
+    this.id = id;
+    this.account = account;
+    this.sessionId = sessionId;
+    this.tokenHash = tokenHash;
+    this.createdAt = createdAt;
+    this.expiresAt = expiresAt;
+  }
 }

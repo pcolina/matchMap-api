@@ -1,3 +1,9 @@
+matchmap:
+  auth:
+    jwt-secret: ${MATCHMAP_JWT_SECRET}
+    access-token-ttl: 15m
+    refresh-token-ttl: 30d
+
 spring:
   application:
     name: matchmap-api
