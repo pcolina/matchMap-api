@@ -36,14 +36,20 @@ class RefreshTokenService {
     return token;
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = AuthException.class)
   Rotation rotate(String presented) {
     var now = Instant.now();
     var current =
         refreshTokens
             .findByTokenHash(hash(presented))
-            .filter(token -> token.getExpiresAt().isAfter(now))
             .orElseThrow(AuthException::invalidRefreshToken);
+    if (current.isUsedOrRevoked()) {
+      refreshTokens.findBySessionId(current.getSessionId()).forEach(token -> token.revoke(now));
+      throw AuthException.invalidRefreshToken();
+    }
+    if (!current.getExpiresAt().isAfter(now)) {
+      throw AuthException.invalidRefreshToken();
+    }
     current.markUsed(now);
     var account = current.getAccount();
     return new Rotation(account, issue(account, current.getSessionId()));

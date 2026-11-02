@@ -29,7 +29,7 @@
 ## 5. Session lifecycle (specs/authentication)
 
 - [x] 5.1 Write `RefreshIT.rotatesTokens` and `RefreshIT.rejectsExpiredToken` (scenarios "Successful refresh" and "Expired refresh token") and show them failing; add `POST /api/auth/refresh` with rotation and row locking (D5); verify the tests pass
-- [ ] 5.2 Write `RefreshIT.reuseRevokesSession` (scenario "Stolen token is replayed") and show it failing; add reuse detection (D5); verify the test passes
+- [x] 5.2 Write `RefreshIT.reuseRevokesSession` (scenario "Stolen token is replayed") and show it failing; add reuse detection (D5); verify the test passes
 - [ ] 5.3 Write `LogoutIT.endsSession` and `LogoutIT.unknownTokenReturnsNoContent` (scenarios "Sign out ends the session" and "Unknown token") and show them failing; add `POST /api/auth/logout`; verify the tests pass
 
 ## 6. Google sign-in (specs/authentication)

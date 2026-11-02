@@ -71,6 +71,22 @@ class RefreshIT {
     assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_refresh_token");
   }
 
+  @Test
+  void reuseRevokesSession() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "sam" + suffix + "@example.com";
+    registerAccount(email, "sam_" + suffix);
+    var first = refreshTokenOf(login(email));
+    var second = refreshTokenOf(post("/api/auth/refresh", Map.of("refreshToken", first)));
+
+    var replay = post("/api/auth/refresh", Map.of("refreshToken", first));
+    var later = post("/api/auth/refresh", Map.of("refreshToken", second));
+
+    assertThat(replay).hasStatus(HttpStatus.UNAUTHORIZED);
+    assertThat(replay).bodyJson().extractingPath("$.error").isEqualTo("invalid_refresh_token");
+    assertThat(later).hasStatus(HttpStatus.UNAUTHORIZED);
+  }
+
   private static String sha256(String token) throws Exception {
     return HexFormat.of()
         .formatHex(

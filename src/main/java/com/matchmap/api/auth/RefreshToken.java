@@ -57,6 +57,16 @@ public class RefreshToken {
     this.usedAt = now;
   }
 
+  boolean isUsedOrRevoked() {
+    return usedAt != null || revokedAt != null;
+  }
+
+  void revoke(Instant now) {
+    if (revokedAt == null) {
+      revokedAt = now;
+    }
+  }
+
   RefreshToken(
       UUID id,
       UserAccount account,
