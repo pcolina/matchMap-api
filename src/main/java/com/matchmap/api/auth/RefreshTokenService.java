@@ -55,6 +55,16 @@ class RefreshTokenService {
     return new Rotation(account, issue(account, current.getSessionId()));
   }
 
+  @Transactional
+  void logout(String presented) {
+    var now = Instant.now();
+    refreshTokens
+        .findByTokenHash(hash(presented))
+        .ifPresent(
+            token ->
+                refreshTokens.findBySessionId(token.getSessionId()).forEach(t -> t.revoke(now)));
+  }
+
   private static String hash(String token) {
     try {
       return HexFormat.of()

@@ -6,10 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -58,6 +60,12 @@ class AuthController {
   public TokenResponse refresh(@RequestBody RefreshRequest request) {
     var rotation = refreshTokens.rotate(request.refreshToken());
     return tokenResponse(rotation.account(), rotation.refreshToken());
+  }
+
+  @PostMapping("/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void logout(@RequestBody RefreshRequest request) {
+    refreshTokens.logout(request.refreshToken());
   }
 
   private TokenResponse tokenResponse(UserAccount account, String refreshToken) {
