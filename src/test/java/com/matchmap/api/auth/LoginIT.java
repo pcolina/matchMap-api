@@ -8,6 +8,7 @@ import com.matchmap.api.TestcontainersConfiguration;
 import com.nimbusds.jwt.SignedJWT;
 import java.time.Duration;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import tools.jackson.databind.json.JsonMapper;
@@ -28,6 +30,8 @@ class LoginIT {
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;
+
+  @Autowired JdbcTemplate jdbcTemplate;
 
   @Test
   void returnsTokensForCorrectCredentials() {
@@ -55,6 +59,44 @@ class LoginIT {
         Duration.between(claims.getIssueTime().toInstant(), claims.getExpirationTime().toInstant());
     assertThat(response).bodyJson().extractingPath("$.expiresIn").isEqualTo(900);
     assertThat(lifetime).isEqualTo(Duration.ofSeconds(900));
+  }
+
+  @Test
+  void rejectsWrongPassword() {
+    String suffix = uniqueSuffix();
+    registerAccount("cara" + suffix + "@example.com", "cara_" + suffix);
+
+    var response = login("cara" + suffix + "@example.com", "wrong password here");
+
+    assertInvalidCredentials(response);
+  }
+
+  @Test
+  void rejectsUnknownEmail() {
+    var response = login("nobody" + uniqueSuffix() + "@example.com", PASSWORD);
+
+    assertInvalidCredentials(response);
+  }
+
+  @Test
+  void rejectsAccountWithoutPassword() {
+    String suffix = uniqueSuffix();
+    jdbcTemplate.update(
+        "INSERT INTO user_account (id, email, username, display_name, created_at)"
+            + " VALUES (?, ?, ?, ?, now())",
+        UUID.randomUUID(),
+        "gina" + suffix + "@example.com",
+        "gina_" + suffix,
+        "Gina");
+
+    var response = login("gina" + suffix + "@example.com", PASSWORD);
+
+    assertInvalidCredentials(response);
+  }
+
+  private void assertInvalidCredentials(MvcTestResult response) {
+    assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_credentials");
   }
 
   private String accessToken(MvcTestResult response) throws Exception {

@@ -22,7 +22,7 @@
 ## 4. Password sign-in and access tokens (specs/authentication)
 
 - [x] 4.1 Write `LoginIT.returnsTokensForCorrectCredentials` and `LoginIT.expiresInMatchesAccessTokenLifetime` (scenarios "Correct credentials" and "expiresIn matches the access token lifetime") and show them failing; add `POST /api/auth/login`, the access token issuer (D4) and refresh token creation (D5); verify the tests pass
-- [ ] 4.2 Write `LoginIT.rejectsWrongPassword`, `LoginIT.rejectsUnknownEmail` and `LoginIT.rejectsAccountWithoutPassword` (scenarios "Wrong password", "Unknown email" and "Account without password") and show them failing; return the generic `invalid_credentials` error (D10); verify the tests pass
+- [x] 4.2 Write `LoginIT.rejectsWrongPassword`, `LoginIT.rejectsUnknownEmail` and `LoginIT.rejectsAccountWithoutPassword` (scenarios "Wrong password", "Unknown email" and "Account without password") and show them failing; return the generic `invalid_credentials` error (D10); verify the tests pass
 - [ ] 4.3 Write `MeQueryIT.returnsOwnAccount`, `MeQueryIT.anonymousClientIsUnauthorized`, `MeQueryIT.tamperedTokenIsRejected` and `MeQueryIT.expiredTokenIsRejected` (scenarios "Signed-in user reads their account", "Anonymous client reads me", "Valid token", "Tampered token" and "Expired token") and show them failing; add the `me` query protected with `@PreAuthorize` and the JWT decoder (D4, D7); verify the tests pass
 - [ ] 4.4 Write `LoginThrottlingIT.throttlesAfterFailedAttempts` and `LoginThrottlingIT.otherEmailsAreNotAffected` (scenarios "Too many failed attempts" and "Other emails are not affected") and show them failing; add the in-memory throttling with 5 failed attempts per email and IP in a 15-minute window (D8); verify the tests pass
 
