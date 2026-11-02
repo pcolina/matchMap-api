@@ -1,4 +1,4 @@
-name: matchmap
+name: matchmap-backend
 
 services:
   db:

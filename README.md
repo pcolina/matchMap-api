@@ -149,7 +149,7 @@ The project includes a test entry point that starts a throwaway PostGIS containe
 | `POSTGRES_DB is required` when running Compose | `infra/docker/.env` does not exist. Create it from `.env.example`. |
 | `Cannot connect to the Docker daemon` | Docker is not running. Start Docker Desktop and wait until it reports ready. |
 | `port is already allocated` on `8080` or `5433` | Another process uses the port. Stop it, or change `POSTGRES_PORT` in `infra/docker/.env` (for `8080`, the port is fixed in `docker-compose.yml`). |
-| API container exits or stays unhealthy | Read the logs with `docker logs matchmap-api-1`. |
+| API container exits or stays unhealthy | Read the logs with `docker logs matchmap-backend-api-1`. |
 | Start from an empty database | `docker compose -f infra/docker/docker-compose.yml down -v`, then `up -d --build`. This deletes all local data. |
 
 ## Using the API
@@ -188,7 +188,7 @@ Send your own ID to follow a request through the logs, or let the API generate o
 
 ```bash
 curl -i -H "X-Correlation-Id: my-trace-1" http://localhost:8080/actuator/health
-docker logs -f matchmap-api-1
+docker logs -f matchmap-backend-api-1
 ```
 
 A client-supplied ID is accepted only if it has 1 to 64 characters from `A-Z`, `a-z`, `0-9` and `-`; anything else is replaced with a new UUID, so a client cannot inject content into the logs.
@@ -198,7 +198,7 @@ A client-supplied ID is accepted only if it has 1 to 64 characters from `A-Z`, `
 PostGIS is published on the host port set by `POSTGRES_PORT` (`5433` in `infra/docker/.env.example`, to avoid clashing with a local PostgreSQL on `5432`). Connect with any client (pgAdmin, DBeaver, IntelliJ) using the credentials in `infra/docker/.env`, or from the container:
 
 ```bash
-docker exec -it matchmap-db-1 psql -U matchmap -d matchmap
+docker exec -it matchmap-backend-db-1 psql -U matchmap -d matchmap
 ```
 
 ## Development
