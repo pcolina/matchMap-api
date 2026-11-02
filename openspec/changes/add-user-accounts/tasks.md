@@ -35,6 +35,7 @@
 ## 6. Google sign-in (specs/authentication)
 
 - [ ] 6.1 Write `GoogleSignInIT.createsAccountOnFirstSignIn`, `GoogleSignInIT.signsInReturningUser` and `UsernameGeneratorTest` (scenarios "First Google sign-in creates an account" and "Returning Google user"), signing tokens with a local test RSA key, and show them failing; add `POST /api/auth/google`, the `GoogleIdTokenVerifier` and the username generator (D6); verify the tests pass
+  - [NEEDS CLARIFICATION: the username generator from D6 does not say (a) what to do when the email local part has fewer than 3 usable characters after replacing invalid ones, e.g. `a@gmail.com`; (b) the format of the numeric suffix on collision (`carla2` or `carla_2`) and (c) how to cut the base to 30 characters so that the suffix still fits. Options for (a) are a fixed fallback such as `user`, padding with `_`, or a generated `user_<random>`; the answer decides the 6.1 red test.]
 - [ ] 6.2 Write `GoogleSignInIT.rejectsTokenForAnotherAudience` and `GoogleSignInIT.rejectsExpiredToken` (scenarios "Token for another audience" and "Expired token") and show them failing; add the issuer, audience and timestamp validators (D6); verify the tests pass
 - [ ] 6.3 Write `GoogleSignInIT.linksPasswordAccountByVerifiedEmail` and `GoogleSignInIT.rejectsUnverifiedEmail` (scenarios "Linking a password account" and "Unverified Google email") and show them failing; add linking and the `google_email_not_verified` error; verify the tests pass
 
