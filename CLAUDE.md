@@ -6,18 +6,21 @@ Operating manual for any AI coding agent working in this repository. Read it bef
 
 MatchMap is a travel app for web and mobile. Users pin countries and cities (`VISITED`, `WANT_TO_GO`, `LIVED`), see them on a world map, find friends, and compare maps with them: in common, only me, only them, shared wishlist, trip ideas and a Jaccard compatibility score.
 
-This repository is the **backend only**: the API and its database. Web and mobile live in other repositories and consume this API only through its published contracts.
+This repository is the **backend only**: the API and its database. Web and mobile live in https://github.com/pcolina/MatchMap and consume this API only through its published contracts.
 
 Anything not covered by an approved spec in `openspec/specs/` or an approved change in `openspec/changes/` is out of scope.
 
 ## 2. Golden rules
 
+- **Do only what the user asks.** Never take an action the user did not explicitly request. If something else seems necessary or useful, ask first and wait for the answer.
+- **Never touch the remote repository unless explicitly asked.** No `push`, `fetch`, `pull`, `ls-remote`, pull requests or any other interaction with GitHub, not even read-only, unless the user explicitly requests that exact action.
 - **No code without an approved change.** Every change to code belongs to an OpenSpec change in `openspec/changes/<change-name>/`. Exceptions are typo fixes and dependency bumps, and those still need the user's OK.
 - **One change at a time.** Only one change is open in the repository. Do not start another until the current one is merged into `main` and archived.
 - **Stop at every gate.** After proposing a change, stop and wait for explicit approval. After implementing it, stop and wait before archiving. Never chain phases.
 - **Never guess.** If a requirement, behaviour, name, value or decision is missing or ambiguous, add `[NEEDS CLARIFICATION: <question>]` to the artifact, ask the user and stop. This also applies during `/opsx:apply`. Do not pick a "reasonable default".
 - **TDD always.** For every task: write the failing test, run it and show it failing, write the minimum code to make it pass, then refactor. Never write production code before its test.
 - **Schema-first API.** Any API change starts in `contracts/` (`graphql/` for domain operations, `openapi/` for HTTP endpoints where GraphQL does not fit). The implementation follows the contract.
+- **Data validation on both sides.** Required fields, length, format and the other data rules are validated in the API and in the clients (web and mobile). The API is the authority: it validates every request, whatever the client did. A client never enforces a rule the API does not enforce, and a rule the API lacks is added to the API change.
 - **Never** commit secrets, disable or skip tests, lower coverage thresholds, edit an applied Flyway migration, or add a dependency that the approved `design.md` does not list.
 - **No comments** in any file except Markdown, unless the user asks for them.
 - **Everything technical is in English:** code, identifiers, commits, PRs and OpenSpec artifacts. Conversation with the user may be in Spanish.
@@ -108,9 +111,10 @@ Rules:
 
 ## 9. Git, commits and PRs
 
-- Trunk-based: `main` is always green. One branch per change, squash-merged via PR.
+- Trunk-based: `main` is always green. One branch per change, merged via PR with a merge commit (no squash), so the history graph shows every change and its task commits.
 - Commit subjects are short imperative sentences in English, with no prefix (`Add upsertPin mutation`). One commit per task, with the task id in the body (`Task: 2.3`).
-- The agent may commit on the change branch and open the PR. The agent never merges, force-pushes, rewrites `main` or deletes branches.
+- The agent may commit locally on the change branch. It never pushes, opens pull requests, merges, force-pushes, rewrites `main` or deletes branches unless the user explicitly asks for that action.
+- Commit messages and PR descriptions never include AI attribution (no `Co-Authored-By` trailers, no "Generated with" lines).
 - The PR description includes the change name, the completed tasks, the test summary, any contract or schema changes, and open questions.
 
 ## 10. Definition of Done (per change)

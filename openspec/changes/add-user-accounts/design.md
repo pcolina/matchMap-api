@@ -104,6 +104,17 @@ A component keeps a fixed-window counter per `(normalized email, client IP)` in 
 - Test starters: `spring-boot-starter-security-test`, `spring-boot-starter-security-oauth2-resource-server-test`, `spring-boot-starter-validation-test`, `spring-boot-starter-data-jpa-test`.
 - `org.bouncycastle:bcprov-jdk18on:1.86` (D3).
 
+### D15. Timeouts and retries
+
+The API makes outbound HTTP calls only to fetch Google's JWK set (D6). The database is the other external dependency. The rules below cover both.
+
+- Every outbound HTTP call has an explicit connect timeout and read timeout, set on the JWK source used by D6. Library defaults are not relied upon. The Google JWK set fetch uses a connect timeout of 2 seconds and a read timeout of 3 seconds.
+- The database connection has an explicit acquisition timeout (`spring.datasource.hikari.connection-timeout`) and a statement timeout. The connection acquisition timeout is 2 seconds, and the statement timeout is 5 seconds.
+- Retries apply only to idempotent calls to external services, which today means the Google JWK set fetch. The fetch is retried up to 2 times (3 attempts in total), with exponential backoff starting at 500 ms.
+- The API never retries its own mutations: `register`, sign-in, refresh and sign-out. Retrying a refresh could present an already used token and make D5 revoke a legitimate session.
+- Inbound GraphQL and REST endpoints get no retries and no circuit breaker. Sign-in abuse is limited by D8.
+- Library: retries use Spring Framework's core `@Retryable`, enabled with `@EnableResilientMethods`, and timeouts come from the HTTP client. No additional dependency is needed. Resilience4j is the alternative to adopt if a later change needs circuit breakers or several external services; adopting it would then need its own decision, recorded in a new design section and an ADR.
+
 ## Risks / Trade-offs
 
 - [Registration reveals whether an email is taken (`EMAIL_TAKEN`)] → Unavoidable without email verification; the sign-in endpoint stays non-revealing. Revisit when email verification is added.

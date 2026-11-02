@@ -1,6 +1,6 @@
 # ADR 0002: Token-based authentication with JWT access tokens and rotating refresh tokens
 
-- Status: Accepted
+- Status: Proposed
 - Date: 2026-10-24
 - Change: `add-user-accounts`
 
