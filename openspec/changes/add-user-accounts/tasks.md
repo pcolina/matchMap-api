@@ -40,7 +40,7 @@
 
 ## 7. Credential hygiene (specs/authentication)
 
-- [ ] 7.1 Write `CredentialLeakIT.signInLeavesNoSecretsInLogs` and `CredentialLeakIT.storesOnlyRefreshTokenHashes` (scenarios "Sign-in leaves no secrets in the logs" and "Stored refresh tokens are hashes") and show them failing if any secret leaks; fix any leak found; verify the tests pass
+- [x] 7.1 Write `CredentialLeakIT.signInLeavesNoSecretsInLogs` and `CredentialLeakIT.storesOnlyRefreshTokenHashes` (scenarios "Sign-in leaves no secrets in the logs" and "Stored refresh tokens are hashes") and show them failing if any secret leaks; fix any leak found; verify the tests pass
 
 ## 8. Configuration and local runtime
 
