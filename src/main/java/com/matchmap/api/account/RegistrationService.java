@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
@@ -76,7 +77,7 @@ class RegistrationService {
       @NotBlank @Email @Size(max = 254) String email,
       @NotBlank @Pattern(regexp = "[a-z0-9_]{3,30}") String username,
       @NotBlank @Size(max = 50) String displayName,
-      String password) {
+      @NotNull @Size(min = 12, max = 128) String password) {
 
     static Registration from(RegisterInput input) {
       return new Registration(

@@ -160,6 +160,26 @@ class RegisterIT {
     assertValidationFailed(response, "displayName");
   }
 
+  @Test
+  void rejectsTooShortPassword() {
+    String suffix = uniqueSuffix();
+
+    var response =
+        graphql(registerBody("short" + suffix + "@example.com", "short_" + suffix, "Ana", "a".repeat(11)));
+
+    assertValidationFailed(response, "password");
+  }
+
+  @Test
+  void rejectsTooLongPassword() {
+    String suffix = uniqueSuffix();
+
+    var response =
+        graphql(registerBody("long" + suffix + "@example.com", "long_" + suffix, "Ana", "a".repeat(129)));
+
+    assertValidationFailed(response, "password");
+  }
+
   private void assertValidationFailed(MvcTestResult response, String field) {
     assertThat(response)
         .bodyJson()
