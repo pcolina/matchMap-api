@@ -1,5 +1,6 @@
 package com.matchmap.api.auth;
 
+import java.time.Duration;
 import org.springframework.http.HttpStatus;
 
 class AuthException extends RuntimeException {
@@ -8,15 +9,21 @@ class AuthException extends RuntimeException {
 
   private final HttpStatus status;
   private final String code;
+  private final Duration retryAfter;
 
-  AuthException(HttpStatus status, String code) {
+  private AuthException(HttpStatus status, String code, Duration retryAfter) {
     super(code, null, false, false);
     this.status = status;
     this.code = code;
+    this.retryAfter = retryAfter;
   }
 
   static AuthException invalidCredentials() {
-    return new AuthException(HttpStatus.UNAUTHORIZED, "invalid_credentials");
+    return new AuthException(HttpStatus.UNAUTHORIZED, "invalid_credentials", null);
+  }
+
+  static AuthException tooManyAttempts(Duration retryAfter) {
+    return new AuthException(HttpStatus.TOO_MANY_REQUESTS, "too_many_attempts", retryAfter);
   }
 
   HttpStatus status() {
@@ -25,5 +32,9 @@ class AuthException extends RuntimeException {
 
   String code() {
     return code;
+  }
+
+  Duration retryAfter() {
+    return retryAfter;
   }
 }

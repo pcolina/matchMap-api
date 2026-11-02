@@ -2,6 +2,8 @@ package com.matchmap.api.auth;
 
 import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,25 +20,37 @@ class AuthController {
   private final PasswordEncoder passwordEncoder;
   private final AccessTokenIssuer accessTokens;
   private final RefreshTokenService refreshTokens;
+  private final LoginThrottle loginThrottle;
 
   AuthController(
       UserAccountRepository accounts,
       PasswordEncoder passwordEncoder,
       AccessTokenIssuer accessTokens,
-      RefreshTokenService refreshTokens) {
+      RefreshTokenService refreshTokens,
+      LoginThrottle loginThrottle) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.accessTokens = accessTokens;
     this.refreshTokens = refreshTokens;
+    this.loginThrottle = loginThrottle;
   }
 
   @PostMapping("/login")
-  public TokenResponse login(@RequestBody LoginRequest request) {
-    var account =
-        accounts
-            .findByEmail(request.email().trim().toLowerCase(Locale.ROOT))
-            .filter(candidate -> passwordMatches(candidate, request.password()))
-            .orElseThrow(AuthException::invalidCredentials);
+  public TokenResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    var email = request.email().trim().toLowerCase(Locale.ROOT);
+    var throttleKey = email + "|" + httpRequest.getRemoteAddr();
+    var now = Instant.now();
+    var retryAfter = loginThrottle.retryAfter(throttleKey, now);
+    if (retryAfter.isPresent()) {
+      throw AuthException.tooManyAttempts(retryAfter.get());
+    }
+    var found = accounts.findByEmail(email).filter(c -> passwordMatches(c, request.password()));
+    if (found.isEmpty()) {
+      loginThrottle.recordFailure(throttleKey, now);
+      throw AuthException.invalidCredentials();
+    }
+    loginThrottle.reset(throttleKey);
+    var account = found.get();
     var accessToken = accessTokens.issue(account.getId());
     var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
     return new TokenResponse("Bearer", accessToken, accessTokens.ttl().getSeconds(), refreshToken);
