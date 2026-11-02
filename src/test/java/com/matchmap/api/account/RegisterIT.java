@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
@@ -24,6 +25,8 @@ class RegisterIT {
   private static final String PASSWORD = "correct horse battery";
 
   @Autowired MockMvcTester mockMvc;
+
+  @Autowired JdbcTemplate jdbcTemplate;
 
   @Test
   void registersAccount() {
@@ -70,6 +73,99 @@ class RegisterIT {
         .asArray()
         .isNotEmpty()
         .noneSatisfy(name -> assertThat(name.toString().toLowerCase()).contains("password"));
+  }
+
+  @Test
+  void normalizesEmail() {
+    String suffix = uniqueSuffix();
+
+    var response =
+        graphql(
+            registerBody("  Ana" + suffix + "@Example.COM ", "norm_" + suffix, "Ana", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.email")
+        .isEqualTo("ana" + suffix + "@example.com");
+  }
+
+  @Test
+  void rejectsTakenEmail() {
+    String suffix = uniqueSuffix();
+    graphql(registerBody("taken" + suffix + "@example.com", "first_" + suffix, "Ana", PASSWORD));
+
+    var response =
+        graphql(
+            registerBody("TAKEN" + suffix + "@example.com", "second_" + suffix, "Ana", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.code")
+        .isEqualTo("EMAIL_TAKEN");
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM user_account WHERE email = ?",
+                Integer.class,
+                "taken" + suffix + "@example.com"))
+        .isEqualTo(1);
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM user_account WHERE username = ?",
+                Integer.class,
+                "second_" + suffix))
+        .isZero();
+  }
+
+  @Test
+  void rejectsTakenUsername() {
+    String suffix = uniqueSuffix();
+    graphql(registerBody("first" + suffix + "@example.com", "taken_" + suffix, "Ana", PASSWORD));
+
+    var response =
+        graphql(
+            registerBody("second" + suffix + "@example.com", "TAKEN_" + suffix, "Ana", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.code")
+        .isEqualTo("USERNAME_TAKEN");
+  }
+
+  @Test
+  void rejectsInvalidEmail() {
+    String suffix = uniqueSuffix();
+
+    var response = graphql(registerBody("not-an-email", "invalid_" + suffix, "Ana", PASSWORD));
+
+    assertValidationFailed(response, "email");
+  }
+
+  @Test
+  void rejectsInvalidUsername() {
+    String suffix = uniqueSuffix();
+
+    var response = graphql(registerBody("short" + suffix + "@example.com", "a", "Ana", PASSWORD));
+
+    assertValidationFailed(response, "username");
+  }
+
+  @Test
+  void rejectsBlankDisplayName() {
+    String suffix = uniqueSuffix();
+
+    var response =
+        graphql(
+            registerBody("blank" + suffix + "@example.com", "blank_" + suffix, "   ", PASSWORD));
+
+    assertValidationFailed(response, "displayName");
+  }
+
+  private void assertValidationFailed(MvcTestResult response, String field) {
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.code")
+        .isEqualTo("VALIDATION_FAILED");
+    assertThat(response).bodyJson().extractingPath("$.errors[0].extensions.field").isEqualTo(field);
   }
 
   private MvcTestResult graphql(String requestBody) {
