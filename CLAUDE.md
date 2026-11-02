@@ -80,7 +80,7 @@ Run from the repo root.
 | Full check (format, lint, tests, coverage) | `.\gradlew.bat check` |
 | Format | `.\gradlew.bat spotlessApply` |
 
-Once running, the API listens on `http://localhost:8080`: health at `/actuator/health`, GraphQL at `/graphql`, and GraphiQL at `/graphiql` (Docker Compose only). PostGIS is published on the host port set by `POSTGRES_PORT` in `infra/docker/.env`.
+Once running, the API listens on `http://localhost:8080`: health at `/actuator/health`, GraphQL at `/graphql`, and GraphiQL at `/graphiql` (Docker Compose only). PostGIS is published on the host port set by `POSTGRES_PORT` in `infra/docker/.env`. The API needs `MATCHMAP_JWT_SECRET` in the same file: a base64 value of at least 256 bits, which it refuses to start without. Generate one once with `$b = New-Object byte[] 32; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)`. Tests set their own fixed secret in `build.gradle.kts`.
 
 If a command is missing or fails, report it. Do not improvise an alternative.
 

@@ -49,7 +49,7 @@
 
 ## 9. Integration check
 
-- [ ] 9.1 From a clean clone, run `.\gradlew.bat check` with Docker running and confirm format, lint, tests and coverage pass; update `CLAUDE.md` if commands or environment variables changed
+- [x] 9.1 From a clean clone, run `.\gradlew.bat check` with Docker running and confirm format, lint, tests and coverage pass; update `CLAUDE.md` if commands or environment variables changed
 
 ## Workflow follow-up
 
