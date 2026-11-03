@@ -102,6 +102,62 @@ class GoogleSignInIT {
         .isEqualTo(accountId.toString());
   }
 
+  @Test
+  void rejectsTokenForAnotherAudience() throws Exception {
+    String suffix = uniqueSuffix();
+
+    var response =
+        signIn(
+            googleToken(
+                "https://accounts.google.com",
+                "another-client",
+                Instant.now().plusSeconds(3600),
+                "g-" + suffix,
+                "gina" + suffix + "@gmail.com",
+                "Gina"));
+
+    assertInvalidGoogleToken(response);
+  }
+
+  @Test
+  void rejectsExpiredToken() throws Exception {
+    String suffix = uniqueSuffix();
+
+    var response =
+        signIn(
+            googleToken(
+                "https://accounts.google.com",
+                "matchmap-test-client",
+                Instant.now().minusSeconds(600),
+                "g-" + suffix,
+                "hana" + suffix + "@gmail.com",
+                "Hana"));
+
+    assertInvalidGoogleToken(response);
+  }
+
+  @Test
+  void rejectsTokenFromAnotherIssuer() throws Exception {
+    String suffix = uniqueSuffix();
+
+    var response =
+        signIn(
+            googleToken(
+                "https://evil.example.com",
+                "matchmap-test-client",
+                Instant.now().plusSeconds(3600),
+                "g-" + suffix,
+                "ivy" + suffix + "@gmail.com",
+                "Ivy"));
+
+    assertInvalidGoogleToken(response);
+  }
+
+  private void assertInvalidGoogleToken(MvcTestResult response) {
+    assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_google_token");
+  }
+
   private String displayNameOf(String subject) {
     return jdbcTemplate.queryForObject(
         "SELECT display_name FROM user_account WHERE google_subject = ?", String.class, subject);
@@ -122,17 +178,28 @@ class GoogleSignInIT {
   }
 
   private static String googleToken(String subject, String email, String name) throws Exception {
-    var now = Instant.now();
+    return googleToken(
+        "https://accounts.google.com",
+        "matchmap-test-client",
+        Instant.now().plusSeconds(3600),
+        subject,
+        email,
+        name);
+  }
+
+  private static String googleToken(
+      String issuer, String audience, Instant expiresAt, String subject, String email, String name)
+      throws Exception {
     var claims =
         new JWTClaimsSet.Builder()
-            .issuer("https://accounts.google.com")
+            .issuer(issuer)
             .subject(subject)
-            .audience("matchmap-test-client")
+            .audience(audience)
             .claim("email", email)
             .claim("email_verified", true)
             .claim("name", name)
-            .issueTime(Date.from(now))
-            .expirationTime(Date.from(now.plusSeconds(3600)))
+            .issueTime(Date.from(expiresAt.minusSeconds(3600)))
+            .expirationTime(Date.from(expiresAt))
             .build();
     var jwt =
         new SignedJWT(

@@ -5,6 +5,8 @@ matchmap:
     refresh-token-ttl: 30d
     max-failed-logins: 5
     failed-login-window: 15m
+    google:
+      client-ids: ${MATCHMAP_GOOGLE_CLIENT_IDS:}
 
 spring:
   application:
