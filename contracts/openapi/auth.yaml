@@ -1,0 +1,167 @@
+openapi: 3.1.0
+info:
+  title: MatchMap Authentication API
+  version: 0.1.0
+  description: >-
+    Sign-in, token refresh and sign-out for MatchMap. Account creation and
+    account reads are GraphQL operations defined in contracts/graphql.
+paths:
+  /api/auth/login:
+    post:
+      operationId: login
+      summary: Sign in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Signed in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Wrong password, unknown email or account without password.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_credentials
+        '429':
+          description: Too many failed attempts for this email from this client.
+          headers:
+            Retry-After:
+              description: Seconds until a new attempt is accepted.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: too_many_attempts
+  /api/auth/google:
+    post:
+      operationId: signInWithGoogle
+      summary: Sign in with a Google ID token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleSignInRequest'
+      responses:
+        '200':
+          description: Signed in; the account is created or linked if needed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: The ID token is invalid, expired or for another audience.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_google_token
+        '403':
+          description: Google reports the email as not verified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: google_email_not_verified
+  /api/auth/refresh:
+    post:
+      operationId: refresh
+      summary: Exchange a refresh token for new tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: New access and refresh tokens; the presented refresh token is no longer valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Unknown, expired, revoked or reused refresh token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_refresh_token
+  /api/auth/logout:
+    post:
+      operationId: logout
+      summary: Sign out by revoking the session of a refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '204':
+          description: Session revoked, or the token was already unknown or revoked.
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          format: password
+    GoogleSignInRequest:
+      type: object
+      required: [idToken]
+      properties:
+        idToken:
+          type: string
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    TokenResponse:
+      type: object
+      required: [tokenType, accessToken, expiresIn, refreshToken]
+      properties:
+        tokenType:
+          type: string
+          const: Bearer
+        accessToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Seconds until the access token expires.
+          examples: [900]
+        refreshToken:
+          type: string
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum:
+            - invalid_credentials
+            - too_many_attempts
+            - invalid_google_token
+            - google_email_not_verified
+            - invalid_refresh_token
