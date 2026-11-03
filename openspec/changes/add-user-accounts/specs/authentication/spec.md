@@ -40,7 +40,7 @@ After 5 failed password sign-ins for the same email from the same client IP with
 - **THEN** the response is HTTP 200
 
 ### Requirement: Sign in with Google
-`POST /api/auth/google` SHALL be public and accept `{"idToken": "<Google ID token>"}`. The system SHALL accept the token only if its signature verifies against Google's published keys, its issuer is Google, its audience is one of the configured Google client IDs and it has not expired. On success it SHALL return the same token response as password sign-in. An invalid token SHALL return HTTP 401 with body `{"error": "invalid_google_token"}`.
+`POST /api/auth/google` SHALL be public and accept `{"idToken": "<Google ID token>"}`. The system SHALL accept the token only if its signature verifies against Google's published keys, its issuer is Google, its audience is one of the configured Google client IDs and it has not expired. On success it SHALL return the same token response as password sign-in. An invalid token SHALL return HTTP 401 with body `{"error": "invalid_google_token"}`. When Google's published keys cannot be fetched, the system SHALL retry the fetch up to two more times with exponential backoff starting at 500 ms; if it still fails, the response SHALL be HTTP 503 with body `{"error": "google_unavailable"}`.
 
 #### Scenario: First Google sign-in creates an account
 - **WHEN** a client posts a valid Google ID token for subject `g-123`, verified email `carla@gmail.com` and name `Carla`, and no account has that email or subject
@@ -58,6 +58,10 @@ After 5 failed password sign-ins for the same email from the same client IP with
 #### Scenario: Expired token
 - **WHEN** a client posts an expired Google ID token
 - **THEN** the response is HTTP 401 with body `{"error": "invalid_google_token"}`
+
+#### Scenario: Google keys unavailable
+- **WHEN** a client posts a valid Google ID token and Google's published keys cannot be fetched on any of the three attempts
+- **THEN** the response is HTTP 503 with body `{"error": "google_unavailable"}`
 
 ### Requirement: Link Google to an existing account by verified email
 When a valid Google ID token has no linked account but its email matches an existing account and Google marks the email as verified, the system SHALL link the Google subject to that account and sign it in. When Google marks the email as not verified, the system SHALL return HTTP 403 with body `{"error": "google_email_not_verified"}` and SHALL NOT create or link any account.

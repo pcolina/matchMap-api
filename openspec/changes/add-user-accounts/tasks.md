@@ -46,7 +46,7 @@
 
 - [x] 6.4 Write `GoogleJwkRetryTest.retriesFetchUntilKeysAreAvailable` and `GoogleJwkRetryTest.givesUpAfterThreeAttempts` (D11: the Google JWK set fetch is retried up to 2 times with exponential backoff from 500 ms) and show them failing; add `ResilientJwkSource` with `@Retryable` and `@EnableResilientMethods(proxyTargetClass = true)`; verify the tests pass
   - Note: with the default JDK proxy the retry did not run, so the configuration uses class-based proxies.
-  - Decided: when the Google JWK set is still unavailable after the 3 attempts, `POST /api/auth/google` answers 503 `google_unavailable`, not 401, because the token itself is valid. Tested in `GoogleSignInUnavailableIT`. The spec has no scenario for this case; it comes from D11.
+  - Decided: when the Google JWK set is still unavailable after the 3 attempts, `POST /api/auth/google` answers 503 `google_unavailable`, not 401, because the token itself is valid. Tested in `GoogleSignInUnavailableIT.answersServiceUnavailableWhenGoogleKeysCannotBeFetched`, which maps to the spec scenario "Google keys unavailable".
 
 ## 7. Credential hygiene (specs/authentication)
 
