@@ -66,12 +66,12 @@ Current examples:
 | Change | State | Specs it delivers |
 |---|---|---|
 | `setup-walking-skeleton` | Archived, finished | `service-health`, `request-correlation`, `api-version` |
-| `add-user-accounts` | Open, in progress | `user-accounts`, `authentication` (not finished, not yet approved) |
+| `add-user-accounts` | Merged into `main`, archive pending | `user-accounts`, `authentication` (their specs are not in `openspec/specs/` until the archive is merged) |
 
 ## The cycle at a glance
 
 ```
-explore  ->  propose  ->  review  ->  implement (TDD)  ->  pull request  ->  merge  ->  archive
+explore  ->  propose  ->  review  ->  implement (TDD)  ->  archive  ->  pull request  ->  merge
                             |                 |                                        |
                     approve or update    one task = one commit                 specs move into
                                                                                openspec/specs/
@@ -89,8 +89,8 @@ In the table, the **Command** column is a slash command typed into Claude Code, 
 | 2. Propose | `/opsx:propose` | `proposal.md`, `specs/`, `design.md` and `tasks.md` in the change folder | Stop for approval |
 | 3. Update | `/opsx:update` | Revised artifacts, kept consistent with each other | Stop for approval |
 | 4. Apply | `/opsx:apply` | Code and tests, one task at a time, one commit per task | Stop when every task is done |
-| 5. Pull request | none (manual) | A PR to `main` with the change name, the tasks, the test summary, any changes to the database schema or the API contract, and open questions | Review and merge |
-| 6. Archive | `/opsx:archive` | The change moves to `openspec/changes/archive/` and its deltas are applied to `openspec/specs/` | After the merge |
+| 5. Archive | `/opsx:archive` | The change moves to `openspec/changes/archive/` and its deltas are applied to `openspec/specs/`, committed on the change branch | Stop before the PR is opened |
+| 6. Pull request | none (manual) | A PR to `main` with the change name, the tasks, the test summary, any changes to the database schema or the API contract, the archive, and open questions | Review and merge |
 
 ### 1. Explore
 
@@ -127,13 +127,23 @@ When every task is checked, the agent runs the full check, `.\gradlew.bat check`
 
 If implementation shows that a spec, design or task is wrong, the agent stops, proposes the correction with `/opsx:update`, and waits for approval. Nothing is corrected silently inside a task commit.
 
-### 5. Pull request
+### 5. Archive
+
+The archive is done on the change's own branch, after the tasks are finished and before the pull request is opened. Its deltas are applied to the matching files in `openspec/specs/`, which hold the current behaviour of the system, and the change folder moves to `openspec/changes/archive/` as a permanent record. The result is committed on the same branch.
+
+#### Why the archive goes in the same pull request
+
+Specs describe what the system does today, so they must match the code that lands in `main`. Archiving in the same pull request as the code means `main` never has code without its specs, or specs without their code. It also keeps one pull request per change, so no second branch or review is needed for the archive.
+
+If the review asks for changes to the code or the specs, they are made on the same branch and the archive is updated in the same commits.
+
+#### Why not after the merge
+
+Archiving after the merge would leave `main` with new code and old specs for a while, and would require a second pull request for a step that has no separate review. `add-user-accounts` was merged before its archive, so its archive needs a second pull request. This flow avoids that.
+
+### 6. Pull request
 
 The branch has the same name as the change. The PR description contains the change name, the completed tasks, the test summary, any changes to the database schema or the API contract, and the open questions. The PR is merged into `main` with a merge commit, not a squash. That means the history graph shows each change as a branch joined to `main`, with its task commits still visible.
-
-### 6. Archive
-
-After the merge, the change is archived. Its deltas are applied to the matching files in `openspec/specs/`, which hold the current behaviour of the system, and the change folder moves to `openspec/changes/archive/` as a permanent record.
 
 ## Where is a change?
 
@@ -163,7 +173,7 @@ So the status of a spec is not written inside the spec. To find it:
 
 In `add-user-accounts`, task 4.3 covers "Signed-in user reads their account" from `user-accounts` and also "Valid token" from `authentication`. Checking that one task advances both specs.
 
-**Example, as of 2026-11-02: `add-user-accounts`.** Its folder is in `openspec/changes/`, so it is open. Its proposal is waiting for approval. In `tasks.md`, tasks 1.1 to 3.1 are checked and the rest are pending. The branch has six commits, is not pushed, and has no pull request. Its two ADRs are `Proposed`.
+**Example: `add-user-accounts`.** Its code and tests were merged into `main` before the archive, so its archive is a second pull request. This is the exception to the flow, not the rule for later changes.
 
 ## Fixing something after a change is merged
 
@@ -176,7 +186,7 @@ main:  M0 ── M1 (add-user-accounts) ── M2 (next change) ── M3 (fix-�
 1. Stop and describe the problem: the behaviour, the spec that says what is correct, and the test that shows the failure.
 2. Propose a new change with `/opsx:propose`. If the spec itself is wrong, the change has a delta for it. If the spec is right and the code is not, the change has no spec delta and adds a test that fails against the current code.
 3. Get the proposal approved, then create the branch from the current `main`.
-4. Implement with TDD, open the PR, merge it with a merge commit and archive.
+4. Implement with TDD, archive, open the PR and merge it with a merge commit.
 
 A branch that was already merged still points to its old commits. Reusing it would drag those commits into the next pull request, so each change gets a fresh branch.
 
