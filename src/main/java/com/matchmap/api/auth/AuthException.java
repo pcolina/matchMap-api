@@ -26,6 +26,10 @@ class AuthException extends RuntimeException {
     return new AuthException(HttpStatus.UNAUTHORIZED, "invalid_refresh_token", null);
   }
 
+  static AuthException invalidGoogleToken() {
+    return new AuthException(HttpStatus.UNAUTHORIZED, "invalid_google_token", null);
+  }
+
   static AuthException tooManyAttempts(Duration retryAfter) {
     return new AuthException(HttpStatus.TOO_MANY_REQUESTS, "too_many_attempts", retryAfter);
   }

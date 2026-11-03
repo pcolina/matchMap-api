@@ -58,7 +58,11 @@ Spring Security's `DelegatingPasswordEncoder` with `Argon2PasswordEncoder.defaul
 
 - A second `NimbusJwtDecoder` built from Google's JWK set (`https://www.googleapis.com/oauth2/v3/certs`) with validators for issuer (`accounts.google.com` or `https://accounts.google.com`), audience (one of `MATCHMAP_GOOGLE_CLIENT_IDS`, a comma-separated list of the web, Android and iOS client IDs) and timestamps.
 - The decoder sits behind a small `GoogleIdTokenVerifier` interface. Tests replace the JWK source with a locally generated RSA key and sign their own Google-shaped tokens, so the validators are tested for real and no test calls Google.
-- Account resolution order: by `google_subject`, then by verified email (link), otherwise create. A new account gets the Google `name` as display name, and a username generated from the email's local part: lowercased, invalid characters replaced with `_`, cut to fit, and a numeric suffix added on collision.
+- Account resolution order: by `google_subject`, then by verified email (link), otherwise create. A new account gets the Google `name` as display name, trimmed; if the name is missing or blank, the display name is the email's local part, and if it is longer than 50 characters it is cut to 50. A username is generated from the email's local part as follows:
+  - Lowercase the local part and replace every character outside `a-z`, `0-9` and `_` with `_`.
+  - If fewer than 3 characters remain, discard the local part and use `user_<random>`, where `<random>` is 8 characters from `a-z0-9` drawn with a secure random generator. The random part is proposed here and needs approval.
+  - Cut the base so that base plus suffix fits in 30 characters.
+  - On collision, append `_<n>` with `n` starting at 2 (for example `carla_2`, `carla_3`). The result must stay within 30 characters.
 
 ### D7. Security configuration
 

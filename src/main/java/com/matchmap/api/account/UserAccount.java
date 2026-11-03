@@ -40,11 +40,23 @@ public class UserAccount {
       String displayName,
       String passwordHash,
       Instant createdAt) {
+    this(id, email, username, displayName, passwordHash, null, createdAt);
+  }
+
+  UserAccount(
+      UUID id,
+      String email,
+      String username,
+      String displayName,
+      String passwordHash,
+      String googleSubject,
+      Instant createdAt) {
     this.id = id;
     this.email = email;
     this.username = username;
     this.displayName = displayName;
     this.passwordHash = passwordHash;
+    this.googleSubject = googleSubject;
     this.createdAt = createdAt;
   }
 

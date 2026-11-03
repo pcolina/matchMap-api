@@ -1,5 +1,6 @@
 package com.matchmap.api.auth;
 
+import com.matchmap.api.account.GoogleAccountService;
 import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,18 +25,36 @@ class AuthController {
   private final AccessTokenIssuer accessTokens;
   private final RefreshTokenService refreshTokens;
   private final LoginThrottle loginThrottle;
+  private final GoogleIdTokenVerifier googleIdTokens;
+  private final GoogleAccountService googleAccounts;
 
   AuthController(
       UserAccountRepository accounts,
       PasswordEncoder passwordEncoder,
       AccessTokenIssuer accessTokens,
       RefreshTokenService refreshTokens,
-      LoginThrottle loginThrottle) {
+      LoginThrottle loginThrottle,
+      GoogleIdTokenVerifier googleIdTokens,
+      GoogleAccountService googleAccounts) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.accessTokens = accessTokens;
     this.refreshTokens = refreshTokens;
     this.loginThrottle = loginThrottle;
+    this.googleIdTokens = googleIdTokens;
+    this.googleAccounts = googleAccounts;
+  }
+
+  @PostMapping("/google")
+  public TokenResponse google(@RequestBody GoogleRequest request) {
+    GoogleIdentity identity;
+    try {
+      identity = googleIdTokens.verify(request.idToken());
+    } catch (JwtException e) {
+      throw AuthException.invalidGoogleToken();
+    }
+    var account = googleAccounts.resolve(identity.subject(), identity.email(), identity.name());
+    return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
   }
 
   @PostMapping("/login")
@@ -84,6 +104,8 @@ class AuthController {
   record LoginRequest(String email, String password) {}
 
   record RefreshRequest(String refreshToken) {}
+
+  record GoogleRequest(String idToken) {}
 
   record TokenResponse(String tokenType, String accessToken, long expiresIn, String refreshToken) {}
 }
