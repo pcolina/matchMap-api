@@ -44,6 +44,10 @@
   - Note: the tests are `linksPasswordAccountByVerifiedEmail`, `rejectsUnverifiedEmailWithoutLinkingExistingAccount` and `rejectsUnverifiedEmailWithoutCreatingAccount`. The unverified check runs before account resolution, so an unverified token gets 403 even for an account already linked by subject. This follows the scenario literally ("a valid Google ID token whose email is marked as not verified").
   - Decided: when a verified Google email matches an account already linked to a different Google subject, the API answers 401 `invalid_google_token` and never overwrites the link. A 409 would reveal to the caller that the email belongs to another Google account, and the system cannot tell the legitimate owner from someone else. Tested in `rejectsVerifiedEmailLinkedToAnotherGoogleSubject`.
 
+- [x] 6.4 Write `GoogleJwkRetryTest.retriesFetchUntilKeysAreAvailable` and `GoogleJwkRetryTest.givesUpAfterThreeAttempts` (D11: the Google JWK set fetch is retried up to 2 times with exponential backoff from 500 ms) and show them failing; add `ResilientJwkSource` with `@Retryable` and `@EnableResilientMethods(proxyTargetClass = true)`; verify the tests pass
+  - Note: with the default JDK proxy the retry did not run, so the configuration uses class-based proxies.
+  - [NEEDS CLARIFICATION: when the Google JWK set is still unavailable after the 3 attempts, which HTTP response should `POST /api/auth/google` return? The code currently returns 401 `invalid_google_token`, which is misleading because the token itself is valid. Option: 503 with a new code such as `google_unavailable`.]
+
 ## 7. Credential hygiene (specs/authentication)
 
 - [x] 7.1 Write `CredentialLeakIT.signInLeavesNoSecretsInLogs` and `CredentialLeakIT.storesOnlyRefreshTokenHashes` (scenarios "Sign-in leaves no secrets in the logs" and "Stored refresh tokens are hashes") and show them failing if any secret leaks; fix any leak found; verify the tests pass

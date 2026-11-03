@@ -8,8 +8,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
 @Configuration(proxyBeanMethods = false)
+@EnableResilientMethods(proxyTargetClass = true)
 class GoogleJwkConfiguration {
 
   private static final int CONNECT_TIMEOUT_MILLIS = 2_000;
@@ -18,8 +20,9 @@ class GoogleJwkConfiguration {
   @Bean
   JWKSource<SecurityContext> googleJwkSource() throws MalformedURLException {
     var url = URI.create("https://www.googleapis.com/oauth2/v3/certs").toURL();
-    return JWKSourceBuilder.<SecurityContext>create(
-            url, new DefaultResourceRetriever(CONNECT_TIMEOUT_MILLIS, READ_TIMEOUT_MILLIS))
-        .build();
+    return new ResilientJwkSource(
+        JWKSourceBuilder.<SecurityContext>create(
+                url, new DefaultResourceRetriever(CONNECT_TIMEOUT_MILLIS, READ_TIMEOUT_MILLIS))
+            .build());
   }
 }
