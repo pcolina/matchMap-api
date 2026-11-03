@@ -30,6 +30,10 @@ class AuthException extends RuntimeException {
     return new AuthException(HttpStatus.UNAUTHORIZED, "invalid_google_token", null);
   }
 
+  static AuthException googleEmailNotVerified() {
+    return new AuthException(HttpStatus.FORBIDDEN, "google_email_not_verified", null);
+  }
+
   static AuthException tooManyAttempts(Duration retryAfter) {
     return new AuthException(HttpStatus.TOO_MANY_REQUESTS, "too_many_attempts", retryAfter);
   }

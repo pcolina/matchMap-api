@@ -1,5 +1,6 @@
 package com.matchmap.api.auth;
 
+import static com.matchmap.api.support.GraphqlRequests.registerBody;
 import static com.matchmap.api.support.GraphqlRequests.uniqueSuffix;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,6 +31,7 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class GoogleSignInIT {
 
+  private static final String PASSWORD = "correct horse battery";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;
@@ -153,6 +155,103 @@ class GoogleSignInIT {
     assertInvalidGoogleToken(response);
   }
 
+  @Test
+  void linksPasswordAccountByVerifiedEmail() throws Exception {
+    String suffix = uniqueSuffix();
+    String subject = "g-" + suffix;
+    String email = "lia" + suffix + "@gmail.com";
+    register(email, "lia" + suffix, PASSWORD);
+
+    var response = signIn(googleToken(subject, email, "Lia"));
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    UUID accountId =
+        jdbcTemplate.queryForObject(
+            "SELECT id FROM user_account WHERE email = ?", UUID.class, email);
+    assertThat(SignedJWT.parse(accessToken(response)).getJWTClaimsSet().getSubject())
+        .isEqualTo(accountId.toString());
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT google_subject FROM user_account WHERE id = ?", String.class, accountId))
+        .isEqualTo(subject);
+    assertThat(login(email, PASSWORD)).hasStatus(HttpStatus.OK);
+  }
+
+  @Test
+  void rejectsUnverifiedEmailWithoutLinkingExistingAccount() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "max" + suffix + "@gmail.com";
+    register(email, "max" + suffix, PASSWORD);
+
+    var response =
+        signIn(
+            googleToken(
+                "https://accounts.google.com",
+                "matchmap-test-client",
+                Instant.now().plusSeconds(3600),
+                "g-" + suffix,
+                email,
+                "Max",
+                false));
+
+    assertUnverifiedGoogleEmail(response);
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT google_subject FROM user_account WHERE email = ?", String.class, email))
+        .isNull();
+  }
+
+  @Test
+  void rejectsUnverifiedEmailWithoutCreatingAccount() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "omar" + suffix + "@gmail.com";
+
+    var response =
+        signIn(
+            googleToken(
+                "https://accounts.google.com",
+                "matchmap-test-client",
+                Instant.now().plusSeconds(3600),
+                "g-" + suffix,
+                email,
+                "Omar",
+                false));
+
+    assertUnverifiedGoogleEmail(response);
+    Integer accounts =
+        jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM user_account WHERE email = ?", Integer.class, email);
+    assertThat(accounts).isZero();
+  }
+
+  private void assertUnverifiedGoogleEmail(MvcTestResult response) {
+    assertThat(response).hasStatus(HttpStatus.FORBIDDEN);
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.error")
+        .isEqualTo("google_email_not_verified");
+  }
+
+  private void register(String email, String username, String password) {
+    mockMvc
+        .post()
+        .uri("/graphql")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(registerBody(email, username, "Account", password))
+        .exchange();
+  }
+
+  private MvcTestResult login(String email, String password) {
+    return mockMvc
+        .post()
+        .uri("/api/auth/login")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(JSON.writeValueAsString(Map.of("email", email, "password", password)))
+        .exchange();
+  }
+
   private void assertInvalidGoogleToken(MvcTestResult response) {
     assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
     assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_google_token");
@@ -190,13 +289,25 @@ class GoogleSignInIT {
   private static String googleToken(
       String issuer, String audience, Instant expiresAt, String subject, String email, String name)
       throws Exception {
+    return googleToken(issuer, audience, expiresAt, subject, email, name, true);
+  }
+
+  private static String googleToken(
+      String issuer,
+      String audience,
+      Instant expiresAt,
+      String subject,
+      String email,
+      String name,
+      boolean emailVerified)
+      throws Exception {
     var claims =
         new JWTClaimsSet.Builder()
             .issuer(issuer)
             .subject(subject)
             .audience(audience)
             .claim("email", email)
-            .claim("email_verified", true)
+            .claim("email_verified", emailVerified)
             .claim("name", name)
             .issueTime(Date.from(expiresAt.minusSeconds(3600)))
             .expirationTime(Date.from(expiresAt))

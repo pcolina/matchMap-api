@@ -80,6 +80,14 @@ public class UserAccount {
     return passwordHash;
   }
 
+  String getGoogleSubject() {
+    return googleSubject;
+  }
+
+  void linkGoogleSubject(String subject) {
+    this.googleSubject = subject;
+  }
+
   public Instant getCreatedAt() {
     return createdAt;
   }

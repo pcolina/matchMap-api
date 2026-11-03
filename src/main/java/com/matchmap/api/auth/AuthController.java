@@ -53,7 +53,13 @@ class AuthController {
     } catch (JwtException e) {
       throw AuthException.invalidGoogleToken();
     }
-    var account = googleAccounts.resolve(identity.subject(), identity.email(), identity.name());
+    if (!identity.emailVerified()) {
+      throw AuthException.googleEmailNotVerified();
+    }
+    var account =
+        googleAccounts
+            .resolve(identity.subject(), identity.email(), identity.name())
+            .orElseThrow(AuthException::invalidGoogleToken);
     return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
   }
 

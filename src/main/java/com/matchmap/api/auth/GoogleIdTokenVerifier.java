@@ -53,6 +53,9 @@ class GoogleIdTokenVerifier {
   GoogleIdentity verify(String idToken) {
     var jwt = decoder.decode(idToken);
     return new GoogleIdentity(
-        jwt.getSubject(), jwt.getClaimAsString("email"), jwt.getClaimAsString("name"));
+        jwt.getSubject(),
+        jwt.getClaimAsString("email"),
+        Boolean.TRUE.equals(jwt.getClaimAsBoolean("email_verified")),
+        jwt.getClaimAsString("name"));
   }
 }
