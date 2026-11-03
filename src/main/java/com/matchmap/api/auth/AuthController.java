@@ -3,6 +3,7 @@ package com.matchmap.api.auth;
 import com.matchmap.api.account.GoogleAccountService;
 import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
+import com.nimbusds.jose.KeySourceException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Locale;
@@ -51,6 +52,9 @@ class AuthController {
     try {
       identity = googleIdTokens.verify(request.idToken());
     } catch (JwtException e) {
+      if (e.getCause() instanceof KeySourceException) {
+        throw AuthException.googleUnavailable();
+      }
       throw AuthException.invalidGoogleToken();
     }
     if (!identity.emailVerified()) {
