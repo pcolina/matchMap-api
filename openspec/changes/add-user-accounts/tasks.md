@@ -42,7 +42,7 @@
   - Decided: when `MATCHMAP_GOOGLE_CLIENT_IDS` is empty, the API starts and rejects every Google sign-in with 401 `invalid_google_token`. Tested in `GoogleSignInWithoutClientIdsIT`.
 - [x] 6.3 Write `GoogleSignInIT.linksPasswordAccountByVerifiedEmail` and `GoogleSignInIT.rejectsUnverifiedEmail` (scenarios "Linking a password account" and "Unverified Google email") and show them failing; add linking and the `google_email_not_verified` error; verify the tests pass
   - Note: the tests are `linksPasswordAccountByVerifiedEmail`, `rejectsUnverifiedEmailWithoutLinkingExistingAccount` and `rejectsUnverifiedEmailWithoutCreatingAccount`. The unverified check runs before account resolution, so an unverified token gets 403 even for an account already linked by subject. This follows the scenario literally ("a valid Google ID token whose email is marked as not verified").
-  - [NEEDS CLARIFICATION: when a verified Google email matches an account already linked to a different Google subject, what should the API answer? The code currently answers 401 `invalid_google_token` without a test, so the existing link is never overwritten.]
+  - Decided: when a verified Google email matches an account already linked to a different Google subject, the API answers 401 `invalid_google_token` and never overwrites the link. A 409 would reveal to the caller that the email belongs to another Google account, and the system cannot tell the legitimate owner from someone else. Tested in `rejectsVerifiedEmailLinkedToAnotherGoogleSubject`.
 
 ## 7. Credential hygiene (specs/authentication)
 

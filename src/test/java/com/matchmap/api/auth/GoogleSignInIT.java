@@ -224,6 +224,22 @@ class GoogleSignInIT {
     assertThat(accounts).isZero();
   }
 
+  @Test
+  void rejectsVerifiedEmailLinkedToAnotherGoogleSubject() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "quinn" + suffix + "@gmail.com";
+    register(email, "quinn" + suffix, PASSWORD);
+    signIn(googleToken("g-first-" + suffix, email, "Quinn"));
+
+    var response = signIn(googleToken("g-second-" + suffix, email, "Quinn"));
+
+    assertInvalidGoogleToken(response);
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT google_subject FROM user_account WHERE email = ?", String.class, email))
+        .isEqualTo("g-first-" + suffix);
+  }
+
   private void assertUnverifiedGoogleEmail(MvcTestResult response) {
     assertThat(response).hasStatus(HttpStatus.FORBIDDEN);
     assertThat(response)
