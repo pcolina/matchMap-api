@@ -93,8 +93,9 @@ Before marking any task done, run the full check and paste a summary of the resu
 | 1. Explore | `/opsx:explore` | Clarified requirements. No files written without confirmation. | None |
 | 2. Propose | `/opsx:propose` | `openspec/changes/<name>/`: `proposal.md`, `specs/` (deltas), `design.md`, `tasks.md` | Stop for approval |
 | 3. Update | `/opsx:update` | Revised artifacts after feedback | Stop for approval |
-| 4. Apply | `/opsx:apply` | One task at a time, TDD, one commit per task | Stop when `tasks.md` is done, then open a PR |
-| 5. Archive | `/opsx:archive` | Deltas merged into `openspec/specs/`, change moved to `archive/` | After the PR is merged |
+| 4. Apply | `/opsx:apply` | One task at a time, TDD, one commit per task | Stop when `tasks.md` is done |
+| 5. Archive | `/opsx:archive` | Deltas merged into `openspec/specs/`, change moved to `archive/`, committed on the change branch | Stop before the PR is opened |
+| 6. Pull request | none (manual) | PR to `main` with code, tests, specs and archive together | Stop for review and merge |
 
 Rules:
 
