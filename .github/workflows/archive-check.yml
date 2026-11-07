@@ -1,0 +1,20 @@
+name: archive-check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  archive-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - name: Run the archive check tests
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+        run: ./gradlew test --tests com.matchmap.api.archive.ArchiveCheckTest
