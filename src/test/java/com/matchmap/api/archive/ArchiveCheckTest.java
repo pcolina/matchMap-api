@@ -30,4 +30,12 @@ class ArchiveCheckTest {
 
     assertThat(result.passed()).isTrue();
   }
+
+  @Test
+  void archiveMissing() {
+    var result = new ArchiveCheck(root).evaluate("add-x");
+
+    assertThat(result.passed()).isFalse();
+    assertThat(result.output()).contains("not archived");
+  }
 }
