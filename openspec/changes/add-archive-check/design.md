@@ -15,8 +15,8 @@ A branch protection rule on `main` marks `archive-check` as a required status ch
 ### D3: Folder checks use the file system, not the git history
 The workflow checks out the pull request and tests the folders that exist in that checkout. This matches what the merge will produce.
 
-### D4: Test approach is a throwaway pull request
-Each scenario of the spec is tested by opening a throwaway pull request into `main` that matches the scenario, and recording the result of `archive-check` in the task. No new tooling is added. Alternatives considered: running the workflow locally with `act` (an external dependency not approved in this design), and moving the logic into a script tested by Gradle (adds code that only exists to test the workflow).
+### D4: The check is a JUnit test in the test source set
+The check logic lives in `ArchiveCheckTest` under `src/test/java`, with one test per scenario of the spec that reads the change name from the environment variable `GITHUB_HEAD_REF` and inspects the folders of the checkout. No code is added to the application under `src/main`, and no new dependency is added. The workflow of D1 runs `./gradlew test --tests ArchiveCheckTest` on the pull request checkout, so the same tests protect the rule locally and in GitHub. The merge scenarios (D2) depend on the GitHub branch protection rule, which Gradle cannot test, so they are verified by hand on GitHub and the result is recorded in the task. Alternatives considered: a throwaway pull request per scenario (creates remote branches and pull requests for each test), and `act` (an external dependency not approved in this design).
 
 ## Risks
 
