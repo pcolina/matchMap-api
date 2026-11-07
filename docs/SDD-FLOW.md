@@ -98,6 +98,8 @@ This is the step for thinking a problem through before anything is written. The 
 
 ### 2. Propose
 
+A change starts from a GitHub issue. When the assistant works on a change, the issue is opened first, it stays open until the change is merged into `main`, and the proposal and the pull request cite it with `Closes #<number>`. The repository owner may create a change without an issue.
+
 This is the step that creates the change. The agent creates the change folder, which is what makes it a change, with four artifacts:
 
 - `proposal.md`: why the change is needed, what changes, what is out of scope, and which existing specs or changes it depends on.
