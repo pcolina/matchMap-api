@@ -21,4 +21,13 @@ class ArchiveCheckTest {
     assertThat(result.passed()).isFalse();
     assertThat(result.output()).contains("openspec/changes/add-x");
   }
+
+  @Test
+  void changeArchived() throws IOException {
+    Files.createDirectories(root.resolve("openspec/changes/archive/2026-11-03-add-x"));
+
+    var result = new ArchiveCheck(root).evaluate("add-x");
+
+    assertThat(result.passed()).isTrue();
+  }
 }
