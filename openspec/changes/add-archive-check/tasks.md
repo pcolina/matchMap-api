@@ -7,6 +7,7 @@
 - [ ] 1.3 Write `ArchiveCheckTest.archiveMissing` for the scenario "Archive missing" (D4) and show it failing
 - [ ] 1.4 Write `ArchiveCheckTest.pullRequestWithoutChange` for the scenario "Pull request without a change" (D4) and show it failing
 - [ ] 1.5 Add `.github/workflows/archive-check.yml` (D1) that runs `./gradlew test --tests ArchiveCheckTest` with `GITHUB_HEAD_REF` set, and verify the four tests pass
+- [ ] 1.6 Write `ArchiveCheckTest.pullRequestCheckout` that reads `GITHUB_HEAD_REF` and evaluates the real repository root (D6) and show it failing, then make it pass in the workflow run
 
 ## 2. Enforcement (specs/archive-gate)
 
