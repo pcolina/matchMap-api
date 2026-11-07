@@ -1,6 +1,7 @@
 package com.matchmap.api.archive;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,5 +46,17 @@ class ArchiveCheckTest {
 
     assertThat(result.passed()).isTrue();
     assertThat(result.output()).contains("no change");
+  }
+
+  @Test
+  void pullRequestCheckout() {
+    var branch = System.getenv("GITHUB_HEAD_REF");
+    if (branch == null || branch.isBlank()) {
+      fail("GITHUB_HEAD_REF is not set: this test only runs in the pull request workflow");
+    }
+
+    var result = new ArchiveCheck(Path.of("").toAbsolutePath()).evaluate(branch);
+
+    assertThat(result.passed()).as(result.output()).isTrue();
   }
 }
