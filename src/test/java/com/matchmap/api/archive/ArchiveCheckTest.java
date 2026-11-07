@@ -38,4 +38,12 @@ class ArchiveCheckTest {
     assertThat(result.passed()).isFalse();
     assertThat(result.output()).contains("not archived");
   }
+
+  @Test
+  void pullRequestWithoutChange() {
+    var result = new ArchiveCheck(root).evaluate("fix-typo");
+
+    assertThat(result.passed()).isTrue();
+    assertThat(result.output()).contains("no change");
+  }
 }
