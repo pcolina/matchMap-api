@@ -145,6 +145,23 @@ Archiving after the merge would leave `main` with new code and old specs for a w
 
 The branch has the same name as the change. The PR description contains the change name, the completed tasks, the test summary, any changes to the database schema or the API contract, and the open questions. The PR is merged into `main` with a merge commit, not a squash. That means the history graph shows each change as a branch joined to `main`, with its task commits still visible.
 
+### The archive check
+
+Every pull request to `main` runs the `archive-check` workflow (`.github/workflows/archive-check.yml`). It reads the name of the pull request's branch as the change name, and checks the folders of the pull request:
+
+| Situation | Result |
+|---|---|
+| `openspec/changes/<change-name>/` still exists | Fails: the change is still open |
+| `openspec/changes/archive/<date>-<change-name>/` exists and the open folder does not | Passes: the change is archived |
+| Neither folder exists, and the branch starts with `fix-` or `bump-` | Passes: a pull request without a change, such as a typo fix or a dependency bump |
+| Neither folder exists, and the branch has any other name | Fails: the change is not archived |
+
+The workflow only reports the result. The rule that stops a merge is a branch protection rule on `main` that requires the `archive-check` check to pass. That rule is set in the repository settings on GitHub, not in the code, and it is documented here so that it is not lost. Without it, GitHub allows the merge even when the check fails.
+
+The repository owner may bypass the branch protection rule. The agent warns the user before any action outside this flow.
+
+A branch with a `fix-` or `bump-` prefix is treated as a pull request without a change, so a real change must not be named with those prefixes.
+
 ## Where is a change?
 
 There is no status file to check. A change's stage is read from the signals below, which the flow itself produces:
