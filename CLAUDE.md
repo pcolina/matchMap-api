@@ -103,6 +103,7 @@ Rules:
 - `proposal.md` lists what is out of scope and which existing specs the change depends on.
 - Every requirement scenario (WHEN/THEN) maps to at least one test, and `tasks.md` names that test.
 - If implementation shows that a spec, design or task is wrong, stop, propose the correction with `/opsx:update` and wait for approval.
+- The agent works only on changes that come from a GitHub issue. The issue is opened before the change is proposed, stays open until the change is merged into `main`, and is cited in the proposal and in the pull request (`Closes #<number>`). The repository owner may create a change without an issue.
 - The `archive-check` workflow (`.github/workflows/archive-check.yml`) runs on every pull request to `main`. It fails while `openspec/changes/<change-name>/` exists, and fails when no `openspec/changes/archive/<date>-<change-name>/` exists. Branches starting with `fix-` or `bump-` pass without a change. Once branch protection requires `archive-check`, GitHub does not allow the merge while it fails. The repository owner may bypass the rule, and the agent warns the user before any action outside this flow.
 
 ## 8. API, database and observability
