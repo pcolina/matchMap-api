@@ -80,6 +80,27 @@ class ClientTypeHeaderIT {
   }
 
   @Test
+  void missingClientTypeOnLoginIsRejectedAndIssuesNoTokens() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "lena" + suffix + "@example.com";
+    registerAccount(email, "lena_" + suffix);
+
+    var response =
+        mockMvc
+            .post()
+            .uri("/api/auth/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(JSON.writeValueAsString(Map.of("email", email, "password", PASSWORD)))
+            .exchange();
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_client");
+    assertThat(response.getResponse().getContentAsString()).doesNotContain("accessToken");
+    assertThat(response.getResponse().getHeader("Set-Cookie")).isNull();
+  }
+
+  @Test
   void missingClientTypeOnRefreshIsRejected() throws Exception {
     String suffix = uniqueSuffix();
     String email = "wade" + suffix + "@example.com";
