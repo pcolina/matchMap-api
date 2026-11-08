@@ -121,6 +121,9 @@ class AuthController {
       @CookieValue(name = "refresh_token", required = false) String presentedCookie,
       HttpServletResponse httpResponse) {
     if (ClientType.from(client) == ClientType.WEB) {
+      if (presentedCookie == null) {
+        throw AuthException.invalidRefreshToken();
+      }
       var rotation = refreshTokens.rotate(presentedCookie);
       httpResponse.addHeader(
           HttpHeaders.SET_COOKIE, refreshCookie(rotation.refreshToken()).toString());
