@@ -37,7 +37,7 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class MeQueryIT {
 
-  private static final String PASSWORD = "correcthorse1";
+  private static final String PASSWORD = "Correcthorse1!";
   private static final String ME = "{ me { id email username displayName } }";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 

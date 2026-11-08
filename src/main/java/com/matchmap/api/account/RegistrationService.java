@@ -77,7 +77,12 @@ class RegistrationService {
       @NotBlank @Email @Size(max = 254) String email,
       @NotBlank @Pattern(regexp = "[a-z0-9_]{3,30}") String username,
       @NotBlank @Size(max = 50) String displayName,
-      @NotNull @Size(min = 12, max = 20) @Pattern(regexp = "\\S*") String password) {
+      @NotNull
+          @Size(min = 6, max = 20)
+          @Pattern(
+              regexp =
+                  "(?U)(?=.*[a-z])(?=.*[A-Z])(?=.*[!\\\"#$%&'()*+,\\-./:;<=>?@\\[\\\\\\]^_`{|}~])\\S*")
+          String password) {
 
     static Registration from(RegisterInput input) {
       return new Registration(

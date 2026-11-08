@@ -28,7 +28,7 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class RefreshIT {
 
-  private static final String PASSWORD = "correcthorse1";
+  private static final String PASSWORD = "Correcthorse1!";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;

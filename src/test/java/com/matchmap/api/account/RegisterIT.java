@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 @AutoConfigureMockMvc
 class RegisterIT {
 
-  private static final String PASSWORD = "correcthorse1";
+  private static final String PASSWORD = "Correcthorse1!";
 
   @Autowired MockMvcTester mockMvc;
 
@@ -164,10 +164,7 @@ class RegisterIT {
   void rejectsTooShortPassword() {
     String suffix = uniqueSuffix();
 
-    var response =
-        graphql(
-            registerBody(
-                "short" + suffix + "@example.com", "short_" + suffix, "Ana", "a".repeat(11)));
+    var response = registerPassword(suffix, "Ab1!x");
 
     assertValidationFailed(response, "password");
   }
@@ -176,10 +173,7 @@ class RegisterIT {
   void rejectsTooLongPassword() {
     String suffix = uniqueSuffix();
 
-    var response =
-        graphql(
-            registerBody(
-                "long" + suffix + "@example.com", "long_" + suffix, "Ana", "a".repeat(21)));
+    var response = registerPassword(suffix, "Abcdefghijklmnopqrs1!");
 
     assertValidationFailed(response, "password");
   }
@@ -188,21 +182,89 @@ class RegisterIT {
   void acceptsPasswordsAtTheLimits() {
     String suffix = uniqueSuffix();
 
-    var shortest =
-        graphql(
-            registerBody("min" + suffix + "@example.com", "min_" + suffix, "Ana", "a".repeat(12)));
-    var longest =
-        graphql(
-            registerBody("max" + suffix + "@example.com", "max_" + suffix, "Ana", "a".repeat(20)));
+    var shortest = registerPassword("min" + suffix, "Abcd1!");
+    var longest = registerPassword("max" + suffix, "Abcdefghijklmnopqr1!");
 
     assertThat(shortest)
         .bodyJson()
         .extractingPath("$.data.register.username")
-        .isEqualTo("min_" + suffix);
+        .isEqualTo("pw_min" + suffix);
     assertThat(longest)
         .bodyJson()
         .extractingPath("$.data.register.username")
-        .isEqualTo("max_" + suffix);
+        .isEqualTo("pw_max" + suffix);
+  }
+
+  @Test
+  void rejectsPasswordWithoutLowercaseLetter() {
+    String suffix = uniqueSuffix();
+
+    var response = registerPassword(suffix, "ABCDEFGHIJK1!");
+
+    assertValidationFailed(response, "password");
+  }
+
+  @Test
+  void rejectsPasswordWithoutUppercaseLetter() {
+    String suffix = uniqueSuffix();
+
+    var response = registerPassword(suffix, "abcdefghijk1!");
+
+    assertValidationFailed(response, "password");
+  }
+
+  @Test
+  void rejectsPasswordWithoutSpecialCharacter() {
+    String suffix = uniqueSuffix();
+
+    var response = registerPassword(suffix, "Abcdefghijkl12");
+
+    assertValidationFailed(response, "password");
+  }
+
+  @Test
+  void rejectsLettersAndDigitsAsSpecialCharacters() {
+    String suffix = uniqueSuffix();
+
+    var digitsOnly = registerPassword("digits" + suffix, "Abcdefghijkl12");
+    var unicodeLetter = registerPassword("accent" + suffix, "Abcdefghijkl1\u00e9");
+
+    assertValidationFailed(digitsOnly, "password");
+    assertValidationFailed(unicodeLetter, "password");
+  }
+
+  @Test
+  void acceptsEverySpecialCharacterFromTheOwaspList() {
+    String suffix = uniqueSuffix();
+    String specials = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+    for (int i = 0; i < specials.length(); i++) {
+      var response = registerPassword("sp" + i + suffix, "Abcdefghijk1" + specials.charAt(i));
+
+      assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    }
+  }
+
+  @Test
+  void acceptsUnicodeCharacters() {
+    String suffix = uniqueSuffix();
+
+    var response = registerPassword(suffix, "\u00d1and\u00fa!Ab");
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+  }
+
+  @Test
+  void rejectsNonBreakingSpace() {
+    String suffix = uniqueSuffix();
+
+    var response = registerPassword(suffix, "Abcdefghijk\u00a01!");
+
+    assertValidationFailed(response, "password");
+  }
+
+  private MvcTestResult registerPassword(String suffix, String password) {
+    return graphql(registerBody("pw" + suffix + "@example.com", "pw_" + suffix, "Ana", password));
   }
 
   @Test

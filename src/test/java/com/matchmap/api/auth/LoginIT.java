@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import tools.jackson.databind.json.JsonMapper;
@@ -30,12 +31,14 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class LoginIT {
 
-  private static final String PASSWORD = "correcthorse1";
+  private static final String PASSWORD = "Correcthorse1!";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;
 
   @Autowired JdbcTemplate jdbcTemplate;
+
+  @Autowired PasswordEncoder passwordEncoder;
 
   @Test
   void returnsTokensForCorrectCredentials() {
@@ -142,13 +145,14 @@ class LoginIT {
   void passwordWithoutUppercaseIsNotRejectedForThat() {
     String suffix = uniqueSuffix();
     String password = "lowercase123";
-    mockMvc
-        .post()
-        .uri("/graphql")
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody("lower" + suffix + "@example.com", "lower_" + suffix, "Lo", password))
-        .exchange();
+    jdbcTemplate.update(
+        "INSERT INTO user_account (id, email, username, display_name, password_hash, created_at)"
+            + " VALUES (?, ?, ?, ?, ?, now())",
+        UUID.randomUUID(),
+        "lower" + suffix + "@example.com",
+        "lower_" + suffix,
+        "Lo",
+        passwordEncoder.encode(password));
 
     var response = login("lower" + suffix + "@example.com", password);
 
