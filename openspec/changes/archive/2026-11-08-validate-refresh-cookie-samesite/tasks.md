@@ -11,4 +11,4 @@
 
 ## 2. Full check
 
-- [ ] 2.1 Run `.\gradlew.bat check` and paste the summary. Coverage thresholds must be met. `ArchiveCheckTest` only runs in the pull request workflow and is covered by the archive step
+- [x] 2.1 Run `.\gradlew.bat check` and paste the summary. Coverage thresholds must be met. `ArchiveCheckTest` only runs in the pull request workflow and is covered by the archive step
