@@ -7,6 +7,10 @@ matchmap:
     failed-login-window: 15m
     google:
       client-ids: ${MATCHMAP_GOOGLE_CLIENT_IDS:}
+    refresh-cookie:
+      same-site: ${MATCHMAP_REFRESH_COOKIE_SAMESITE:Lax}
+  cors:
+    allowed-origins: ${MATCHMAP_CORS_ALLOWED_ORIGINS:http://localhost:4300}
 
 spring:
   application:
