@@ -98,7 +98,9 @@ This is the step for thinking a problem through before anything is written. The 
 
 ### 2. Propose
 
-A change starts from a GitHub issue. When the assistant works on a change, the issue is opened first, it stays open until the change is merged into `main`, and the proposal and the pull request cite it with `Closes #<number>`. The repository owner may create a change without an issue.
+Every change comes from a GitHub issue. The issue is opened first, it stays open until the change is merged into `main`, and the proposal and the pull request cite it with `Closes #<number>`.
+
+Exceptions are possible, but the agent does not decide them alone. If there is no issue for the work, the agent tells the person and waits for their approval before it proposes the change. The repository owner may also create a change without an issue.
 
 This is the step that creates the change. The agent creates the change folder, which is what makes it a change, with four artifacts:
 
@@ -108,6 +110,13 @@ This is the step that creates the change. The agent creates the change folder, w
 - `tasks.md`: ordered implementation steps. Each step names the failing test to write first and the scenario it covers.
 
 Anything missing or ambiguous is written as `[NEEDS CLARIFICATION: <question>]`. The agent does not choose a default.
+
+As soon as the change folder exists in the repository, the agent updates the issue's labels on GitHub:
+
+- It adds the `in progress` label, which means a change is being worked on for the issue.
+- It removes the `blocks-frontend` label, if the issue has it. That label marks backend issues that block the frontend, so it is removed once a change for the issue is under way.
+
+Both steps happen in the same step as the proposal. A proposal without the label change is incomplete.
 
 ### 3. Update
 
