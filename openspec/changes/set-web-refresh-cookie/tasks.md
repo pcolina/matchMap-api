@@ -7,7 +7,7 @@
 ## 2. Configuration (D3)
 
 - [x] 2.1 Write the test "Cookie SameSite comes from configuration" and show it failing
-- [ ] 2.2 Write the test "CORS allows credentials from the configured web origin" and show it failing
+- [x] 2.2 Write the test "CORS allows credentials from the configured web origin" and show it failing
 - [ ] 2.3 Implement the environment variables `MATCHMAP_REFRESH_COOKIE_SAMESITE` and `MATCHMAP_CORS_ALLOWED_ORIGINS` with local defaults, add them to `infra/docker/.env.example`, and verify all tests pass
 
 ## 3. Client type header (specs/authentication, "Client type header")
