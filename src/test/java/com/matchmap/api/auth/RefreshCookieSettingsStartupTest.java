@@ -9,7 +9,8 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 class RefreshCookieSettingsStartupTest {
 
   private final ApplicationContextRunner runner =
-      new ApplicationContextRunner().withUserConfiguration(RefreshCookieSettingsConfiguration.class);
+      new ApplicationContextRunner()
+          .withUserConfiguration(RefreshCookieSettingsConfiguration.class);
 
   @Test
   void unknownValueStopsStartup() {
@@ -19,7 +20,7 @@ class RefreshCookieSettingsStartupTest {
             context -> {
               assertThat(context).hasFailed();
               assertThat(context.getStartupFailure())
-                  .hasMessageContaining("MATCHMAP_REFRESH_COOKIE_SAMESITE");
+                  .hasStackTraceContaining("MATCHMAP_REFRESH_COOKIE_SAMESITE");
             });
   }
 

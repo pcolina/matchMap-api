@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -40,7 +39,7 @@ class AuthController {
   private final GoogleAccountService googleAccounts;
   private final Validator validator;
   private final AuthProperties authProperties;
-  private final String refreshCookieSameSite;
+  private final RefreshCookieProperties refreshCookieProperties;
 
   AuthController(
       UserAccountRepository accounts,
@@ -52,7 +51,7 @@ class AuthController {
       GoogleAccountService googleAccounts,
       Validator validator,
       AuthProperties authProperties,
-      @Value("${matchmap.auth.refresh-cookie.same-site}") String refreshCookieSameSite) {
+      RefreshCookieProperties refreshCookieProperties) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.accessTokens = accessTokens;
@@ -62,7 +61,7 @@ class AuthController {
     this.googleAccounts = googleAccounts;
     this.validator = validator;
     this.authProperties = authProperties;
-    this.refreshCookieSameSite = refreshCookieSameSite;
+    this.refreshCookieProperties = refreshCookieProperties;
   }
 
   @PostMapping("/google")
@@ -184,7 +183,7 @@ class AuthController {
         .secure(true)
         .path("/api/auth")
         .maxAge(maxAge)
-        .sameSite(refreshCookieSameSite)
+        .sameSite(refreshCookieProperties.sameSite())
         .build();
   }
 
