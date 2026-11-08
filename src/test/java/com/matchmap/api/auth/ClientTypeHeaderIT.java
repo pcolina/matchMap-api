@@ -120,6 +120,18 @@ class ClientTypeHeaderIT {
     assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_client");
   }
 
+  @Test
+  void webSignInDefaultsSameSiteToLax() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "zoe" + suffix + "@example.com";
+    registerAccount(email, "zoe_" + suffix);
+
+    var response = post("/api/auth/login", "web", Map.of("email", email, "password", PASSWORD));
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(setCookieOf(response)).contains("SameSite=Lax");
+  }
+
   private void registerAccount(String email, String username) {
     mockMvc
         .post()
