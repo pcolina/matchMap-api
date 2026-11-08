@@ -3,13 +3,18 @@ package com.matchmap.api.auth;
 import com.matchmap.api.account.GoogleAccountService;
 import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nimbusds.jose.KeySourceException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Validator;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +36,8 @@ class AuthController {
   private final GoogleIdTokenVerifier googleIdTokens;
   private final GoogleAccountService googleAccounts;
   private final Validator validator;
+  private final AuthProperties authProperties;
+  private final String refreshCookieSameSite;
 
   AuthController(
       UserAccountRepository accounts,
@@ -40,7 +47,9 @@ class AuthController {
       LoginThrottle loginThrottle,
       GoogleIdTokenVerifier googleIdTokens,
       GoogleAccountService googleAccounts,
-      Validator validator) {
+      Validator validator,
+      AuthProperties authProperties,
+      @Value("${matchmap.auth.refresh-cookie.same-site}") String refreshCookieSameSite) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.accessTokens = accessTokens;
@@ -49,6 +58,8 @@ class AuthController {
     this.googleIdTokens = googleIdTokens;
     this.googleAccounts = googleAccounts;
     this.validator = validator;
+    this.authProperties = authProperties;
+    this.refreshCookieSameSite = refreshCookieSameSite;
   }
 
   @PostMapping("/google")
@@ -79,8 +90,9 @@ class AuthController {
   public TokenResponse login(
       @RequestBody LoginRequest request,
       @RequestHeader(value = "X-Client", required = false) String client,
-      HttpServletRequest httpRequest) {
-    ClientType.from(client);
+      HttpServletRequest httpRequest,
+      HttpServletResponse httpResponse) {
+    var clientType = ClientType.from(client);
     var email = request.email() == null ? null : request.email().trim().toLowerCase(Locale.ROOT);
     var password = request.password() == null ? null : request.password().strip();
     validateLoginLimits(email, password);
@@ -97,7 +109,12 @@ class AuthController {
     }
     loginThrottle.reset(throttleKey);
     var account = found.get();
-    return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
+    var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
+    if (clientType == ClientType.WEB) {
+      httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refreshToken).toString());
+      return tokenResponse(account, null);
+    }
+    return tokenResponse(account, refreshToken);
   }
 
   @PostMapping("/refresh")
@@ -126,6 +143,16 @@ class AuthController {
         refreshToken);
   }
 
+  private ResponseCookie refreshCookie(String refreshToken) {
+    return ResponseCookie.from("refresh_token", refreshToken)
+        .httpOnly(true)
+        .secure(true)
+        .path("/api/auth")
+        .maxAge(authProperties.refreshTokenTtl())
+        .sameSite(refreshCookieSameSite)
+        .build();
+  }
+
   private void validateLoginLimits(String email, String password) {
     var violations = validator.validate(new LoginLimits(email, password));
     var fields = violations.stream().map(v -> v.getPropertyPath().toString()).toList();
@@ -148,5 +175,9 @@ class AuthController {
 
   record GoogleRequest(String idToken) {}
 
-  record TokenResponse(String tokenType, String accessToken, long expiresIn, String refreshToken) {}
+  record TokenResponse(
+      String tokenType,
+      String accessToken,
+      long expiresIn,
+      @JsonInclude(JsonInclude.Include.NON_NULL) String refreshToken) {}
 }
