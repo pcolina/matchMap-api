@@ -22,6 +22,10 @@ class AuthException extends RuntimeException {
     return new AuthException(HttpStatus.UNAUTHORIZED, "invalid_credentials", null);
   }
 
+  static AuthException invalidClient() {
+    return new AuthException(HttpStatus.BAD_REQUEST, "invalid_client", null);
+  }
+
   static AuthException invalidEmail() {
     return new AuthException(HttpStatus.BAD_REQUEST, "invalid_email", null);
   }

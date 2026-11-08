@@ -240,6 +240,27 @@ class GoogleSignInIT {
         .isEqualTo("g-first-" + suffix);
   }
 
+  @Test
+  void webGoogleSignInSetsRefreshCookieAndOmitsRefreshTokenFromBody() throws Exception {
+    String suffix = uniqueSuffix();
+    String subject = "g-" + suffix;
+    String email = "nora" + suffix + "@gmail.com";
+
+    var response = webSignIn(googleToken(subject, email, "Nora"));
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+    assertThat(response).bodyJson().extractingPath("$.accessToken").asString().isNotBlank();
+    assertThat(JSON.readTree(response.getResponse().getContentAsString()).has("refreshToken"))
+        .isFalse();
+    assertThat(String.join(";", response.getResponse().getHeaders("Set-Cookie")))
+        .contains("refresh_token=")
+        .contains("HttpOnly")
+        .contains("Secure")
+        .contains("Path=/api/auth")
+        .contains("Max-Age=2592000");
+  }
+
   private void assertUnverifiedGoogleEmail(MvcTestResult response) {
     assertThat(response).hasStatus(HttpStatus.FORBIDDEN);
     assertThat(response)
@@ -262,6 +283,7 @@ class GoogleSignInIT {
     return mockMvc
         .post()
         .uri("/api/auth/login")
+        .header("X-Client", "mobile")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
         .content(JSON.writeValueAsString(Map.of("email", email, "password", password)))
@@ -278,10 +300,22 @@ class GoogleSignInIT {
         "SELECT display_name FROM user_account WHERE google_subject = ?", String.class, subject);
   }
 
+  private MvcTestResult webSignIn(String idToken) {
+    return mockMvc
+        .post()
+        .uri("/api/auth/google")
+        .header("X-Client", "web")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(JSON.writeValueAsString(Map.of("idToken", idToken)))
+        .exchange();
+  }
+
   private MvcTestResult signIn(String idToken) {
     return mockMvc
         .post()
         .uri("/api/auth/google")
+        .header("X-Client", "mobile")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
         .content(JSON.writeValueAsString(Map.of("idToken", idToken)))

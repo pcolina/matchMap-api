@@ -5,6 +5,7 @@ import static com.matchmap.api.support.GraphqlRequests.uniqueSuffix;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.matchmap.api.TestcontainersConfiguration;
+import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
@@ -87,6 +88,78 @@ class RefreshIT {
     assertThat(later).hasStatus(HttpStatus.UNAUTHORIZED);
   }
 
+  @Test
+  void successfulRefreshFromMobileReturnsRefreshTokenInBody() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "tina" + suffix + "@example.com";
+    registerAccount(email, "tina_" + suffix);
+    var first = refreshTokenOf(login(email));
+
+    var response = post("/api/auth/refresh", Map.of("refreshToken", first));
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+    assertThat(response).bodyJson().extractingPath("$.accessToken").asString().isNotBlank();
+    assertThat(response).bodyJson().extractingPath("$.expiresIn").isEqualTo(900);
+    assertThat(refreshTokenOf(response)).isNotBlank().isNotEqualTo(first);
+  }
+
+  @Test
+  void successfulRefreshFromWebUsesCookieAndReturnsNewCookie() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "ursula" + suffix + "@example.com";
+    registerAccount(email, "ursula_" + suffix);
+    var first = refreshCookieOf(webLogin(email));
+
+    var response = webRefresh(first);
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.accessToken").asString().isNotBlank();
+    assertThat(JSON.readTree(response.getResponse().getContentAsString()).has("refreshToken"))
+        .isFalse();
+    assertThat(refreshCookieOf(response)).isNotBlank().isNotEqualTo(first);
+  }
+
+  @Test
+  void webRefreshWithoutCookieIsRejected() throws Exception {
+    var response =
+        mockMvc
+            .post()
+            .uri("/api/auth/refresh")
+            .header("X-Client", "web")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange();
+
+    assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_refresh_token");
+  }
+
+  private MvcTestResult webLogin(String email) {
+    return mockMvc
+        .post()
+        .uri("/api/auth/login")
+        .header("X-Client", "web")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(JSON.writeValueAsString(Map.of("email", email, "password", PASSWORD)))
+        .exchange();
+  }
+
+  private MvcTestResult webRefresh(String refreshCookie) {
+    return mockMvc
+        .post()
+        .uri("/api/auth/refresh")
+        .header("X-Client", "web")
+        .cookie(new Cookie("refresh_token", refreshCookie))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange();
+  }
+
+  private String refreshCookieOf(MvcTestResult response) {
+    var setCookie = response.getResponse().getHeader("Set-Cookie");
+    return setCookie.substring("refresh_token=".length(), setCookie.indexOf(';'));
+  }
+
   private static String sha256(String token) throws Exception {
     return HexFormat.of()
         .formatHex(
@@ -117,6 +190,7 @@ class RefreshIT {
     return mockMvc
         .post()
         .uri(uri)
+        .header("X-Client", "mobile")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
         .content(JSON.writeValueAsString(body))

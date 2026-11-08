@@ -1,22 +1,31 @@
 package com.matchmap.api.auth;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.matchmap.api.account.GoogleAccountService;
 import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
 import com.nimbusds.jose.KeySourceException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Validator;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,6 +39,8 @@ class AuthController {
   private final GoogleIdTokenVerifier googleIdTokens;
   private final GoogleAccountService googleAccounts;
   private final Validator validator;
+  private final AuthProperties authProperties;
+  private final String refreshCookieSameSite;
 
   AuthController(
       UserAccountRepository accounts,
@@ -39,7 +50,9 @@ class AuthController {
       LoginThrottle loginThrottle,
       GoogleIdTokenVerifier googleIdTokens,
       GoogleAccountService googleAccounts,
-      Validator validator) {
+      Validator validator,
+      AuthProperties authProperties,
+      @Value("${matchmap.auth.refresh-cookie.same-site}") String refreshCookieSameSite) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.accessTokens = accessTokens;
@@ -48,10 +61,16 @@ class AuthController {
     this.googleIdTokens = googleIdTokens;
     this.googleAccounts = googleAccounts;
     this.validator = validator;
+    this.authProperties = authProperties;
+    this.refreshCookieSameSite = refreshCookieSameSite;
   }
 
   @PostMapping("/google")
-  public TokenResponse google(@RequestBody GoogleRequest request) {
+  public TokenResponse google(
+      @RequestBody GoogleRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      HttpServletResponse httpResponse) {
+    var clientType = ClientType.from(client);
     GoogleIdentity identity;
     try {
       identity = googleIdTokens.verify(request.idToken());
@@ -68,11 +87,16 @@ class AuthController {
         googleAccounts
             .resolve(identity.subject(), identity.email(), identity.name())
             .orElseThrow(AuthException::invalidGoogleToken);
-    return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
+    return signedInResponse(account, clientType, httpResponse);
   }
 
   @PostMapping("/login")
-  public TokenResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+  public TokenResponse login(
+      @RequestBody LoginRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      HttpServletRequest httpRequest,
+      HttpServletResponse httpResponse) {
+    var clientType = ClientType.from(client);
     var email = request.email() == null ? null : request.email().trim().toLowerCase(Locale.ROOT);
     var password = request.password() == null ? null : request.password().strip();
     validateLoginLimits(email, password);
@@ -88,19 +112,49 @@ class AuthController {
       throw AuthException.invalidCredentials();
     }
     loginThrottle.reset(throttleKey);
-    var account = found.get();
-    return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
+    return signedInResponse(found.get(), clientType, httpResponse);
   }
 
   @PostMapping("/refresh")
-  public TokenResponse refresh(@RequestBody RefreshRequest request) {
+  public TokenResponse refresh(
+      @RequestBody(required = false) RefreshRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      @CookieValue(name = "refresh_token", required = false) String presentedCookie,
+      HttpServletResponse httpResponse) {
+    if (ClientType.from(client) == ClientType.WEB) {
+      if (presentedCookie == null) {
+        throw AuthException.invalidRefreshToken();
+      }
+      var rotation = refreshTokens.rotate(presentedCookie);
+      httpResponse.addHeader(
+          HttpHeaders.SET_COOKIE,
+          refreshCookie(rotation.refreshToken(), authProperties.refreshTokenTtl()).toString());
+      return tokenResponse(rotation.account(), null);
+    }
+    if (request == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
     var rotation = refreshTokens.rotate(request.refreshToken());
     return tokenResponse(rotation.account(), rotation.refreshToken());
   }
 
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void logout(@RequestBody RefreshRequest request) {
+  public void logout(
+      @RequestBody(required = false) RefreshRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      @CookieValue(name = "refresh_token", required = false) String presentedCookie,
+      HttpServletResponse httpResponse) {
+    if (ClientType.from(client) == ClientType.WEB) {
+      if (presentedCookie != null) {
+        refreshTokens.logout(presentedCookie);
+      }
+      httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie("", Duration.ZERO).toString());
+      return;
+    }
+    if (request == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
     refreshTokens.logout(request.refreshToken());
   }
 
@@ -110,6 +164,28 @@ class AuthController {
         accessTokens.issue(account.getId()),
         accessTokens.ttl().getSeconds(),
         refreshToken);
+  }
+
+  private TokenResponse signedInResponse(
+      UserAccount account, ClientType clientType, HttpServletResponse httpResponse) {
+    var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
+    if (clientType == ClientType.WEB) {
+      httpResponse.addHeader(
+          HttpHeaders.SET_COOKIE,
+          refreshCookie(refreshToken, authProperties.refreshTokenTtl()).toString());
+      return tokenResponse(account, null);
+    }
+    return tokenResponse(account, refreshToken);
+  }
+
+  private ResponseCookie refreshCookie(String value, Duration maxAge) {
+    return ResponseCookie.from("refresh_token", value)
+        .httpOnly(true)
+        .secure(true)
+        .path("/api/auth")
+        .maxAge(maxAge)
+        .sameSite(refreshCookieSameSite)
+        .build();
   }
 
   private void validateLoginLimits(String email, String password) {
@@ -134,5 +210,9 @@ class AuthController {
 
   record GoogleRequest(String idToken) {}
 
-  record TokenResponse(String tokenType, String accessToken, long expiresIn, String refreshToken) {}
+  record TokenResponse(
+      String tokenType,
+      String accessToken,
+      long expiresIn,
+      @JsonInclude(JsonInclude.Include.NON_NULL) String refreshToken) {}
 }

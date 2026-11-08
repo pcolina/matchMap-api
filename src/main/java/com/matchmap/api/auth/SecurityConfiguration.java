@@ -66,8 +66,10 @@ class SecurityConfiguration {
       @Value("${matchmap.cors.allowed-origins:}") List<String> allowedOrigins) {
     var configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(allowedOrigins);
+    configuration.setAllowCredentials(true);
     configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
-    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Correlation-Id"));
+    configuration.setAllowedHeaders(
+        List.of("Authorization", "Content-Type", "X-Correlation-Id", "X-Client"));
     configuration.setExposedHeaders(List.of("X-Correlation-Id", "WWW-Authenticate", "Retry-After"));
     var source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
