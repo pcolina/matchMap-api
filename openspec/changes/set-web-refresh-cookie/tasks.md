@@ -23,7 +23,7 @@
 - [x] 4.2 Write the test "Correct credentials from web" and show it failing
 - [x] 4.3 Implement the cookie for web sign-in and the body without `refreshToken` (D1, D3, D4), and verify all tests pass
 - [x] 4.4 Write the test "Missing X-Client header" for login and show it passing. The header check from 3.3 already runs before anything else in login, so the test guards it
-- [ ] 4.5 Write the test "Google sign-in from web" and show it failing
+- [x] 4.5 Write the test "Google sign-in from web" and show it failing
 - [ ] 4.6 Implement the same web behaviour for `POST /api/auth/google` (D7), and verify all tests pass
 
 ## 5. Refresh (specs/authentication, "Refresh with rotation")
