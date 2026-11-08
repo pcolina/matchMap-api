@@ -65,8 +65,9 @@ class AuthController {
   @PostMapping("/google")
   public TokenResponse google(
       @RequestBody GoogleRequest request,
-      @RequestHeader(value = "X-Client", required = false) String client) {
-    ClientType.from(client);
+      @RequestHeader(value = "X-Client", required = false) String client,
+      HttpServletResponse httpResponse) {
+    var clientType = ClientType.from(client);
     GoogleIdentity identity;
     try {
       identity = googleIdTokens.verify(request.idToken());
@@ -83,7 +84,7 @@ class AuthController {
         googleAccounts
             .resolve(identity.subject(), identity.email(), identity.name())
             .orElseThrow(AuthException::invalidGoogleToken);
-    return tokenResponse(account, refreshTokens.issue(account, UUID.randomUUID()));
+    return signedInResponse(account, clientType, httpResponse);
   }
 
   @PostMapping("/login")
@@ -108,13 +109,7 @@ class AuthController {
       throw AuthException.invalidCredentials();
     }
     loginThrottle.reset(throttleKey);
-    var account = found.get();
-    var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
-    if (clientType == ClientType.WEB) {
-      httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refreshToken).toString());
-      return tokenResponse(account, null);
-    }
-    return tokenResponse(account, refreshToken);
+    return signedInResponse(found.get(), clientType, httpResponse);
   }
 
   @PostMapping("/refresh")
@@ -141,6 +136,16 @@ class AuthController {
         accessTokens.issue(account.getId()),
         accessTokens.ttl().getSeconds(),
         refreshToken);
+  }
+
+  private TokenResponse signedInResponse(
+      UserAccount account, ClientType clientType, HttpServletResponse httpResponse) {
+    var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
+    if (clientType == ClientType.WEB) {
+      httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refreshToken).toString());
+      return tokenResponse(account, null);
+    }
+    return tokenResponse(account, refreshToken);
   }
 
   private ResponseCookie refreshCookie(String refreshToken) {
