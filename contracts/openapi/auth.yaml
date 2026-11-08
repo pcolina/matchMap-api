@@ -5,11 +5,16 @@ info:
   description: >-
     Sign-in, token refresh and sign-out for MatchMap. Account creation and
     account reads are GraphQL operations defined in contracts/graphql.
+    Every operation requires the X-Client header. For web, the refresh token
+    travels only in the refresh_token cookie, and it never appears in a
+    response body. For mobile, the refresh token travels in the body.
 paths:
   /api/auth/login:
     post:
       operationId: login
       summary: Sign in with email and password
+      parameters:
+        - $ref: '#/components/parameters/XClient'
       requestBody:
         required: true
         content:
@@ -18,11 +23,25 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Signed in.
+          description: >-
+            Signed in. For X-Client mobile the body contains refreshToken. For
+            X-Client web the body omits refreshToken and the response sets the
+            refresh_token cookie.
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenCookie'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: "The X-Client header is missing or unknown (invalid_client), or the email or the password breaks its input limits (invalid_email or invalid_password)."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_email
         '401':
           description: Wrong password, unknown email or account without password.
           content:
@@ -31,14 +50,6 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: invalid_credentials
-        '400':
-          description: "The email or the password breaks its input limits. The error says which field: invalid_email or invalid_password."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: invalid_email
         '429':
           description: Too many failed attempts for this email from this client.
           headers:
@@ -56,6 +67,8 @@ paths:
     post:
       operationId: signInWithGoogle
       summary: Sign in with a Google ID token
+      parameters:
+        - $ref: '#/components/parameters/XClient'
       requestBody:
         required: true
         content:
@@ -64,11 +77,24 @@ paths:
               $ref: '#/components/schemas/GoogleSignInRequest'
       responses:
         '200':
-          description: Signed in; the account is created or linked if needed.
+          description: >-
+            Signed in; the account is created or linked if needed. The refresh
+            token follows the same rule as login for the X-Client value.
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenCookie'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: The X-Client header is missing or unknown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_client
         '401':
           description: The ID token is invalid, expired or for another audience.
           content:
@@ -89,21 +115,40 @@ paths:
     post:
       operationId: refresh
       summary: Exchange a refresh token for new tokens
+      description: >-
+        For X-Client mobile the request body carries refreshToken. For X-Client
+        web the request has no body and the refresh token is read from the
+        refresh_token cookie; any body is ignored.
+      parameters:
+        - $ref: '#/components/parameters/XClient'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
         '200':
-          description: New access and refresh tokens; the presented refresh token is no longer valid.
+          description: >-
+            New access and refresh tokens; the presented refresh token is no longer valid.
+            For X-Client web the body omits refreshToken and the response sets the new refresh_token cookie.
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenCookie'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: The X-Client header is missing or unknown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_client
         '401':
-          description: Unknown, expired, revoked or reused refresh token.
+          description: Unknown, expired, revoked or reused refresh token, or a web request without the refresh_token cookie.
           content:
             application/json:
               schema:
@@ -114,16 +159,53 @@ paths:
     post:
       operationId: logout
       summary: Sign out by revoking the session of a refresh token
+      description: >-
+        For X-Client mobile the request body carries refreshToken. For X-Client
+        web the request has no body; the refresh token is read from the
+        refresh_token cookie, and the response clears that cookie.
+      parameters:
+        - $ref: '#/components/parameters/XClient'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
         '204':
-          description: Session revoked, or the token was already unknown or revoked.
+          description: Session revoked, or the token was already unknown, revoked or missing. For X-Client web the response expires the refresh_token cookie.
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/ClearRefreshTokenCookie'
+        '400':
+          description: The X-Client header is missing or unknown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_client
 components:
+  parameters:
+    XClient:
+      name: X-Client
+      in: header
+      required: true
+      description: Which client sends the request. web keeps the refresh token in a cookie; mobile keeps it in the body.
+      schema:
+        type: string
+        enum: [web, mobile]
+  headers:
+    RefreshTokenCookie:
+      description: >-
+        refresh_token=<token>; Path=/api/auth; Max-Age=2592000; HttpOnly; Secure; SameSite=<configured value, Lax by default>
+      schema:
+        type: string
+    ClearRefreshTokenCookie:
+      description: >-
+        refresh_token=; Path=/api/auth; Max-Age=0; HttpOnly; Secure; SameSite=<configured value, Lax by default>
+      schema:
+        type: string
   schemas:
     LoginRequest:
       type: object
@@ -147,13 +229,13 @@ components:
           type: string
     RefreshTokenRequest:
       type: object
-      required: [refreshToken]
+      description: Required for X-Client mobile. Not used for X-Client web.
       properties:
         refreshToken:
           type: string
     TokenResponse:
       type: object
-      required: [tokenType, accessToken, expiresIn, refreshToken]
+      required: [tokenType, accessToken, expiresIn]
       properties:
         tokenType:
           type: string
@@ -166,6 +248,7 @@ components:
           examples: [900]
         refreshToken:
           type: string
+          description: Present for X-Client mobile only. Web receives the refresh token in the refresh_token cookie.
     Error:
       type: object
       required: [error]
@@ -173,6 +256,7 @@ components:
         error:
           type: string
           enum:
+            - invalid_client
             - invalid_credentials
             - too_many_attempts
             - invalid_google_token
