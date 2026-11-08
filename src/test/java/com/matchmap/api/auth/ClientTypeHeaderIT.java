@@ -42,6 +42,26 @@ class ClientTypeHeaderIT {
     assertThat(stillValid).hasStatus(HttpStatus.OK);
   }
 
+  @Test
+  void missingClientTypeOnRefreshIsRejected() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "wade" + suffix + "@example.com";
+    registerAccount(email, "wade_" + suffix);
+    var refreshToken = refreshTokenOf(login(email));
+
+    var response =
+        mockMvc
+            .post()
+            .uri("/api/auth/refresh")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(JSON.writeValueAsString(Map.of("refreshToken", refreshToken)))
+            .exchange();
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_client");
+  }
+
   private void registerAccount(String email, String username) {
     mockMvc
         .post()
