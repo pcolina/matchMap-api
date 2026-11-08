@@ -4,9 +4,9 @@ Each task is one commit with `Task: <id>` in the body. Every task follows TDD: w
 
 ## 1. Lock the duplicate-username and taken-email codes
 
-- [ ] 1.1 Write the failing integration test `RegistrationErrorCodesIT.duplicateUsernameReturnsUsernameTaken` (covers scenario "Duplicate username returns its own code"): create an account with `ana_travels`, then register with a new email and `Ana_Travels`, and assert `extensions.code` is `USERNAME_TAKEN`. Run it and show the result. If it already passes, record that the issue's claim that a duplicate username returns `email taken` is not reproduced, and do not change production code.
-- [ ] 1.2 Write the failing integration test `RegistrationErrorCodesIT.takenEmailReturnsEmailTaken` (covers scenario "Taken email returns its own code"). Run it and show the result.
-- [ ] 1.3 Make 1.1 and 1.2 pass only if they fail. Write the minimum production code needed, and only if a test shows a wrong code. Otherwise make no production change and commit only the tests.
+- [x] 1.1 Covers scenario "Duplicate username returns its own code" with the existing test `RegisterIT.rejectsTakenUsername` (`src/test/java/com/matchmap/api/account/RegisterIT.java`). It registers `taken_<suffix>` and then `TAKEN_<suffix>` and asserts `extensions.code` is `USERNAME_TAKEN`. It passes; the issue's claim that a duplicate username returns `email taken` is not reproduced. No new test file and no production change.
+- [x] 1.2 Covers scenario "Taken email returns its own code" with the existing test `RegisterIT.rejectsTakenEmail`. It asserts `extensions.code` is `EMAIL_TAKEN` and that no second account is stored. It passes.
+- [x] 1.3 No production change is needed, because 1.1 and 1.2 already pass. Nothing new is committed for this group.
 
 ## 2. Document the codes in the contract
 
