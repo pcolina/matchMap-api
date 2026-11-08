@@ -16,5 +16,5 @@ Each task is one commit with `Task: <id>` in the body. Every task follows TDD: w
 
 ## 3. Full check
 
-- [ ] 3.1 Run `.\gradlew.bat spotlessApply`, then `.\gradlew.bat check`, and paste the summary in the PR.
+- [ ] 3.1 Run `.\gradlew.bat spotlessApply`, then `.\gradlew.bat test`. The only failure accepted is `ArchiveCheckTest.pullRequestCheckout`, which needs `GITHUB_HEAD_REF` and the archived change, and no other test may fail. Record the test counts in the PR description. The full `.\gradlew.bat check`, including `ArchiveCheckTest`, runs in the pull request workflow after archiving.
 - [ ] 3.2 Confirm that `contracts/` and the implementation are in sync, and that no `[NEEDS CLARIFICATION]` remains in the artifacts.
