@@ -13,7 +13,7 @@
 ## 3. Client type header (specs/authentication, "Client type header")
 
 - [x] 3.0 Send `X-Client: mobile` from the existing auth tests (LoginIT, LogoutIT, RefreshIT, CredentialLeakIT, LoginThrottlingIT, GoogleSignInIT, GoogleSignInUnavailableIT, GoogleSignInWithoutClientIdsIT, MeQueryIT and AccountSchemaIT where they call `/api/auth/*`). The header is now required, so their behaviour does not change. Run them and show they pass before the new tests are written
-- [ ] 3.1 Write the test "Unknown X-Client value" and show it failing
+- [x] 3.1 Write the test "Unknown X-Client value" and show it failing
 - [ ] 3.2 Write the test "Missing X-Client on refresh" and show it failing
 - [ ] 3.3 Implement the header check on the four `/api/auth` operations and verify all tests pass
 
