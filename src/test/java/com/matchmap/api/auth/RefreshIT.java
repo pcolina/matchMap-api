@@ -87,6 +87,22 @@ class RefreshIT {
     assertThat(later).hasStatus(HttpStatus.UNAUTHORIZED);
   }
 
+  @Test
+  void successfulRefreshFromMobileReturnsRefreshTokenInBody() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "tina" + suffix + "@example.com";
+    registerAccount(email, "tina_" + suffix);
+    var first = refreshTokenOf(login(email));
+
+    var response = post("/api/auth/refresh", Map.of("refreshToken", first));
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+    assertThat(response).bodyJson().extractingPath("$.accessToken").asString().isNotBlank();
+    assertThat(response).bodyJson().extractingPath("$.expiresIn").isEqualTo(900);
+    assertThat(refreshTokenOf(response)).isNotBlank().isNotEqualTo(first);
+  }
+
   private static String sha256(String token) throws Exception {
     return HexFormat.of()
         .formatHex(
