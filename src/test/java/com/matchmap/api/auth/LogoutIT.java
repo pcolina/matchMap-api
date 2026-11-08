@@ -22,7 +22,7 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class LogoutIT {
 
-  private static final String PASSWORD = "correct horse battery";
+  private static final String PASSWORD = "correcthorse1";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;

@@ -5,6 +5,7 @@ import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
 import com.nimbusds.jose.KeySourceException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Validator;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
@@ -28,6 +29,7 @@ class AuthController {
   private final LoginThrottle loginThrottle;
   private final GoogleIdTokenVerifier googleIdTokens;
   private final GoogleAccountService googleAccounts;
+  private final Validator validator;
 
   AuthController(
       UserAccountRepository accounts,
@@ -36,7 +38,8 @@ class AuthController {
       RefreshTokenService refreshTokens,
       LoginThrottle loginThrottle,
       GoogleIdTokenVerifier googleIdTokens,
-      GoogleAccountService googleAccounts) {
+      GoogleAccountService googleAccounts,
+      Validator validator) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.accessTokens = accessTokens;
@@ -44,6 +47,7 @@ class AuthController {
     this.loginThrottle = loginThrottle;
     this.googleIdTokens = googleIdTokens;
     this.googleAccounts = googleAccounts;
+    this.validator = validator;
   }
 
   @PostMapping("/google")
@@ -69,14 +73,16 @@ class AuthController {
 
   @PostMapping("/login")
   public TokenResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-    var email = request.email().trim().toLowerCase(Locale.ROOT);
+    var email = request.email() == null ? null : request.email().trim().toLowerCase(Locale.ROOT);
+    var password = request.password() == null ? null : request.password().strip();
+    validateLoginLimits(email, password);
     var throttleKey = email + "|" + httpRequest.getRemoteAddr();
     var now = Instant.now();
     var retryAfter = loginThrottle.retryAfter(throttleKey, now);
     if (retryAfter.isPresent()) {
       throw AuthException.tooManyAttempts(retryAfter.get());
     }
-    var found = accounts.findByEmail(email).filter(c -> passwordMatches(c, request.password()));
+    var found = accounts.findByEmail(email).filter(c -> passwordMatches(c, password));
     if (found.isEmpty()) {
       loginThrottle.recordFailure(throttleKey, now);
       throw AuthException.invalidCredentials();
@@ -104,6 +110,17 @@ class AuthController {
         accessTokens.issue(account.getId()),
         accessTokens.ttl().getSeconds(),
         refreshToken);
+  }
+
+  private void validateLoginLimits(String email, String password) {
+    var violations = validator.validate(new LoginLimits(email, password));
+    var fields = violations.stream().map(v -> v.getPropertyPath().toString()).toList();
+    if (fields.contains("email")) {
+      throw AuthException.invalidEmail();
+    }
+    if (fields.contains("password")) {
+      throw AuthException.invalidPassword();
+    }
   }
 
   private boolean passwordMatches(UserAccount account, String password) {

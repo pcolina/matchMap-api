@@ -4,12 +4,16 @@ import static com.matchmap.api.support.GraphqlRequests.registerBody;
 import static com.matchmap.api.support.GraphqlRequests.uniqueSuffix;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.matchmap.api.TestcontainersConfiguration;
 import com.nimbusds.jwt.SignedJWT;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -26,7 +30,7 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class LoginIT {
 
-  private static final String PASSWORD = "correct horse battery";
+  private static final String PASSWORD = "correcthorse1";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;
@@ -66,7 +70,7 @@ class LoginIT {
     String suffix = uniqueSuffix();
     registerAccount("cara" + suffix + "@example.com", "cara_" + suffix);
 
-    var response = login("cara" + suffix + "@example.com", "wrong password here");
+    var response = login("cara" + suffix + "@example.com", "wrongpassword1");
 
     assertInvalidCredentials(response);
   }
@@ -92,6 +96,121 @@ class LoginIT {
     var response = login("gina" + suffix + "@example.com", PASSWORD);
 
     assertInvalidCredentials(response);
+  }
+
+  @Test
+  void rejectsEmptyEmail() {
+    var response = login("", PASSWORD);
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_email");
+  }
+
+  @Test
+  void rejectsEmailTooLong() {
+    var response = login("a".repeat(243) + "@example.com", PASSWORD);
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_email");
+  }
+
+  @Test
+  void rejectsEmailNotInStandardFormat() {
+    var response = login("not-an-email", PASSWORD);
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_email");
+  }
+
+  @Test
+  void rejectsPasswordTooShort() {
+    var response = login("short" + uniqueSuffix() + "@example.com", "abcde");
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_password");
+  }
+
+  @Test
+  void rejectsPasswordTooLong() {
+    var response = login("long" + uniqueSuffix() + "@example.com", "a".repeat(21));
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_password");
+  }
+
+  @Test
+  void passwordWithoutUppercaseIsNotRejectedForThat() {
+    String suffix = uniqueSuffix();
+    String password = "lowercase123";
+    mockMvc
+        .post()
+        .uri("/graphql")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(registerBody("lower" + suffix + "@example.com", "lower_" + suffix, "Lo", password))
+        .exchange();
+
+    var response = login("lower" + suffix + "@example.com", password);
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+  }
+
+  @Test
+  void limitBreachIsNotLoggedWithSubmittedValues() {
+    var email = "breach" + uniqueSuffix() + "@example.com";
+    var password = "secr3";
+    var logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    var appender = new ListAppender<ILoggingEvent>();
+    appender.start();
+    logger.addAppender(appender);
+    try {
+      var response = login(email, password);
+
+      assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+      assertThat(appender.list)
+          .allSatisfy(
+              event -> {
+                assertThat(event.getFormattedMessage())
+                    .doesNotContain(email)
+                    .doesNotContain(password);
+                assertThat(String.valueOf(event.getThrowableProxy()))
+                    .doesNotContain(email)
+                    .doesNotContain(password);
+              });
+    } finally {
+      logger.detachAppender(appender);
+    }
+  }
+
+  @Test
+  void rejectsWhitespaceInsidePassword() {
+    var response = login("space" + uniqueSuffix() + "@example.com", "secret pass1");
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_password");
+  }
+
+  @Test
+  void trimsSurroundingSpacesOfEmailAndPassword() {
+    String suffix = uniqueSuffix();
+    registerAccount("surround" + suffix + "@example.com", "surround_" + suffix);
+
+    var response = login("  surround" + suffix + "@example.com  ", " " + PASSWORD + " ");
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+  }
+
+  @Test
+  void matchesEmailRegardlessOfLetterCase() {
+    String suffix = uniqueSuffix();
+    registerAccount("lettercase" + suffix + "@example.com", "lettercase_" + suffix);
+
+    var response = login("LetterCase" + suffix + "@EXAMPLE.com", PASSWORD);
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
   }
 
   private void assertInvalidCredentials(MvcTestResult response) {
