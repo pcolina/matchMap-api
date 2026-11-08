@@ -17,12 +17,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -114,9 +116,19 @@ class AuthController {
 
   @PostMapping("/refresh")
   public TokenResponse refresh(
-      @RequestBody RefreshRequest request,
-      @RequestHeader(value = "X-Client", required = false) String client) {
-    ClientType.from(client);
+      @RequestBody(required = false) RefreshRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      @CookieValue(name = "refresh_token", required = false) String presentedCookie,
+      HttpServletResponse httpResponse) {
+    if (ClientType.from(client) == ClientType.WEB) {
+      var rotation = refreshTokens.rotate(presentedCookie);
+      httpResponse.addHeader(
+          HttpHeaders.SET_COOKIE, refreshCookie(rotation.refreshToken()).toString());
+      return tokenResponse(rotation.account(), null);
+    }
+    if (request == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
     var rotation = refreshTokens.rotate(request.refreshToken());
     return tokenResponse(rotation.account(), rotation.refreshToken());
   }

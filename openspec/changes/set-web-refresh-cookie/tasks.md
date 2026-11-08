@@ -30,7 +30,7 @@
 
 - [x] 5.1 Write the test "Successful refresh from mobile" and show it passing. It guards the mobile behaviour
 - [x] 5.2 Write the test "Successful refresh from web" and show it failing
-- [ ] 5.3 Implement cookie reading and writing for web refresh, ignoring any body (D5), and verify all tests pass
+- [x] 5.3 Implement cookie reading and writing for web refresh, ignoring any body (D5), and verify all tests pass
 - [ ] 5.4 Write the test "Web refresh without the cookie" and show it failing
 - [ ] 5.5 Implement the 401 for a missing cookie and verify all tests pass
 
