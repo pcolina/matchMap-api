@@ -14,6 +14,11 @@ input RegisterInput {
 }
 
 type Mutation {
+  """
+  Creates an account. Errors carry extensions.code: EMAIL_TAKEN when the email is already in use,
+  USERNAME_TAKEN when the username is already in use, and VALIDATION_FAILED when an input breaks
+  its rules; for VALIDATION_FAILED, extensions.field names the offending field.
+  """
   register(input: RegisterInput!): User!
 }
 
