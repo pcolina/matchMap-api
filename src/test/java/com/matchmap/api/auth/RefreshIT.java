@@ -120,6 +120,20 @@ class RefreshIT {
     assertThat(refreshCookieOf(response)).isNotBlank().isNotEqualTo(first);
   }
 
+  @Test
+  void webRefreshWithoutCookieIsRejected() throws Exception {
+    var response =
+        mockMvc
+            .post()
+            .uri("/api/auth/refresh")
+            .header("X-Client", "web")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange();
+
+    assertThat(response).hasStatus(HttpStatus.UNAUTHORIZED);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_refresh_token");
+  }
+
   private MvcTestResult webLogin(String email) {
     return mockMvc
         .post()
