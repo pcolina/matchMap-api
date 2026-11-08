@@ -1,13 +1,14 @@
 package com.matchmap.api.auth;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.matchmap.api.account.GoogleAccountService;
 import com.matchmap.api.account.UserAccount;
 import com.matchmap.api.account.UserAccountRepository;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nimbusds.jose.KeySourceException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Validator;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
@@ -126,7 +127,8 @@ class AuthController {
       }
       var rotation = refreshTokens.rotate(presentedCookie);
       httpResponse.addHeader(
-          HttpHeaders.SET_COOKIE, refreshCookie(rotation.refreshToken()).toString());
+          HttpHeaders.SET_COOKIE,
+          refreshCookie(rotation.refreshToken(), authProperties.refreshTokenTtl()).toString());
       return tokenResponse(rotation.account(), null);
     }
     if (request == null) {
@@ -139,9 +141,18 @@ class AuthController {
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void logout(
-      @RequestBody RefreshRequest request,
-      @RequestHeader(value = "X-Client", required = false) String client) {
-    ClientType.from(client);
+      @RequestBody(required = false) RefreshRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      @CookieValue(name = "refresh_token", required = false) String presentedCookie,
+      HttpServletResponse httpResponse) {
+    if (ClientType.from(client) == ClientType.WEB) {
+      refreshTokens.logout(presentedCookie);
+      httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie("", Duration.ZERO).toString());
+      return;
+    }
+    if (request == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
     refreshTokens.logout(request.refreshToken());
   }
 
@@ -157,18 +168,20 @@ class AuthController {
       UserAccount account, ClientType clientType, HttpServletResponse httpResponse) {
     var refreshToken = refreshTokens.issue(account, UUID.randomUUID());
     if (clientType == ClientType.WEB) {
-      httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refreshToken).toString());
+      httpResponse.addHeader(
+          HttpHeaders.SET_COOKIE,
+          refreshCookie(refreshToken, authProperties.refreshTokenTtl()).toString());
       return tokenResponse(account, null);
     }
     return tokenResponse(account, refreshToken);
   }
 
-  private ResponseCookie refreshCookie(String refreshToken) {
-    return ResponseCookie.from("refresh_token", refreshToken)
+  private ResponseCookie refreshCookie(String value, Duration maxAge) {
+    return ResponseCookie.from("refresh_token", value)
         .httpOnly(true)
         .secure(true)
         .path("/api/auth")
-        .maxAge(authProperties.refreshTokenTtl())
+        .maxAge(maxAge)
         .sameSite(refreshCookieSameSite)
         .build();
   }
