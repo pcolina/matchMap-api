@@ -58,6 +58,7 @@ class GoogleSignInWithoutClientIdsIT {
         mockMvc
             .post()
             .uri("/api/auth/google")
+            .header("X-Client", "mobile")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .content(JSON.writeValueAsString(Map.of("idToken", jwt.serialize())))

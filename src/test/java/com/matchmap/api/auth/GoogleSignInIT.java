@@ -262,6 +262,7 @@ class GoogleSignInIT {
     return mockMvc
         .post()
         .uri("/api/auth/login")
+        .header("X-Client", "mobile")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
         .content(JSON.writeValueAsString(Map.of("email", email, "password", password)))
@@ -282,6 +283,7 @@ class GoogleSignInIT {
     return mockMvc
         .post()
         .uri("/api/auth/google")
+        .header("X-Client", "mobile")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
         .content(JSON.writeValueAsString(Map.of("idToken", idToken)))
