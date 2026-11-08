@@ -58,6 +58,28 @@ class ClientTypeHeaderIT {
   }
 
   @Test
+  void webSignInSetsRefreshCookieAndOmitsRefreshTokenFromBody() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "wendy" + suffix + "@example.com";
+    registerAccount(email, "wendy_" + suffix);
+
+    var response = post("/api/auth/login", "web", Map.of("email", email, "password", PASSWORD));
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+    assertThat(response).bodyJson().extractingPath("$.accessToken").asString().isNotBlank();
+    assertThat(response).bodyJson().extractingPath("$.expiresIn").isNotNull();
+    assertThat(JSON.readTree(response.getResponse().getContentAsString()).has("refreshToken"))
+        .isFalse();
+    assertThat(setCookieOf(response))
+        .contains("refresh_token=")
+        .contains("HttpOnly")
+        .contains("Secure")
+        .contains("Path=/api/auth")
+        .contains("Max-Age=2592000");
+  }
+
+  @Test
   void missingClientTypeOnRefreshIsRejected() throws Exception {
     String suffix = uniqueSuffix();
     String email = "wade" + suffix + "@example.com";
@@ -95,6 +117,10 @@ class ClientTypeHeaderIT {
     return JSON.readTree(response.getResponse().getContentAsString())
         .get("refreshToken")
         .asString();
+  }
+
+  private String setCookieOf(MvcTestResult response) {
+    return String.join(";", response.getResponse().getHeaders("Set-Cookie"));
   }
 
   private MvcTestResult post(String uri, String clientType, Map<String, String> body) {
