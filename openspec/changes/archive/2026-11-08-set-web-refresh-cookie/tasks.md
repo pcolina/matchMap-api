@@ -43,4 +43,4 @@
 
 ## 7. Full check
 
-- [ ] 7.1 Run `.\gradlew.bat check` and paste the summary. Coverage thresholds must be met
+- [x] 7.1 Run `.\gradlew.bat check` and paste the summary. Coverage thresholds must be met
