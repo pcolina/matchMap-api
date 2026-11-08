@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,7 +52,10 @@ class AuthController {
   }
 
   @PostMapping("/google")
-  public TokenResponse google(@RequestBody GoogleRequest request) {
+  public TokenResponse google(
+      @RequestBody GoogleRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client) {
+    ClientType.from(client);
     GoogleIdentity identity;
     try {
       identity = googleIdTokens.verify(request.idToken());
@@ -72,7 +76,11 @@ class AuthController {
   }
 
   @PostMapping("/login")
-  public TokenResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+  public TokenResponse login(
+      @RequestBody LoginRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client,
+      HttpServletRequest httpRequest) {
+    ClientType.from(client);
     var email = request.email() == null ? null : request.email().trim().toLowerCase(Locale.ROOT);
     var password = request.password() == null ? null : request.password().strip();
     validateLoginLimits(email, password);
@@ -93,14 +101,20 @@ class AuthController {
   }
 
   @PostMapping("/refresh")
-  public TokenResponse refresh(@RequestBody RefreshRequest request) {
+  public TokenResponse refresh(
+      @RequestBody RefreshRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client) {
+    ClientType.from(client);
     var rotation = refreshTokens.rotate(request.refreshToken());
     return tokenResponse(rotation.account(), rotation.refreshToken());
   }
 
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void logout(@RequestBody RefreshRequest request) {
+  public void logout(
+      @RequestBody RefreshRequest request,
+      @RequestHeader(value = "X-Client", required = false) String client) {
+    ClientType.from(client);
     refreshTokens.logout(request.refreshToken());
   }
 
