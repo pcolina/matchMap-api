@@ -23,8 +23,8 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 class LoginThrottlingIT {
 
-  private static final String PASSWORD = "correct horse battery";
-  private static final String WRONG_PASSWORD = "wrong password here";
+  private static final String PASSWORD = "correcthorse1";
+  private static final String WRONG_PASSWORD = "wrongpassword1";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;

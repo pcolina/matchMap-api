@@ -31,6 +31,14 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: invalid_credentials
+        '400':
+          description: "The email or the password breaks its input limits. The error says which field: invalid_email or invalid_password."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: invalid_email
         '429':
           description: Too many failed attempts for this email from this client.
           headers:
@@ -123,9 +131,14 @@ components:
       properties:
         email:
           type: string
+          format: email
+          minLength: 1
+          maxLength: 254
         password:
           type: string
           format: password
+          minLength: 6
+          maxLength: 20
     GoogleSignInRequest:
       type: object
       required: [idToken]
@@ -165,3 +178,5 @@ components:
             - invalid_google_token
             - google_email_not_verified
             - invalid_refresh_token
+            - invalid_email
+            - invalid_password

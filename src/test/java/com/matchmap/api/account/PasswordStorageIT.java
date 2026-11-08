@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 @AutoConfigureMockMvc
 class PasswordStorageIT {
 
-  private static final String PASSWORD = "correct horse battery";
+  private static final String PASSWORD = "correcthorse1";
 
   @Autowired MockMvcTester mockMvc;
 

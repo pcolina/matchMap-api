@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 @AutoConfigureMockMvc
 class RegisterIT {
 
-  private static final String PASSWORD = "correct horse battery";
+  private static final String PASSWORD = "correcthorse1";
 
   @Autowired MockMvcTester mockMvc;
 
@@ -179,9 +179,59 @@ class RegisterIT {
     var response =
         graphql(
             registerBody(
-                "long" + suffix + "@example.com", "long_" + suffix, "Ana", "a".repeat(129)));
+                "long" + suffix + "@example.com", "long_" + suffix, "Ana", "a".repeat(21)));
 
     assertValidationFailed(response, "password");
+  }
+
+  @Test
+  void acceptsPasswordsAtTheLimits() {
+    String suffix = uniqueSuffix();
+
+    var shortest =
+        graphql(
+            registerBody("min" + suffix + "@example.com", "min_" + suffix, "Ana", "a".repeat(12)));
+    var longest =
+        graphql(
+            registerBody("max" + suffix + "@example.com", "max_" + suffix, "Ana", "a".repeat(20)));
+
+    assertThat(shortest)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .isEqualTo("min_" + suffix);
+    assertThat(longest)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .isEqualTo("max_" + suffix);
+  }
+
+  @Test
+  void rejectsPasswordWithWhitespaceInside() {
+    String suffix = uniqueSuffix();
+
+    var response =
+        graphql(
+            registerBody(
+                "space" + suffix + "@example.com", "space_" + suffix, "Ana", "secret pass12"));
+
+    assertValidationFailed(response, "password");
+  }
+
+  @Test
+  void rejectsPasswordWithSurroundingWhitespace() {
+    String suffix = uniqueSuffix();
+
+    var leading =
+        graphql(
+            registerBody(
+                "lead" + suffix + "@example.com", "lead_" + suffix, "Ana", " secret pass12"));
+    var trailing =
+        graphql(
+            registerBody(
+                "trail" + suffix + "@example.com", "trail_" + suffix, "Ana", "secret pass12 "));
+
+    assertValidationFailed(leading, "password");
+    assertValidationFailed(trailing, "password");
   }
 
   private void assertValidationFailed(MvcTestResult response, String field) {
