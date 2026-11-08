@@ -43,6 +43,21 @@ class ClientTypeHeaderIT {
   }
 
   @Test
+  void mobileSignInReturnsRefreshTokenInBody() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "mia" + suffix + "@example.com";
+    registerAccount(email, "mia_" + suffix);
+
+    var response = login(email);
+
+    assertThat(response).hasStatus(HttpStatus.OK);
+    assertThat(response).bodyJson().extractingPath("$.tokenType").isEqualTo("Bearer");
+    assertThat(response).bodyJson().extractingPath("$.accessToken").asString().isNotBlank();
+    assertThat(response).bodyJson().extractingPath("$.expiresIn").isEqualTo(900);
+    assertThat(refreshTokenOf(response)).isNotBlank();
+  }
+
+  @Test
   void missingClientTypeOnRefreshIsRejected() throws Exception {
     String suffix = uniqueSuffix();
     String email = "wade" + suffix + "@example.com";
