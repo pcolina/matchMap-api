@@ -239,8 +239,7 @@ class RegisterIT {
     String specials = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
     for (int i = 0; i < specials.length(); i++) {
-      var response =
-          registerPassword("sp" + i + suffix, "Abcdefghijk1" + specials.charAt(i));
+      var response = registerPassword("sp" + i + suffix, "Abcdefghijk1" + specials.charAt(i));
 
       assertThat(response).bodyJson().doesNotHavePath("$.errors");
     }

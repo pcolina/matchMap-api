@@ -18,6 +18,10 @@ type Mutation {
   Creates an account. Errors carry extensions.code: EMAIL_TAKEN when the email is already in use,
   USERNAME_TAKEN when the username is already in use, and VALIDATION_FAILED when an input breaks
   its rules; for VALIDATION_FAILED, extensions.field names the offending field.
+  The password has 6 to 20 characters, at least one lowercase letter, at least one uppercase letter
+  and at least one special character from the OWASP list of ASCII punctuation and symbols, and it
+  has no whitespace character. Letters and digits are not special characters. Unicode characters
+  are allowed.
   """
   register(input: RegisterInput!): User!
 }

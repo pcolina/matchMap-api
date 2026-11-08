@@ -27,4 +27,20 @@ class AccountContractTest {
         .contains("VALIDATION_FAILED")
         .contains("extensions.field");
   }
+
+  @Test
+  void registerDescriptionDocumentsThePasswordRule() throws IOException {
+    String contract = Files.readString(Path.of("contracts/graphql/account.graphqls"));
+
+    Matcher matcher = REGISTER_DESCRIPTION.matcher(contract);
+
+    assertThat(matcher.find()).isTrue();
+    assertThat(matcher.group(1))
+        .contains("6 to 20 characters")
+        .contains("lowercase")
+        .contains("uppercase")
+        .contains("special character")
+        .contains("OWASP")
+        .contains("whitespace");
+  }
 }
