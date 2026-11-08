@@ -65,6 +65,19 @@ class LogoutIT {
         .contains("Path=/api/auth");
   }
 
+  @Test
+  void webSignOutWithoutCookieReturnsNoContent() {
+    var response =
+        mockMvc
+            .post()
+            .uri("/api/auth/logout")
+            .header("X-Client", "web")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange();
+
+    assertThat(response).hasStatus(HttpStatus.NO_CONTENT);
+  }
+
   private MvcTestResult webLogin(String email) {
     return mockMvc
         .post()
