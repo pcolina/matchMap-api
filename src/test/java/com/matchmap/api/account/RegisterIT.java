@@ -188,11 +188,11 @@ class RegisterIT {
     assertThat(shortest)
         .bodyJson()
         .extractingPath("$.data.register.username")
-        .isEqualTo("min" + suffix);
+        .isEqualTo("pw_min" + suffix);
     assertThat(longest)
         .bodyJson()
         .extractingPath("$.data.register.username")
-        .isEqualTo("max" + suffix);
+        .isEqualTo("pw_max" + suffix);
   }
 
   @Test
