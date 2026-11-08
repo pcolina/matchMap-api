@@ -39,7 +39,7 @@
 - [x] 6.1 Write the test "Web sign out clears the cookie" and show it failing
 - [x] 6.2 Implement the revocation and the expired `Set-Cookie` for web logout (D6), and verify all tests pass
 - [x] 6.3 Write the test "Web sign out without the cookie" and show it failing
-- [ ] 6.4 Implement the 204 for a missing cookie and verify all tests pass
+- [x] 6.4 Implement the 204 for a missing cookie and verify all tests pass
 
 ## 7. Full check
 

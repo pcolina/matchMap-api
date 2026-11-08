@@ -146,7 +146,9 @@ class AuthController {
       @CookieValue(name = "refresh_token", required = false) String presentedCookie,
       HttpServletResponse httpResponse) {
     if (ClientType.from(client) == ClientType.WEB) {
-      refreshTokens.logout(presentedCookie);
+      if (presentedCookie != null) {
+        refreshTokens.logout(presentedCookie);
+      }
       httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie("", Duration.ZERO).toString());
       return;
     }
