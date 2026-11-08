@@ -2,7 +2,7 @@
 
 ## 1. Contract
 
-- [ ] 1.1 Verify that `contracts/openapi/auth.yaml` declares the limits of `LoginRequest` as the spec says, and that the client types regenerate from it (D1)
+- [x] 1.1 Verify that `contracts/openapi/auth.yaml` declares the limits of `LoginRequest` as the spec says (D1). Regenerating the client types happens in the client repository and is not checked here
 
 ## 2. Open questions
 
@@ -38,4 +38,4 @@
 
 ## 4. Documentation
 
-- [ ] 4.1 Record in the pull request whether `CLAUDE.md` or `docs/SDD-FLOW.md` changed (none expected)
+- [x] 4.1 Record in the pull request whether `CLAUDE.md` or `docs/SDD-FLOW.md` changed (none expected)

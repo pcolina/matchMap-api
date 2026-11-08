@@ -50,14 +50,26 @@ A username SHALL have 3 to 30 characters from `a-z`, `0-9` and `_`, SHALL be sto
 - **THEN** the response has an error whose `extensions.code` is `VALIDATION_FAILED` and whose `extensions.field` is `displayName`
 
 ### Requirement: Password policy
-A password SHALL have at least 12 and at most 128 characters. Any character SHALL be allowed, including spaces and Unicode, and no composition rules SHALL apply. A password that breaks the policy SHALL be rejected with `VALIDATION_FAILED` and `extensions.field` `password`.
+A password SHALL have at least 12 and at most 20 characters. A password SHALL NOT contain any whitespace character, including spaces, tabs and line breaks, at any position. Any other character SHALL be allowed, including Unicode, and no composition rules SHALL apply. A password that breaks the policy SHALL be rejected with `VALIDATION_FAILED` and `extensions.field` `password`.
 
 #### Scenario: Password too short
 - **WHEN** a client registers with a password of 11 characters
 - **THEN** the response has an error whose `extensions.code` is `VALIDATION_FAILED` and whose `extensions.field` is `password`
 
 #### Scenario: Password too long
-- **WHEN** a client registers with a password of 129 characters
+- **WHEN** a client registers with a password of 21 characters
+- **THEN** the response has an error whose `extensions.code` is `VALIDATION_FAILED` and whose `extensions.field` is `password`
+
+#### Scenario: Password at the limits
+- **WHEN** a client registers with a password of 12 characters and another with a password of 20 characters, both without whitespace
+- **THEN** both registrations succeed
+
+#### Scenario: Password with whitespace
+- **WHEN** a client registers with a password that contains a space between its characters
+- **THEN** the response has an error whose `extensions.code` is `VALIDATION_FAILED` and whose `extensions.field` is `password`
+
+#### Scenario: Password with leading or trailing whitespace
+- **WHEN** a client registers with a password that starts or ends with a space
 - **THEN** the response has an error whose `extensions.code` is `VALIDATION_FAILED` and whose `extensions.field` is `password`
 
 ### Requirement: Passwords are stored only as salted hashes
