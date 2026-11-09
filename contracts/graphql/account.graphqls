@@ -8,8 +8,6 @@ type User {
 
 input RegisterInput {
   email: String!
-  username: String!
-  displayName: String!
   password: String!
 }
 
