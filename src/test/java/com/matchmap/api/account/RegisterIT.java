@@ -250,6 +250,19 @@ class RegisterIT {
   }
 
   @Test
+  void shortEmailPrefixGetsRandomUsername() {
+    String suffix = uniqueSuffix();
+
+    var response = graphql(registerBody("a@short" + suffix + ".example", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .asString()
+        .matches("user_[a-z0-9]{8}");
+  }
+
+  @Test
   void inputWithRemovedFieldIsRejected() {
     String email = "removed" + uniqueSuffix() + "@example.com";
 
