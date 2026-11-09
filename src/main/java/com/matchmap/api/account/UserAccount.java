@@ -30,8 +30,7 @@ public class UserAccount {
 
   protected UserAccount() {}
 
-  UserAccount(
-      UUID id, String email, String username, String passwordHash, Instant createdAt) {
+  UserAccount(UUID id, String email, String username, String passwordHash, Instant createdAt) {
     this(id, email, username, passwordHash, null, createdAt);
   }
 

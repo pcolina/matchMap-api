@@ -219,8 +219,7 @@ class RegisterIT {
   void rejectsPasswordWithWhitespaceInside() {
     String suffix = uniqueSuffix();
 
-    var response =
-        graphql(registerBody("space" + suffix + "@example.com", "secret pass12"));
+    var response = graphql(registerBody("space" + suffix + "@example.com", "secret pass12"));
 
     assertPasswordInvalid(response);
   }
@@ -296,10 +295,13 @@ class RegisterIT {
             body(
                 REGISTER,
                 Map.of(
-                    "input",
-                    Map.of("email", email, "password", PASSWORD, "displayName", "Ana"))));
+                    "input", Map.of("email", email, "password", PASSWORD, "displayName", "Ana"))));
 
-    assertThat(response).bodyJson().extractingPath("$.errors[0].message").asString().contains("displayName");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].message")
+        .asString()
+        .contains("displayName");
     assertThat(
             jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM user_account WHERE email = ?", Integer.class, email))

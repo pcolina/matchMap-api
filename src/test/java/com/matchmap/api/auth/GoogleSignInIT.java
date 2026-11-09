@@ -51,12 +51,9 @@ class GoogleSignInIT {
     assertThat(response).bodyJson().extractingPath("$.refreshToken").asString().isNotBlank();
     var account =
         jdbcTemplate.queryForMap(
-            "SELECT email, username, password_hash FROM user_account"
-                + " WHERE google_subject = ?",
+            "SELECT email, username, password_hash FROM user_account" + " WHERE google_subject = ?",
             subject);
-    assertThat(account)
-        .containsEntry("email", email)
-        .containsEntry("username", "carla");
+    assertThat(account).containsEntry("email", email).containsEntry("username", "carla");
     assertThat(account.get("password_hash")).isNull();
   }
 
