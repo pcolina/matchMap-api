@@ -1,11 +1,13 @@
 package com.matchmap.api.account;
 
+import static com.matchmap.api.support.GraphqlRequests.REGISTER;
 import static com.matchmap.api.support.GraphqlRequests.body;
 import static com.matchmap.api.support.GraphqlRequests.registerBody;
 import static com.matchmap.api.support.GraphqlRequests.uniqueSuffix;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.matchmap.api.TestcontainersConfiguration;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,6 +234,25 @@ class RegisterIT {
 
     assertValidationFailed(leading, "password");
     assertValidationFailed(trailing, "password");
+  }
+
+  @Test
+  void inputWithRemovedFieldIsRejected() {
+    String email = "removed" + uniqueSuffix() + "@example.com";
+
+    var response =
+        graphql(
+            body(
+                REGISTER,
+                Map.of(
+                    "input",
+                    Map.of("email", email, "password", PASSWORD, "displayName", "Ana"))));
+
+    assertThat(response).bodyJson().extractingPath("$.errors[0].message").asString().contains("displayName");
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM user_account WHERE email = ?", Integer.class, email))
+        .isZero();
   }
 
   private MvcTestResult registerPassword(String suffix, String password) {
