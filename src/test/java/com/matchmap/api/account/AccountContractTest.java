@@ -29,6 +29,21 @@ class AccountContractTest {
   }
 
   @Test
+  void registerDescriptionListsRegisterErrorCodes() throws IOException {
+    String contract = Files.readString(Path.of("contracts/graphql/account.graphqls"));
+
+    Matcher matcher = REGISTER_DESCRIPTION.matcher(contract);
+
+    assertThat(matcher.find()).isTrue();
+    assertThat(matcher.group(1))
+        .contains("EMAIL_TAKEN")
+        .contains("USERNAME_TAKEN")
+        .contains("VALIDATION_FAILED")
+        .contains("PASSWORD_INVALID")
+        .contains("extensions.field");
+  }
+
+  @Test
   void registerDescriptionDocumentsThePasswordRule() throws IOException {
     String contract = Files.readString(Path.of("contracts/graphql/account.graphqls"));
 
