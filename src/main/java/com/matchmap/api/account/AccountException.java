@@ -21,6 +21,10 @@ class AccountException extends RuntimeException {
     return new AccountException("USERNAME_TAKEN", null, "Username is already in use");
   }
 
+  static AccountException passwordInvalid() {
+    return new AccountException("PASSWORD_INVALID", "password", "Invalid password");
+  }
+
   static AccountException validationFailed(String field) {
     return new AccountException("VALIDATION_FAILED", field, "Invalid " + field);
   }

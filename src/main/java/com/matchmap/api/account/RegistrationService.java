@@ -70,7 +70,9 @@ class RegistrationService {
         .min(Comparator.comparingInt(FIELD_ORDER::indexOf))
         .ifPresent(
             field -> {
-              throw AccountException.validationFailed(field);
+              throw "password".equals(field)
+                  ? AccountException.passwordInvalid()
+                  : AccountException.validationFailed(field);
             });
   }
 

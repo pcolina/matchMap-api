@@ -118,7 +118,7 @@ class RegisterIT {
 
     var response = registerPassword(suffix, "Ab1!x");
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -127,7 +127,7 @@ class RegisterIT {
 
     var response = registerPassword(suffix, "Abcdefghijklmnopqrs1!");
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -153,7 +153,7 @@ class RegisterIT {
 
     var response = registerPassword(suffix, "ABCDEFGHIJK1!");
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -162,7 +162,7 @@ class RegisterIT {
 
     var response = registerPassword(suffix, "abcdefghijk1!");
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -171,7 +171,7 @@ class RegisterIT {
 
     var response = registerPassword(suffix, "Abcdefghijkl12");
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -181,8 +181,8 @@ class RegisterIT {
     var digitsOnly = registerPassword("digits" + suffix, "Abcdefghijkl12");
     var unicodeLetter = registerPassword("accent" + suffix, "Abcdefghijkl1é");
 
-    assertValidationFailed(digitsOnly, "password");
-    assertValidationFailed(unicodeLetter, "password");
+    assertPasswordInvalid(digitsOnly);
+    assertPasswordInvalid(unicodeLetter);
   }
 
   @Test
@@ -212,7 +212,7 @@ class RegisterIT {
 
     var response = registerPassword(suffix, "Abcdefghijk 1!");
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -222,7 +222,7 @@ class RegisterIT {
     var response =
         graphql(registerBody("space" + suffix + "@example.com", "secret pass12"));
 
-    assertValidationFailed(response, "password");
+    assertPasswordInvalid(response);
   }
 
   @Test
@@ -232,8 +232,8 @@ class RegisterIT {
     var leading = graphql(registerBody("lead" + suffix + "@example.com", " secret pass12"));
     var trailing = graphql(registerBody("trail" + suffix + "@example.com", "secret pass12 "));
 
-    assertValidationFailed(leading, "password");
-    assertValidationFailed(trailing, "password");
+    assertPasswordInvalid(leading);
+    assertPasswordInvalid(trailing);
   }
 
   @Test
@@ -308,6 +308,17 @@ class RegisterIT {
 
   private MvcTestResult registerPassword(String suffix, String password) {
     return graphql(registerBody("pw" + suffix + "@example.com", password));
+  }
+
+  private void assertPasswordInvalid(MvcTestResult response) {
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.code")
+        .isEqualTo("PASSWORD_INVALID");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.field")
+        .isEqualTo("password");
   }
 
   private void assertValidationFailed(MvcTestResult response, String field) {
