@@ -39,7 +39,7 @@ class GoogleSignInIT {
   @Autowired JdbcTemplate jdbcTemplate;
 
   @Test
-  void createsAccountOnFirstSignIn() throws Exception {
+  void newAccountUsernameComesFromGoogleName() throws Exception {
     String suffix = uniqueSuffix();
     String subject = "g-" + suffix;
     String email = "carla" + suffix + "@gmail.com";
@@ -56,31 +56,51 @@ class GoogleSignInIT {
             subject);
     assertThat(account)
         .containsEntry("email", email)
-        .containsEntry("display_name", "Carla")
-        .containsEntry("username", "carla" + suffix);
+        .containsEntry("username", "carla");
     assertThat(account.get("password_hash")).isNull();
   }
 
   @Test
-  void usesEmailLocalPartAsDisplayNameWhenNameIsMissing() throws Exception {
+  void nameLessProfileUsesEmailPrefix() throws Exception {
     String suffix = uniqueSuffix();
     String subject = "g-" + suffix;
     String email = "erin" + suffix + "@gmail.com";
 
     signIn(googleToken(subject, email, null));
 
-    assertThat(displayNameOf(subject)).isEqualTo("erin" + suffix);
+    assertThat(usernameOf(subject)).isEqualTo("erin" + suffix);
   }
 
   @Test
-  void cutsDisplayNameToFiftyCharacters() throws Exception {
+  void googleNameIsCutAt30Characters() throws Exception {
     String suffix = uniqueSuffix();
     String subject = "g-" + suffix;
     String email = "fay" + suffix + "@gmail.com";
 
     signIn(googleToken(subject, email, "N".repeat(60)));
 
-    assertThat(displayNameOf(subject)).isEqualTo("N".repeat(50));
+    assertThat(usernameOf(subject)).isEqualTo("n".repeat(30));
+  }
+
+  @Test
+  void nameWithSpacesIsSanitized() throws Exception {
+    String suffix = uniqueSuffix();
+    String subject = "g-" + suffix;
+    String email = "sp" + suffix + "@gmail.com";
+
+    signIn(googleToken(subject, email, "Ana Travels"));
+
+    assertThat(usernameOf(subject)).isEqualTo("ana_travels");
+  }
+
+  @Test
+  void takenGoogleNameGetsSuffix() throws Exception {
+    String suffix = uniqueSuffix();
+    signIn(googleToken("g-a" + suffix, "first" + suffix + "@gmail.com", "Mo Taken"));
+
+    signIn(googleToken("g-b" + suffix, "second" + suffix + "@gmail.com", "Mo Taken"));
+
+    assertThat(usernameOf("g-b" + suffix)).isEqualTo("mo_taken_2");
   }
 
   @Test
@@ -295,9 +315,9 @@ class GoogleSignInIT {
     assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_google_token");
   }
 
-  private String displayNameOf(String subject) {
+  private String usernameOf(String subject) {
     return jdbcTemplate.queryForObject(
-        "SELECT display_name FROM user_account WHERE google_subject = ?", String.class, subject);
+        "SELECT username FROM user_account WHERE google_subject = ?", String.class, subject);
   }
 
   private MvcTestResult webSignIn(String idToken) {

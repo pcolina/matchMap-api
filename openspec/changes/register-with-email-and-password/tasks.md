@@ -26,9 +26,9 @@ Tasks marked [BLOCKED] wait for the [NEEDS CLARIFICATION] answers in proposal.md
 
 ## 4. Google sign-in
 
-- [ ] 4.2 Write the failing test `GoogleSignInIT.newAccountUsernameComesFromGoogleName` for the scenario "First Google sign-in creates an account", expecting `carla`, and run it and show it failing. Then make `GoogleAccountService` pass the Google name to `UsernameGenerator` and stop storing a display name. Verify the test passes.
-- [ ] 4.3 Write the failing tests `GoogleSignInIT.nameWithSpacesIsSanitized` and `GoogleSignInIT.takenGoogleNameGetsSuffix` for the scenarios "Google name with characters outside the username set" and "Google name already used as username", run them and show them failing, then verify they pass.
-- [ ] 4.4 Write the failing test `GoogleSignInIT.nameLessProfileUsesEmailPrefix` for the scenario "Google profile without a name", run it and show it failing. Then make `GoogleAccountService` fall back to the email prefix when the name is empty. Verify the test passes.
+- [x] 4.2 Write the failing test `GoogleSignInIT.newAccountUsernameComesFromGoogleName` for the scenario "First Google sign-in creates an account", expecting `carla`, and run it and show it failing. Then make `GoogleAccountService` pass the Google name to `UsernameGenerator` and stop storing a display name. Verify the test passes.
+- [x] 4.3 Write the failing tests `GoogleSignInIT.nameWithSpacesIsSanitized` and `GoogleSignInIT.takenGoogleNameGetsSuffix` for the scenarios "Google name with characters outside the username set" and "Google name already used as username", run them and show them failing, then verify they pass.
+- [x] 4.4 Write the failing test `GoogleSignInIT.nameLessProfileUsesEmailPrefix` for the scenario "Google profile without a name", run it and show it failing. Then make `GoogleAccountService` fall back to the email prefix when the name is empty. Verify the test passes.
 
 ## 5. Full check
 

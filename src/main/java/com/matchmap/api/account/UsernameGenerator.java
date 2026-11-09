@@ -15,7 +15,15 @@ class UsernameGenerator {
   private static final SecureRandom RANDOM = new SecureRandom();
 
   String generate(String email, Predicate<String> taken) {
-    var localPart = email.substring(0, email.indexOf('@')).toLowerCase(Locale.ROOT);
+    return generateFrom(email.substring(0, email.indexOf('@')), taken);
+  }
+
+  String generateFromName(String name, Predicate<String> taken) {
+    return generateFrom(name, taken);
+  }
+
+  private static String generateFrom(String source, Predicate<String> taken) {
+    var localPart = source.toLowerCase(Locale.ROOT);
     var sanitized = localPart.replaceAll("[^a-z0-9_]", "_");
     var base = sanitized.length() < MIN_BASE_LENGTH ? "user_" + randomSuffix() : sanitized;
     var candidate = truncate(base, MAX_LENGTH);

@@ -40,12 +40,17 @@ public class GoogleAccountService {
     return Optional.of(accounts.saveAndFlush(account));
   }
 
+  private static String sourceName(String name, String email) {
+    var trimmed = name == null ? "" : name.trim();
+    return trimmed.isEmpty() ? email.substring(0, email.indexOf('@')) : trimmed;
+  }
+
   private UserAccount create(String subject, String email, String name) {
     var account =
         new UserAccount(
             UUID.randomUUID(),
             email,
-            usernames.generate(email, accounts::existsByUsername),
+            usernames.generateFromName(sourceName(name, email), accounts::existsByUsername),
             null,
             subject,
             Instant.now());
