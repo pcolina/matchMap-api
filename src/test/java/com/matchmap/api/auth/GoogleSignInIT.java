@@ -51,7 +51,7 @@ class GoogleSignInIT {
     assertThat(response).bodyJson().extractingPath("$.refreshToken").asString().isNotBlank();
     var account =
         jdbcTemplate.queryForMap(
-            "SELECT email, username, display_name, password_hash FROM user_account"
+            "SELECT email, username, password_hash FROM user_account"
                 + " WHERE google_subject = ?",
             subject);
     assertThat(account)
@@ -160,7 +160,7 @@ class GoogleSignInIT {
     String suffix = uniqueSuffix();
     String subject = "g-" + suffix;
     String email = "lia" + suffix + "@gmail.com";
-    register(email, "lia" + suffix, PASSWORD);
+    register(email, PASSWORD);
 
     var response = signIn(googleToken(subject, email, "Lia"));
 
@@ -181,7 +181,7 @@ class GoogleSignInIT {
   void rejectsUnverifiedEmailWithoutLinkingExistingAccount() throws Exception {
     String suffix = uniqueSuffix();
     String email = "max" + suffix + "@gmail.com";
-    register(email, "max" + suffix, PASSWORD);
+    register(email, PASSWORD);
 
     var response =
         signIn(
@@ -228,7 +228,7 @@ class GoogleSignInIT {
   void rejectsVerifiedEmailLinkedToAnotherGoogleSubject() throws Exception {
     String suffix = uniqueSuffix();
     String email = "quinn" + suffix + "@gmail.com";
-    register(email, "quinn" + suffix, PASSWORD);
+    register(email, PASSWORD);
     signIn(googleToken("g-first-" + suffix, email, "Quinn"));
 
     var response = signIn(googleToken("g-second-" + suffix, email, "Quinn"));
@@ -269,13 +269,13 @@ class GoogleSignInIT {
         .isEqualTo("google_email_not_verified");
   }
 
-  private void register(String email, String username, String password) {
+  private void register(String email, String password) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Account", password))
+        .content(registerBody(email, password))
         .exchange();
   }
 

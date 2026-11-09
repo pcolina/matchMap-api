@@ -33,7 +33,7 @@ class LoginThrottlingIT {
   void throttlesAfterFailedAttempts() {
     String suffix = uniqueSuffix();
     String email = "dan" + suffix + "@example.com";
-    registerAccount(email, "dan_" + suffix);
+    registerAccount(email);
     for (int attempt = 0; attempt < 5; attempt++) {
       assertThat(login(email, WRONG_PASSWORD)).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -50,8 +50,8 @@ class LoginThrottlingIT {
     String suffix = uniqueSuffix();
     String throttled = "eve" + suffix + "@example.com";
     String other = "fay" + suffix + "@example.com";
-    registerAccount(throttled, "eve_" + suffix);
-    registerAccount(other, "fay_" + suffix);
+    registerAccount(throttled);
+    registerAccount(other);
     for (int attempt = 0; attempt < 5; attempt++) {
       login(throttled, WRONG_PASSWORD);
     }
@@ -62,13 +62,13 @@ class LoginThrottlingIT {
     assertThat(response).hasStatus(HttpStatus.OK);
   }
 
-  private void registerAccount(String email, String username) {
+  private void registerAccount(String email) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Ana", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
   }
 

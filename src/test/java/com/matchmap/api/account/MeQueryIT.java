@@ -38,7 +38,7 @@ import tools.jackson.databind.json.JsonMapper;
 class MeQueryIT {
 
   private static final String PASSWORD = "Correcthorse1!";
-  private static final String ME = "{ me { id email username displayName } }";
+  private static final String ME = "{ me { id email username } }";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;
@@ -50,7 +50,7 @@ class MeQueryIT {
   void returnsOwnAccount() throws Exception {
     String suffix = uniqueSuffix();
     String email = "mia" + suffix + "@example.com";
-    var registered = graphql(registerBody(email, "mia_" + suffix, "Mia", PASSWORD), null);
+    var registered = graphql(registerBody(email, PASSWORD), null);
     String id = data(registered).at("/register/id").asString();
 
     var response = graphql(body(ME), login(email));
@@ -74,7 +74,7 @@ class MeQueryIT {
   void tamperedTokenIsRejected() throws Exception {
     String suffix = uniqueSuffix();
     String email = "tom" + suffix + "@example.com";
-    registerAccount(email, "tom_" + suffix);
+    registerAccount(email);
     var parts = login(email).split("\\.");
     var payload = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
     var tamperedPayload =
@@ -115,8 +115,8 @@ class MeQueryIT {
     return encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
   }
 
-  private void registerAccount(String email, String username) {
-    graphql(registerBody(email, username, "Ana", PASSWORD), null);
+  private void registerAccount(String email) {
+    graphql(registerBody(email, PASSWORD), null);
   }
 
   private String login(String email) throws Exception {

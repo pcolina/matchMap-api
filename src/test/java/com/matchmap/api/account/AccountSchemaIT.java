@@ -27,7 +27,6 @@ class AccountSchemaIT {
             "id",
             "email",
             "username",
-            "display_name",
             "password_hash",
             "google_subject",
             "created_at");

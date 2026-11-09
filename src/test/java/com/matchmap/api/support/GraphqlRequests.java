@@ -11,7 +11,7 @@ public final class GraphqlRequests {
   public static final String REGISTER =
       """
       mutation Register($input: RegisterInput!) {
-        register(input: $input) { id email username displayName createdAt }
+        register(input: $input) { id email username createdAt }
       }
       """;
 
@@ -25,17 +25,8 @@ public final class GraphqlRequests {
     return JSON.writeValueAsString(Map.of("query", query, "variables", variables));
   }
 
-  public static String registerBody(
-      String email, String username, String displayName, String password) {
-    return body(
-        REGISTER,
-        Map.of(
-            "input",
-            Map.of(
-                "email", email,
-                "username", username,
-                "displayName", displayName,
-                "password", password)));
+  public static String registerBody(String email, String password) {
+    return body(REGISTER, Map.of("input", Map.of("email", email, "password", password)));
   }
 
   public static String uniqueSuffix() {

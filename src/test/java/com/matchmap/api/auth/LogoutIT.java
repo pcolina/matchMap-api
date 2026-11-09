@@ -32,7 +32,7 @@ class LogoutIT {
   void endsSession() throws Exception {
     String suffix = uniqueSuffix();
     String email = "lena" + suffix + "@example.com";
-    registerAccount(email, "lena_" + suffix);
+    registerAccount(email);
     var refreshToken = refreshTokenOf(login(email));
 
     var logout = post("/api/auth/logout", Map.of("refreshToken", refreshToken));
@@ -53,7 +53,7 @@ class LogoutIT {
   void webSignOutClearsCookie() throws Exception {
     String suffix = uniqueSuffix();
     String email = "lola" + suffix + "@example.com";
-    registerAccount(email, "lola_" + suffix);
+    registerAccount(email);
     var cookie = refreshCookieOf(webLogin(email));
 
     var response = webLogout(cookie);
@@ -104,13 +104,13 @@ class LogoutIT {
     return setCookie.substring("refresh_token=".length(), setCookie.indexOf(';'));
   }
 
-  private void registerAccount(String email, String username) {
+  private void registerAccount(String email) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Lena", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
   }
 

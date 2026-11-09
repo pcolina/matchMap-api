@@ -20,18 +20,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 class RegistrationService {
 
-  private static final List<String> FIELD_ORDER =
-      List.of("email", "username", "displayName", "password");
+  private static final List<String> FIELD_ORDER = List.of("email", "password");
 
   private final UserAccountRepository accounts;
   private final PasswordEncoder passwordEncoder;
   private final Validator validator;
+  private final UsernameGenerator usernames;
 
   RegistrationService(
-      UserAccountRepository accounts, PasswordEncoder passwordEncoder, Validator validator) {
+      UserAccountRepository accounts,
+      PasswordEncoder passwordEncoder,
+      Validator validator,
+      UsernameGenerator usernames) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.validator = validator;
+    this.usernames = usernames;
   }
 
   @Transactional
@@ -41,20 +45,18 @@ class RegistrationService {
     if (accounts.existsByEmail(registration.email())) {
       throw AccountException.emailTaken();
     }
-    if (accounts.existsByUsername(registration.username())) {
-      throw AccountException.usernameTaken();
-    }
+    var username = usernames.generate(registration.email(), accounts::existsByUsername);
     var account =
         new UserAccount(
             UUID.randomUUID(),
             registration.email(),
-            registration.username(),
+            username,
             passwordEncoder.encode(registration.password()),
             Instant.now());
     try {
       return accounts.saveAndFlush(account);
     } catch (DataIntegrityViolationException e) {
-      if (accounts.existsByUsername(registration.username())) {
+      if (accounts.existsByUsername(username)) {
         throw AccountException.usernameTaken();
       }
       throw AccountException.emailTaken();
@@ -74,8 +76,6 @@ class RegistrationService {
 
   record Registration(
       @NotBlank @Email @Size(max = 254) String email,
-      @NotBlank @Pattern(regexp = "[a-z0-9_]{3,30}") String username,
-      @NotBlank @Size(max = 50) String displayName,
       @NotNull
           @Size(min = 6, max = 20)
           @Pattern(
@@ -84,23 +84,11 @@ class RegistrationService {
           String password) {
 
     static Registration from(RegisterInput input) {
-      return new Registration(
-          normalizeEmail(input.email()),
-          normalizeUsername(input.username()),
-          normalizeDisplayName(input.displayName()),
-          input.password());
-    }
-
-    private static String normalizeDisplayName(String displayName) {
-      return displayName == null ? null : displayName.trim();
+      return new Registration(normalizeEmail(input.email()), input.password());
     }
 
     private static String normalizeEmail(String email) {
       return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private static String normalizeUsername(String username) {
-      return username == null ? null : username.trim().toLowerCase(Locale.ROOT);
     }
   }
 }

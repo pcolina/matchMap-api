@@ -43,7 +43,7 @@ class LoginIT {
   @Test
   void returnsTokensForCorrectCredentials() {
     String suffix = uniqueSuffix();
-    registerAccount("ana" + suffix + "@example.com", "ana_" + suffix);
+    registerAccount("ana" + suffix + "@example.com");
 
     var response = login(" Ana" + suffix + "@Example.com ", PASSWORD);
 
@@ -57,7 +57,7 @@ class LoginIT {
   @Test
   void expiresInMatchesAccessTokenLifetime() throws Exception {
     String suffix = uniqueSuffix();
-    registerAccount("bob" + suffix + "@example.com", "bob_" + suffix);
+    registerAccount("bob" + suffix + "@example.com");
 
     var response = login("bob" + suffix + "@example.com", PASSWORD);
 
@@ -71,7 +71,7 @@ class LoginIT {
   @Test
   void rejectsWrongPassword() {
     String suffix = uniqueSuffix();
-    registerAccount("cara" + suffix + "@example.com", "cara_" + suffix);
+    registerAccount("cara" + suffix + "@example.com");
 
     var response = login("cara" + suffix + "@example.com", "wrongpassword1");
 
@@ -89,12 +89,10 @@ class LoginIT {
   void rejectsAccountWithoutPassword() {
     String suffix = uniqueSuffix();
     jdbcTemplate.update(
-        "INSERT INTO user_account (id, email, username, display_name, created_at)"
-            + " VALUES (?, ?, ?, ?, now())",
+        "INSERT INTO user_account (id, email, username, created_at)" + " VALUES (?, ?, ?, now())",
         UUID.randomUUID(),
         "gina" + suffix + "@example.com",
-        "gina_" + suffix,
-        "Gina");
+        "gina_" + suffix);
 
     var response = login("gina" + suffix + "@example.com", PASSWORD);
 
@@ -146,12 +144,11 @@ class LoginIT {
     String suffix = uniqueSuffix();
     String password = "lowercase123";
     jdbcTemplate.update(
-        "INSERT INTO user_account (id, email, username, display_name, password_hash, created_at)"
-            + " VALUES (?, ?, ?, ?, ?, now())",
+        "INSERT INTO user_account (id, email, username, password_hash, created_at)"
+            + " VALUES (?, ?, ?, ?, now())",
         UUID.randomUUID(),
         "lower" + suffix + "@example.com",
         "lower_" + suffix,
-        "Lo",
         passwordEncoder.encode(password));
 
     var response = login("lower" + suffix + "@example.com", password);
@@ -198,7 +195,7 @@ class LoginIT {
   @Test
   void trimsSurroundingSpacesOfEmailAndPassword() {
     String suffix = uniqueSuffix();
-    registerAccount("surround" + suffix + "@example.com", "surround_" + suffix);
+    registerAccount("surround" + suffix + "@example.com");
 
     var response = login("  surround" + suffix + "@example.com  ", " " + PASSWORD + " ");
 
@@ -209,7 +206,7 @@ class LoginIT {
   @Test
   void matchesEmailRegardlessOfLetterCase() {
     String suffix = uniqueSuffix();
-    registerAccount("lettercase" + suffix + "@example.com", "lettercase_" + suffix);
+    registerAccount("lettercase" + suffix + "@example.com");
 
     var response = login("LetterCase" + suffix + "@EXAMPLE.com", PASSWORD);
 
@@ -226,13 +223,13 @@ class LoginIT {
     return JSON.readTree(response.getResponse().getContentAsString()).get("accessToken").asString();
   }
 
-  private void registerAccount(String email, String username) {
+  private void registerAccount(String email) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Ana", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
   }
 
