@@ -21,8 +21,8 @@ Tasks marked [BLOCKED] wait for the [NEEDS CLARIFICATION] answers in proposal.md
 
 ## 3. Read own account
 
-- [ ] 3.1 Write the failing test `MeQueryIT.meReturnsIdEmailAndUsername` for the scenario "Signed-in user reads their account", and run it and show it failing. Then make `me` return `id`, `email` and `username`. Verify the test passes.
-- [ ] 3.2 Update `MeQueryIT` and `GraphqlRequests` so that no test sends or reads `displayName` for `register` or `me`. Verify the affected tests pass.
+- [x] 3.1 Write the failing test `MeQueryIT.meReturnsIdEmailAndUsername` for the scenario "Signed-in user reads their account", and run it and show it failing. Then make `me` return `id`, `email` and `username`. Verify the test passes.
+- [x] 3.2 Update `MeQueryIT` and `GraphqlRequests` so that no test sends or reads `displayName` for `register` or `me`. Verify the affected tests pass.
 
 ## 4. Google sign-in
 

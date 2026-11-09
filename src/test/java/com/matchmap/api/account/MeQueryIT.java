@@ -47,7 +47,7 @@ class MeQueryIT {
   String jwtSecret;
 
   @Test
-  void returnsOwnAccount() throws Exception {
+  void meReturnsIdEmailAndUsername() throws Exception {
     String suffix = uniqueSuffix();
     String email = "mia" + suffix + "@example.com";
     var registered = graphql(registerBody(email, PASSWORD), null);
@@ -58,6 +58,7 @@ class MeQueryIT {
     assertThat(response).bodyJson().doesNotHavePath("$.errors");
     assertThat(response).bodyJson().extractingPath("$.data.me.id").isEqualTo(id);
     assertThat(response).bodyJson().extractingPath("$.data.me.email").isEqualTo(email);
+    assertThat(response).bodyJson().extractingPath("$.data.me.username").isEqualTo("mia" + suffix);
   }
 
   @Test
