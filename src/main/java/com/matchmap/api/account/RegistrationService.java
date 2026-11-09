@@ -49,7 +49,6 @@ class RegistrationService {
             UUID.randomUUID(),
             registration.email(),
             registration.username(),
-            registration.displayName(),
             passwordEncoder.encode(registration.password()),
             Instant.now());
     try {

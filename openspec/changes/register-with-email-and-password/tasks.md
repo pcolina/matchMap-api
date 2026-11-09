@@ -10,6 +10,7 @@ Tasks marked [BLOCKED] wait for the [NEEDS CLARIFICATION] answers in proposal.md
 
 ## 2. Registration
 
+- [x] 2.0 Write the failing Testcontainers test `PersistenceIT.userAccountHasNoDisplayNameColumn` that checks `information_schema.columns` for `user_account` and expects no `display_name` column, run it and show it failing. Then add `V3__drop_display_name.sql` with `ALTER TABLE user_account DROP COLUMN display_name;` and remove the `displayName` field and constructor argument from `UserAccount`. Verify the test passes. (Moved before 2.1: the NOT NULL column blocks any registration insert.)
 - [ ] 2.1 Write the failing test `RegisterIT.successfulRegistrationGeneratesUsernameFromEmail` for the scenario "Successful registration", and run it and show it failing. Then change `RegisterInput` to `(email, password)`, make `RegistrationService` call the username generator, and remove `username` and `displayName` from the `Registration` record. Verify the test passes.
 - [ ] 2.2 Write the failing test `RegisterIT.inputWithRemovedFieldIsRejected` for the scenario "Input with a field that no longer exists", and run it and show it failing. Then verify the test passes with the contract change from 1.2.
 - [ ] 2.3 Write the failing test `RegisterIT.takenGeneratedUsernameGetsCountingSuffix` for the scenario "Generated username is already in use", expecting `ana_2`, and run it and show it failing. Then implement the counting suffix. Verify the test passes.
@@ -23,9 +24,8 @@ Tasks marked [BLOCKED] wait for the [NEEDS CLARIFICATION] answers in proposal.md
 - [ ] 3.1 Write the failing test `MeQueryIT.meReturnsIdEmailAndUsername` for the scenario "Signed-in user reads their account", and run it and show it failing. Then make `me` return `id`, `email` and `username`. Verify the test passes.
 - [ ] 3.2 Update `MeQueryIT` and `GraphqlRequests` so that no test sends or reads `displayName` for `register` or `me`. Verify the affected tests pass.
 
-## 4. Storage and Google sign-in
+## 4. Google sign-in
 
-- [ ] 4.1 Write the failing Testcontainers test `PersistenceIT.userAccountHasNoDisplayNameColumn` that checks `information_schema.columns` for `user_account` and expects no `display_name` column, run it and show it failing. Then add `V3__drop_display_name.sql` with `ALTER TABLE user_account DROP COLUMN display_name;` and remove the `displayName` field and constructor argument from `UserAccount`. Verify the test passes.
 - [ ] 4.2 Write the failing test `GoogleSignInIT.newAccountUsernameComesFromGoogleName` for the scenario "First Google sign-in creates an account", expecting `carla`, and run it and show it failing. Then make `GoogleAccountService` pass the Google name to `UsernameGenerator` and stop storing a display name. Verify the test passes.
 - [ ] 4.3 Write the failing tests `GoogleSignInIT.nameWithSpacesIsSanitized` and `GoogleSignInIT.takenGoogleNameGetsSuffix` for the scenarios "Google name with characters outside the username set" and "Google name already used as username", run them and show them failing, then verify they pass.
 - [ ] 4.4 Write the failing test `GoogleSignInIT.nameLessProfileUsesEmailPrefix` for the scenario "Google profile without a name", run it and show it failing. Then make `GoogleAccountService` fall back to the email prefix when the name is empty. Verify the test passes.

@@ -19,9 +19,6 @@ public class UserAccount {
   @Column(nullable = false, length = 30)
   private String username;
 
-  @Column(name = "display_name", nullable = false, length = 50)
-  private String displayName;
-
   @Column(name = "password_hash")
   private String passwordHash;
 
@@ -34,27 +31,20 @@ public class UserAccount {
   protected UserAccount() {}
 
   UserAccount(
-      UUID id,
-      String email,
-      String username,
-      String displayName,
-      String passwordHash,
-      Instant createdAt) {
-    this(id, email, username, displayName, passwordHash, null, createdAt);
+      UUID id, String email, String username, String passwordHash, Instant createdAt) {
+    this(id, email, username, passwordHash, null, createdAt);
   }
 
   UserAccount(
       UUID id,
       String email,
       String username,
-      String displayName,
       String passwordHash,
       String googleSubject,
       Instant createdAt) {
     this.id = id;
     this.email = email;
     this.username = username;
-    this.displayName = displayName;
     this.passwordHash = passwordHash;
     this.googleSubject = googleSubject;
     this.createdAt = createdAt;
@@ -70,10 +60,6 @@ public class UserAccount {
 
   public String getUsername() {
     return username;
-  }
-
-  public String getDisplayName() {
-    return displayName;
   }
 
   public String getPasswordHash() {
