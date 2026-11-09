@@ -6,7 +6,7 @@ Tasks marked [BLOCKED] wait for the [NEEDS CLARIFICATION] answers in proposal.md
 
 - [x] 1.1 Write the failing contract test `AccountContractIT.registerDescriptionListsRegisterErrorCodes` that reads `contracts/graphql/account.graphqls` and expects the `register` description to name `EMAIL_TAKEN`, `USERNAME_TAKEN`, `VALIDATION_FAILED` and `PASSWORD_INVALID`, and to state that `VALIDATION_FAILED` and `PASSWORD_INVALID` carry `extensions.field`. Run it and show it failing. Then update the description in `contracts/graphql/account.graphqls`. Verify the test passes.
 - [x] 1.2 Write the failing contract test `AccountContractIT.registerInputHasOnlyEmailAndPassword` that reads the schema and expects `RegisterInput` to contain exactly `email` and `password`, both non-null. Run it and show it failing. Then remove `username` and `displayName` from `RegisterInput` in `contracts/graphql/account.graphqls`. Verify the test passes.
-- [ ] 1.3 Write the failing contract test `AccountContractIT.userTypeHasNoDisplayName` that reads the schema and expects the `User` type to contain `id`, `email`, `username` and `createdAt`, and no `displayName`. Run it and show it failing. Then remove `displayName` from `User` in `contracts/graphql/account.graphqls`. Verify the test passes.
+- [x] 1.3 Write the failing contract test `AccountContractIT.userTypeHasNoDisplayName` that reads the schema and expects the `User` type to contain `id`, `email`, `username` and `createdAt`, and no `displayName`. Run it and show it failing. Then remove `displayName` from `User` in `contracts/graphql/account.graphqls`. Verify the test passes.
 
 ## 2. Registration
 

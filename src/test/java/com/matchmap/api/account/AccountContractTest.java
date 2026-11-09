@@ -17,6 +17,8 @@ class AccountContractTest {
   private static final Pattern REGISTER_INPUT =
       Pattern.compile("input RegisterInput \\{(.*?)\\}", Pattern.DOTALL);
 
+  private static final Pattern USER_TYPE = Pattern.compile("type User \\{(.*?)\\}", Pattern.DOTALL);
+
   @Test
   void registerDescriptionNamesTheStableCodes() throws IOException {
     String contract = Files.readString(Path.of("contracts/graphql/account.graphqls"));
@@ -55,6 +57,17 @@ class AccountContractTest {
     assertThat(matcher.find()).isTrue();
     assertThat(matcher.group(1).strip().lines().map(String::strip).toList())
         .containsExactly("email: String!", "password: String!");
+  }
+
+  @Test
+  void userTypeHasNoDisplayName() throws IOException {
+    String contract = Files.readString(Path.of("contracts/graphql/account.graphqls"));
+
+    Matcher matcher = USER_TYPE.matcher(contract);
+
+    assertThat(matcher.find()).isTrue();
+    assertThat(matcher.group(1).strip().lines().map(String::strip).toList())
+        .containsExactly("id: ID!", "email: String!", "username: String!", "createdAt: String!");
   }
 
   @Test
