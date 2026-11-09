@@ -237,6 +237,19 @@ class RegisterIT {
   }
 
   @Test
+  void takenGeneratedUsernameGetsCountingSuffix() {
+    String suffix = uniqueSuffix();
+    graphql(registerBody("tk" + suffix + "@example.com", PASSWORD));
+
+    var response = graphql(registerBody("tk" + suffix + "@other.example", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .isEqualTo("tk" + suffix + "_2");
+  }
+
+  @Test
   void inputWithRemovedFieldIsRejected() {
     String email = "removed" + uniqueSuffix() + "@example.com";
 
