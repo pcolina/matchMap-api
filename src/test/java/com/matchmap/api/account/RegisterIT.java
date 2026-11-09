@@ -263,6 +263,31 @@ class RegisterIT {
   }
 
   @Test
+  void uppercaseAndDotsAreSanitizedInUsername() {
+    String suffix = uniqueSuffix();
+
+    var response = graphql(registerBody("Ana.Travels" + suffix + "@Example.com", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .isEqualTo("ana_travels" + suffix.toLowerCase());
+  }
+
+  @Test
+  void longPrefixIsCutAt30Characters() {
+    String suffix = uniqueSuffix();
+    String prefix = "longprefix" + suffix + "abcdefghijklmnopqrstuvwxyz";
+
+    var response = graphql(registerBody(prefix + "@example.com", PASSWORD));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .isEqualTo(prefix.substring(0, 30));
+  }
+
+  @Test
   void inputWithRemovedFieldIsRejected() {
     String email = "removed" + uniqueSuffix() + "@example.com";
 
