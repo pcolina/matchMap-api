@@ -31,7 +31,7 @@ class ClientTypeHeaderIT {
   void unknownClientTypeIsRejectedAndTokenIsNotExchanged() throws Exception {
     String suffix = uniqueSuffix();
     String email = "vera" + suffix + "@example.com";
-    registerAccount(email, "vera_" + suffix);
+    registerAccount(email);
     var refreshToken = refreshTokenOf(login(email));
 
     var rejected = post("/api/auth/refresh", "desktop", Map.of("refreshToken", refreshToken));
@@ -46,7 +46,7 @@ class ClientTypeHeaderIT {
   void mobileSignInReturnsRefreshTokenInBody() throws Exception {
     String suffix = uniqueSuffix();
     String email = "mia" + suffix + "@example.com";
-    registerAccount(email, "mia_" + suffix);
+    registerAccount(email);
 
     var response = login(email);
 
@@ -61,7 +61,7 @@ class ClientTypeHeaderIT {
   void webSignInSetsRefreshCookieAndOmitsRefreshTokenFromBody() throws Exception {
     String suffix = uniqueSuffix();
     String email = "wendy" + suffix + "@example.com";
-    registerAccount(email, "wendy_" + suffix);
+    registerAccount(email);
 
     var response = post("/api/auth/login", "web", Map.of("email", email, "password", PASSWORD));
 
@@ -83,7 +83,7 @@ class ClientTypeHeaderIT {
   void missingClientTypeOnLoginIsRejectedAndIssuesNoTokens() throws Exception {
     String suffix = uniqueSuffix();
     String email = "lena" + suffix + "@example.com";
-    registerAccount(email, "lena_" + suffix);
+    registerAccount(email);
 
     var response =
         mockMvc
@@ -104,7 +104,7 @@ class ClientTypeHeaderIT {
   void missingClientTypeOnRefreshIsRejected() throws Exception {
     String suffix = uniqueSuffix();
     String email = "wade" + suffix + "@example.com";
-    registerAccount(email, "wade_" + suffix);
+    registerAccount(email);
     var refreshToken = refreshTokenOf(login(email));
 
     var response =
@@ -124,7 +124,7 @@ class ClientTypeHeaderIT {
   void webSignInDefaultsSameSiteToLax() throws Exception {
     String suffix = uniqueSuffix();
     String email = "zoe" + suffix + "@example.com";
-    registerAccount(email, "zoe_" + suffix);
+    registerAccount(email);
 
     var response = post("/api/auth/login", "web", Map.of("email", email, "password", PASSWORD));
 
@@ -132,13 +132,13 @@ class ClientTypeHeaderIT {
     assertThat(setCookieOf(response)).contains("SameSite=Lax");
   }
 
-  private void registerAccount(String email, String username) {
+  private void registerAccount(String email) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Vera", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
   }
 

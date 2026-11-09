@@ -38,7 +38,7 @@ class CredentialLeakIT {
   void signInLeavesNoSecretsInLogs(CapturedOutput output) throws Exception {
     String suffix = uniqueSuffix();
     String email = "lee" + suffix + "@example.com";
-    registerAccount(email, "lee_" + suffix);
+    registerAccount(email);
     var login = post("/api/auth/login", Map.of("email", email, "password", PASSWORD));
     var accessToken = field(login, "accessToken");
     var refreshToken = field(login, "refreshToken");
@@ -58,7 +58,7 @@ class CredentialLeakIT {
   void storesOnlyRefreshTokenHashes() throws Exception {
     String suffix = uniqueSuffix();
     String email = "kim" + suffix + "@example.com";
-    registerAccount(email, "kim_" + suffix);
+    registerAccount(email);
     var refreshToken =
         field(
             post("/api/auth/login", Map.of("email", email, "password", PASSWORD)), "refreshToken");
@@ -79,13 +79,13 @@ class CredentialLeakIT {
             });
   }
 
-  private void registerAccount(String email, String username) {
+  private void registerAccount(String email) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Lee", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
   }
 

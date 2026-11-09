@@ -35,7 +35,7 @@ class RefreshCookieSameSiteIT {
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, "nina_" + suffix, "Nina", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
 
     var response =

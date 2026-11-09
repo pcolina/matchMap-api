@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GoogleAccountService {
 
-  private static final int MAX_DISPLAY_NAME_LENGTH = 50;
-
   private final UserAccountRepository accounts;
   private final UsernameGenerator usernames;
 
@@ -42,24 +40,20 @@ public class GoogleAccountService {
     return Optional.of(accounts.saveAndFlush(account));
   }
 
+  private static String sourceName(String name, String email) {
+    var trimmed = name == null ? "" : name.trim();
+    return trimmed.isEmpty() ? email.substring(0, email.indexOf('@')) : trimmed;
+  }
+
   private UserAccount create(String subject, String email, String name) {
     var account =
         new UserAccount(
             UUID.randomUUID(),
             email,
-            usernames.generate(email, accounts::existsByUsername),
-            displayName(name, email),
+            usernames.generateFromName(sourceName(name, email), accounts::existsByUsername),
             null,
             subject,
             Instant.now());
     return accounts.saveAndFlush(account);
-  }
-
-  private static String displayName(String name, String email) {
-    var trimmed = name == null ? "" : name.trim();
-    var value = trimmed.isEmpty() ? email.substring(0, email.indexOf('@')) : trimmed;
-    return value.length() > MAX_DISPLAY_NAME_LENGTH
-        ? value.substring(0, MAX_DISPLAY_NAME_LENGTH)
-        : value;
   }
 }

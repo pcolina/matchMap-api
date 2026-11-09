@@ -39,7 +39,7 @@ class RefreshIT {
   void rotatesTokens() throws Exception {
     String suffix = uniqueSuffix();
     String email = "rita" + suffix + "@example.com";
-    registerAccount(email, "rita_" + suffix);
+    registerAccount(email);
     var first = refreshTokenOf(login(email));
 
     var response = post("/api/auth/refresh", Map.of("refreshToken", first));
@@ -52,8 +52,8 @@ class RefreshIT {
   @Test
   void rejectsExpiredToken() throws Exception {
     String suffix = uniqueSuffix();
-    String username = "omar_" + suffix;
-    registerAccount("omar" + suffix + "@example.com", username);
+    String username = "omar" + suffix;
+    registerAccount("omar" + suffix + "@example.com");
     UUID accountId =
         jdbcTemplate.queryForObject(
             "SELECT id FROM user_account WHERE username = ?", UUID.class, username);
@@ -76,7 +76,7 @@ class RefreshIT {
   void reuseRevokesSession() throws Exception {
     String suffix = uniqueSuffix();
     String email = "sam" + suffix + "@example.com";
-    registerAccount(email, "sam_" + suffix);
+    registerAccount(email);
     var first = refreshTokenOf(login(email));
     var second = refreshTokenOf(post("/api/auth/refresh", Map.of("refreshToken", first)));
 
@@ -92,7 +92,7 @@ class RefreshIT {
   void successfulRefreshFromMobileReturnsRefreshTokenInBody() throws Exception {
     String suffix = uniqueSuffix();
     String email = "tina" + suffix + "@example.com";
-    registerAccount(email, "tina_" + suffix);
+    registerAccount(email);
     var first = refreshTokenOf(login(email));
 
     var response = post("/api/auth/refresh", Map.of("refreshToken", first));
@@ -108,7 +108,7 @@ class RefreshIT {
   void successfulRefreshFromWebUsesCookieAndReturnsNewCookie() throws Exception {
     String suffix = uniqueSuffix();
     String email = "ursula" + suffix + "@example.com";
-    registerAccount(email, "ursula_" + suffix);
+    registerAccount(email);
     var first = refreshCookieOf(webLogin(email));
 
     var response = webRefresh(first);
@@ -166,13 +166,13 @@ class RefreshIT {
             MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8)));
   }
 
-  private void registerAccount(String email, String username) {
+  private void registerAccount(String email) {
     mockMvc
         .post()
         .uri("/graphql")
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON)
-        .content(registerBody(email, username, "Rita", PASSWORD))
+        .content(registerBody(email, PASSWORD))
         .exchange();
   }
 

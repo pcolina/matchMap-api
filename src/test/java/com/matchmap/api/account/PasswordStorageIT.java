@@ -31,15 +31,15 @@ class PasswordStorageIT {
   void storesSaltedHashOnly() {
     String first = uniqueSuffix();
     String second = uniqueSuffix();
-    graphql(registerBody("hash" + first + "@example.com", "hash_" + first, "Ana", PASSWORD));
-    graphql(registerBody("hash" + second + "@example.com", "hash_" + second, "Bob", PASSWORD));
+    graphql(registerBody("hash" + first + "@example.com", PASSWORD));
+    graphql(registerBody("hash" + second + "@example.com", PASSWORD));
 
     List<String> hashes =
         jdbcTemplate.queryForList(
             "SELECT password_hash FROM user_account WHERE username IN (?, ?)",
             String.class,
-            "hash_" + first,
-            "hash_" + second);
+            "hash" + first,
+            "hash" + second);
 
     assertThat(hashes)
         .hasSize(2)
