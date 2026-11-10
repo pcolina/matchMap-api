@@ -16,6 +16,8 @@ type Mutation {
   USERNAME_TAKEN when the username is already in use, VALIDATION_FAILED when an input breaks
   its rules, and PASSWORD_INVALID when the password breaks the password rule. For VALIDATION_FAILED
   and PASSWORD_INVALID, extensions.field names the offending field.
+  The email is required, must not be blank, must have a standard email format and at most 254 characters.
+  It is trimmed and lower-cased before it is stored.
   The password has 6 to 20 characters, at least one lowercase letter, at least one uppercase letter
   and at least one special character from the OWASP list of ASCII punctuation and symbols, and it
   has no whitespace character. Letters and digits are not special characters. Unicode characters
