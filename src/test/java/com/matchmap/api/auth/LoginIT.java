@@ -116,6 +116,14 @@ class LoginIT {
   }
 
   @Test
+  void rejectsEmailTooLongAndNotInStandardFormat() {
+    var response = login("a".repeat(255), PASSWORD);
+
+    assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("email_too_long");
+  }
+
+  @Test
   void rejectsEmailNotInStandardFormat() {
     var response = login("not-an-email", PASSWORD);
 
