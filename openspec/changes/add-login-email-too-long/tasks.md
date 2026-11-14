@@ -6,7 +6,7 @@
 
 ## 2. Contract
 
-- [ ] 2.1 In `contracts/openapi/auth.yaml`, add `email_too_long` to the `Error` enum after `invalid_password`. Update the login 400 description so it says `invalid_email` for an empty or non-standard email and `email_too_long` for an email longer than 254 characters, and add `email_too_long` to its example list. Covers the contract part of the proposal. Commit: `Declare email_too_long in the login contract`
+- [x] 2.1 In `contracts/openapi/auth.yaml`, add `email_too_long` to the `Error` enum after `invalid_password`. Update the login 400 description so it says `invalid_email` for an empty or non-standard email and `email_too_long` for an email longer than 254 characters, and add `email_too_long` to its example list. Covers the contract part of the proposal. Commit: `Declare email_too_long in the login contract`
 
 ## 3. Backend
 
