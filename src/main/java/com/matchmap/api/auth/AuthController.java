@@ -188,7 +188,7 @@ class AuthController {
   }
 
   private void validateLoginLimits(String email, String password) {
-    if (email != null && email.length() > 254) {
+    if (email != null && email.length() > LoginLimits.MAX_EMAIL_LENGTH) {
       throw AuthException.emailTooLong();
     }
     var violations = validator.validate(new LoginLimits(email, password));

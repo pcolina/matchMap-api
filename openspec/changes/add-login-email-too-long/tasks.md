@@ -11,4 +11,4 @@
 ## 3. Backend
 
 - [x] 3.1 Add `AuthException.emailTooLong()` with status 400 and code `email_too_long`, next to `invalidEmail()`. Make `rejectsEmailTooLong` (1.1) pass with the minimum change in `AuthController.validateLoginLimits`: when the trimmed `email` is longer than 254 characters, throw `emailTooLong()` before the Bean Validation check. Run tests 1.1, 1.2 and 1.3 and show them passing. Commit: `Return email_too_long for a login email over 254 characters`
-- [ ] 3.2 Refactor only: keep the empty and malformed email tests (`rejectsEmptyEmail`, `rejectsEmailNotInStandardFormat`) green and remove any duplication introduced in 3.1. Commit: `Tidy the login email limit check`
+- [x] 3.2 Refactor only: keep the empty and malformed email tests (`rejectsEmptyEmail`, `rejectsEmailNotInStandardFormat`) green and remove any duplication introduced in 3.1. Commit: `Tidy the login email limit check`
