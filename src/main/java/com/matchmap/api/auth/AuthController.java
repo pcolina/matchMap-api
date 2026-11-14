@@ -188,6 +188,9 @@ class AuthController {
   }
 
   private void validateLoginLimits(String email, String password) {
+    if (email != null && email.length() > 254) {
+      throw AuthException.emailTooLong();
+    }
     var violations = validator.validate(new LoginLimits(email, password));
     var fields = violations.stream().map(v -> v.getPropertyPath().toString()).toList();
     if (fields.contains("email")) {
