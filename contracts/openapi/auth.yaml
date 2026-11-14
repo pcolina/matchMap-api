@@ -35,13 +35,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
         '400':
-          description: "The X-Client header is missing or unknown (invalid_client), or the email or the password breaks its input limits (invalid_email or invalid_password)."
+          description: "The X-Client header is missing or unknown (invalid_client), or the email or the password breaks its input limits. An empty or non-standard email returns invalid_email. An email longer than 254 characters after trimming and lower-casing returns email_too_long, whatever its format. A password that breaks its limits returns invalid_password."
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                error: invalid_email
+              examples:
+                invalidEmail:
+                  value:
+                    error: invalid_email
+                emailTooLong:
+                  value:
+                    error: email_too_long
         '401':
           description: Wrong password, unknown email or account without password.
           content:
@@ -264,3 +269,4 @@ components:
             - invalid_refresh_token
             - invalid_email
             - invalid_password
+            - email_too_long

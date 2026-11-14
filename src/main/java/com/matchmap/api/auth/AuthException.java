@@ -30,6 +30,10 @@ class AuthException extends RuntimeException {
     return new AuthException(HttpStatus.BAD_REQUEST, "invalid_email", null);
   }
 
+  static AuthException emailTooLong() {
+    return new AuthException(HttpStatus.BAD_REQUEST, "email_too_long", null);
+  }
+
   static AuthException invalidPassword() {
     return new AuthException(HttpStatus.BAD_REQUEST, "invalid_password", null);
   }
