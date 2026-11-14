@@ -124,6 +124,13 @@ class LoginIT {
   }
 
   @Test
+  void acceptsEmailWithSurroundingSpacesAt254Characters() {
+    var response = login("     " + "a".repeat(238) + "@example.com     ", PASSWORD);
+
+    assertThat(response).bodyText().doesNotContain("email_too_long");
+  }
+
+  @Test
   void rejectsEmailNotInStandardFormat() {
     var response = login("not-an-email", PASSWORD);
 

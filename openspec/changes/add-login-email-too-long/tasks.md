@@ -2,7 +2,7 @@
 
 - [x] 1.1 Change `rejectsEmailTooLong` in `src/test/java/com/matchmap/api/auth/LoginIT.java` to send a 255-character email in standard format and expect HTTP 400 with `email_too_long`. Run it and show it failing. Covers scenario "Email too long". Commit: `Test that a 255 character login email returns email_too_long`
 - [x] 1.2 Add `rejectsEmailTooLongAndNotInStandardFormat` to `LoginIT`: a 255-character email that is not in standard format, expecting HTTP 400 with `email_too_long`. Run it and show it failing. Covers scenario "Email too long and not in standard format". Commit: `Test that a too long non-standard login email returns email_too_long`
-- [ ] 1.3 Add `acceptsEmailWithSurroundingSpacesAt254Characters` to `LoginIT`: a 250-character standard email with 5 spaces before and after, expecting the request not to be rejected with `email_too_long` (any other response from the sign-in flow is acceptable for this test, so assert the error body is not `email_too_long`). Run it and show it failing. Covers scenario "Surrounding spaces do not count toward the email length". Commit: `Test that surrounding spaces do not count toward the login email length`
+- [x] 1.3 Add `acceptsEmailWithSurroundingSpacesAt254Characters` to `LoginIT`: a 250-character standard email with 5 spaces before and after, expecting the request not to be rejected with `email_too_long` (any other response from the sign-in flow is acceptable for this test, so assert the error body is not `email_too_long`). Run it and show it failing. Covers scenario "Surrounding spaces do not count toward the email length". Commit: `Test that surrounding spaces do not count toward the login email length`
 
 ## 2. Contract
 
