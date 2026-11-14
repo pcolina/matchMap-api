@@ -112,7 +112,7 @@ class LoginIT {
     var response = login("a".repeat(243) + "@example.com", PASSWORD);
 
     assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
-    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("invalid_email");
+    assertThat(response).bodyJson().extractingPath("$.error").isEqualTo("email_too_long");
   }
 
   @Test
