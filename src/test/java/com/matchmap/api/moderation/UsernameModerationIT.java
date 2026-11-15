@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @Import(TestcontainersConfiguration.class)
@@ -21,9 +22,12 @@ class UsernameModerationIT {
 
   @Autowired JdbcTemplate jdbcTemplate;
 
+  @Autowired WordCache wordCache;
+
   @Test
   void blocksUsernameWithActiveProhibitedWord() {
     insertWord("prohibited_word", "nazi", "HATE", true);
+    wordCache.reload();
 
     assertThat(usernameModeration.isBlocked("nazi_fan")).isTrue();
   }
@@ -31,6 +35,11 @@ class UsernameModerationIT {
   @Test
   void allowsUsernameWhenNoWordIsStored() {
     assertThat(usernameModeration.isBlocked("nazi_fan")).isFalse();
+  }
+
+  @AfterTransaction
+  void reloadAfterRollback() {
+    wordCache.reload();
   }
 
   private void insertWord(String table, String word, String category, boolean active) {

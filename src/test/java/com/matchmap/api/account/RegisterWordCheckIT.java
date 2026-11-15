@@ -8,6 +8,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.matchmap.api.TestcontainersConfiguration;
+import com.matchmap.api.moderation.WordCache;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,8 @@ class RegisterWordCheckIT {
   @Autowired MockMvcTester mockMvc;
 
   @Autowired JdbcTemplate jdbcTemplate;
+
+  @Autowired WordCache wordCache;
 
   @Test
   void prohibitedPrefixGetsAFallbackUsername() {
@@ -129,6 +133,16 @@ class RegisterWordCheckIT {
   }
 
   private void insertWord(String table, String word, String normalized, String category) {
+    insertRow(table, word, normalized, category);
+    wordCache.reload();
+  }
+
+  @AfterTransaction
+  void reloadAfterRollback() {
+    wordCache.reload();
+  }
+
+  private void insertRow(String table, String word, String normalized, String category) {
     var now = OffsetDateTime.now();
     jdbcTemplate.update(
         "insert into "
