@@ -10,7 +10,7 @@
 - [x] 2.3 Write the failing test "fallback retries after a collision" with an injected random source that forces the first fallback to be taken. It asserts that the second fallback is returned. Run it and show it failing. Commit: `Test that a colliding fallback is retried`
 - [x] 2.4 Make 2.3 pass by retrying while `taken` is true. Commit: `Retry a colliding fallback username`
 - [x] 2.5 Write the failing test "fallback gives up after 5 attempts": with an injected random source that makes every fallback taken, the generator stops after 5 attempts and reports failure. Run it and show it failing. Commit: `Test the retry limit for fallback usernames`
-- [ ] 2.6 Make 2.5 pass: after 5 attempts the sign-up returns an internal error and creates no account. Commit: `Stop after the fallback retry limit`
+- [x] 2.6 Make 2.5 pass: after 5 attempts the sign-up returns an internal error and creates no account. Commit: `Stop after the fallback retry limit`
 
 ## 3. Sign-up wiring
 

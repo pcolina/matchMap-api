@@ -14,6 +14,7 @@ class UsernameGenerator {
   private static final int MIN_BASE_LENGTH = 3;
   private static final int RANDOM_LENGTH = 8;
   private static final String FALLBACK_PREFIX = "user_";
+  private static final int MAX_FALLBACK_ATTEMPTS = 5;
   private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
 
   private final Random random;
@@ -39,11 +40,13 @@ class UsernameGenerator {
   }
 
   Optional<String> fallbackUsername(Predicate<String> taken) {
-    var candidate = fallbackUsername();
-    while (taken.test(candidate)) {
-      candidate = fallbackUsername();
+    for (var attempt = 0; attempt < MAX_FALLBACK_ATTEMPTS; attempt++) {
+      var candidate = fallbackUsername();
+      if (!taken.test(candidate)) {
+        return Optional.of(candidate);
+      }
     }
-    return Optional.of(candidate);
+    return Optional.empty();
   }
 
   private String generateFrom(String source, Predicate<String> taken) {
