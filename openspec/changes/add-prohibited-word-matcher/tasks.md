@@ -27,5 +27,5 @@
 
 ## 5. Short-word boundary
 
-- [ ] 5.1 Write the failing test "Short word as a separated segment" (`ana_nazi` matches `nazi`, category `HATE`) and "Short word split by separators" (`n-a-z-i` matches `nazi`). Run them and show them failing. Commit: `Test segment and separator matching for short words`
-- [ ] 5.2 Make 5.1 pass in `ProhibitedWordMatcher`: a short word matches when it is the whole normalized candidate or one segment separated by `.`, `_`, `-` or a space. Commit: `Match short words by segment as well as whole candidate`
+- [x] 5.1 Write the failing test "Short word as a separated segment" (`ana_nazi` matches `nazi`, category `HATE`) and "Short word split by separators" (`n-a-z-i` matches `nazi`). Run them and show them failing. Commit: `Test segment and separator matching for short words`
+- [x] 5.2 Make 5.1 pass in `ProhibitedWordMatcher`: a short word matches when it is the whole normalized candidate or one segment separated by `.`, `_`, `-` or a space. Commit: `Match short words by segment as well as whole candidate`
