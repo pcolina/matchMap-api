@@ -50,12 +50,41 @@ class RegisterWordCheckIT {
 
   @Test
   void reservedPrefixGetsAFallbackUsername() {
-    insertWord("reserved_word", "support", "suport", "RESERVED");
-
     var response = graphql(registerBody("support" + uniqueSuffix() + "@example.com", PASSWORD));
 
     assertThat(response).bodyJson().doesNotHavePath("$.errors");
     assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .asString()
+        .matches("user_[a-z0-9]{8}");
+  }
+
+  @Test
+  void seededNameGetsFallback() {
+    var response = graphql(registerBody("admin@example.com", PASSWORD));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .asString()
+        .matches("user_[a-z0-9]{8}");
+  }
+
+  @Test
+  void seededNamesWithRepeatedLettersGetFallback() {
+    var suport = graphql(registerBody("suport@example.com", PASSWORD));
+    var rot = graphql(registerBody("ro0t@example.com", PASSWORD));
+
+    assertThat(suport).bodyJson().doesNotHavePath("$.errors");
+    assertThat(suport)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .asString()
+        .matches("user_[a-z0-9]{8}");
+    assertThat(rot).bodyJson().doesNotHavePath("$.errors");
+    assertThat(rot)
         .bodyJson()
         .extractingPath("$.data.register.username")
         .asString()
