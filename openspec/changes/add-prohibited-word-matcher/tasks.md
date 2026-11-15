@@ -7,7 +7,7 @@
 
 ## 2. Normalization
 
-- [ ] 2.1 Write the failing unit test `CandidateNormalizerTest` with one assertion per scenario in "Candidate normalization": `naz1` → `nazi`, `n-a-z-i` → `nazi`, `nnnazi` → `nazi`, `NÁZI` → `nazi`, `n4z1` → `nazi`. Run it and show it failing. Commit: `Test the candidate normalization scenarios`
+- [x] 2.1 Write the failing unit test `CandidateNormalizerTest` with one assertion per scenario in "Candidate normalization": `naz1` → `nazi`, `n-a-z-i` → `nazi`, `nnnazi` → `nazi`, `NÁZI` → `nazi`, `n4z1` → `nazi`. Run it and show it failing. Commit: `Test the candidate normalization scenarios`
 - [ ] 2.2 Implement `CandidateNormalizer` with the steps in the spec, in order: NFKC, lowercase, diacritics, leetspeak map, separator removal, repeat collapse. Make 2.1 pass. Commit: `Normalize candidate usernames for word matching`
 - [ ] 2.3 Add a failing test for each leetspeak mapping in the spec (`0`, `1`, `3`, `4`, `5`, `7`, `@`, `$`) and for space as a separator. Run them and show them failing. Commit: `Test every leetspeak mapping and the space separator`
 - [ ] 2.4 Make 2.3 pass, with the minimum change in `CandidateNormalizer`. Commit: `Map every leetspeak character and remove spaces`
