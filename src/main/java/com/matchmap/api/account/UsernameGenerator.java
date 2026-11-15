@@ -49,16 +49,23 @@ class UsernameGenerator {
     return Optional.empty();
   }
 
+  String baseFor(String email) {
+    return truncate(baseOf(email.substring(0, email.indexOf('@'))), MAX_LENGTH);
+  }
+
   private String generateFrom(String source, Predicate<String> taken) {
-    var localPart = source.toLowerCase(Locale.ROOT);
-    var sanitized = localPart.replaceAll("[^a-z0-9_]", "_");
-    var base = sanitized.length() < MIN_BASE_LENGTH ? FALLBACK_PREFIX + randomSuffix() : sanitized;
+    var base = baseOf(source);
     var candidate = truncate(base, MAX_LENGTH);
     for (var n = 2; taken.test(candidate); n++) {
       var suffix = "_" + n;
       candidate = truncate(base, MAX_LENGTH - suffix.length()) + suffix;
     }
     return candidate;
+  }
+
+  private String baseOf(String source) {
+    var sanitized = source.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
+    return sanitized.length() < MIN_BASE_LENGTH ? FALLBACK_PREFIX + randomSuffix() : sanitized;
   }
 
   private static String truncate(String value, int length) {

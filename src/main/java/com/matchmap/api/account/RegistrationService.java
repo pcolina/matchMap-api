@@ -1,5 +1,6 @@
 package com.matchmap.api.account;
 
+import com.matchmap.api.moderation.UsernameModeration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Email;
@@ -26,16 +27,19 @@ class RegistrationService {
   private final PasswordEncoder passwordEncoder;
   private final Validator validator;
   private final UsernameGenerator usernames;
+  private final UsernameModeration moderation;
 
   RegistrationService(
       UserAccountRepository accounts,
       PasswordEncoder passwordEncoder,
       Validator validator,
-      UsernameGenerator usernames) {
+      UsernameGenerator usernames,
+      UsernameModeration moderation) {
     this.accounts = accounts;
     this.passwordEncoder = passwordEncoder;
     this.validator = validator;
     this.usernames = usernames;
+    this.moderation = moderation;
   }
 
   @Transactional
@@ -45,7 +49,7 @@ class RegistrationService {
     if (accounts.existsByEmail(registration.email())) {
       throw AccountException.emailTaken();
     }
-    var username = usernames.generate(registration.email(), accounts::existsByUsername);
+    var username = assignUsername(registration.email());
     var account =
         new UserAccount(
             UUID.randomUUID(),
@@ -61,6 +65,15 @@ class RegistrationService {
       }
       throw AccountException.emailTaken();
     }
+  }
+
+  private String assignUsername(String email) {
+    if (!moderation.isBlocked(usernames.baseFor(email))) {
+      return usernames.generate(email, accounts::existsByUsername);
+    }
+    return usernames
+        .fallbackUsername(accounts::existsByUsername)
+        .orElseThrow(() -> new IllegalStateException("No free fallback username"));
   }
 
   private void validate(Registration registration) {
