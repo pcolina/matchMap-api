@@ -25,8 +25,7 @@ class ProhibitedWordMatcherTest {
   void ignoresInactiveEntries() {
     var inactive =
         new ProhibitedWordMatcher(
-            List.of(
-                new WordEntry("nazis", "HATE", false), new WordEntry("ass", "HATE", false)));
+            List.of(new WordEntry("nazis", "HATE", false), new WordEntry("ass", "HATE", false)));
 
     assertThat(inactive.match("xnazisx")).isEmpty();
     assertThat(inactive.match("ass")).isEmpty();
