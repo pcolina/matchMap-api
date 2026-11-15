@@ -33,6 +33,20 @@ class ProhibitedWordMatcherTest {
   }
 
   @Test
+  void matchesShortWordAsSeparatedSegment() {
+    var segments = new ProhibitedWordMatcher(List.of(new WordEntry("nazi", "HATE", true)));
+
+    assertThat(segments.match("ana_nazi")).contains("HATE");
+  }
+
+  @Test
+  void matchesShortWordSplitBySeparators() {
+    var segments = new ProhibitedWordMatcher(List.of(new WordEntry("nazi", "HATE", true)));
+
+    assertThat(segments.match("n-a-z-i")).contains("HATE");
+  }
+
+  @Test
   void reportsNoMatchWhenNothingIsFound() {
     assertThat(matcher.match("hello")).isEmpty();
   }
