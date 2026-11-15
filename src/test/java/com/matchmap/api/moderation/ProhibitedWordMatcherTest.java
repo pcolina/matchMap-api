@@ -20,4 +20,12 @@ class ProhibitedWordMatcherTest {
   void doesNotMatchShortWordInsideLongerCandidate() {
     assertThat(matcher.match("classic")).isEmpty();
   }
+
+  @Test
+  void matchesShortReservedWordAsWholeCandidate() {
+    var normalized = new CandidateNormalizer().normalize("root");
+    var reserved = new ProhibitedWordMatcher(List.of(new WordEntry(normalized, "RESERVED", true)));
+
+    assertThat(reserved.match("r00t")).contains("RESERVED");
+  }
 }

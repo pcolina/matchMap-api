@@ -20,8 +20,8 @@
 
 - [x] 4.1 Write the failing unit test `ProhibitedWordMatcherTest` for "Matching rule by word length": a long word `nazis` matches inside `xnazisx`, and a short word `ass` does not match inside `classic`. Run it and show it failing. Covers scenarios "Long word inside a longer candidate" and "Short word inside a longer candidate". Commit: `Test substring matching for long words and whole-word matching for short ones`
 - [x] 4.2 Implement `ProhibitedWordMatcher`: build an Aho-Corasick automaton from the active normalized words longer than 4 characters, and whole-word comparison for the others. Make 4.1 pass. Commit: `Match prohibited words by length`
-- [ ] 4.3 Write the failing test "Short word as the whole candidate": reserved word `root` matches `r00t` with category `RESERVED`. Run it and show it failing. Commit: `Test that a short reserved word matches the whole candidate`
-- [ ] 4.4 Make 4.3 pass. Commit: `Match short reserved words as whole candidates`
+- [x] 4.3 Write the failing test "Short word as the whole candidate": reserved word `root` matches `r00t` with category `RESERVED`. Run it and show it failing. Commit: `Test that a short reserved word matches the whole candidate`
+- [x] 4.4 Make 4.3 pass. Commit: `Match short reserved words as whole candidates`
 - [ ] 4.5 Write the failing tests "Inactive entries are ignored", "No match" and "Match reports the category" (`HATE`). Run them and show them failing. Commit: `Test inactive entries, no match and the reported category`
 - [ ] 4.6 Make 4.5 pass. Commit: `Report the category of the matched word`
 
