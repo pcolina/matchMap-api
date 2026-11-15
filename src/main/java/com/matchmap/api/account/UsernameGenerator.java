@@ -2,6 +2,8 @@ package com.matchmap.api.account;
 
 import java.security.SecureRandom;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Predicate;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +13,19 @@ class UsernameGenerator {
   private static final int MAX_LENGTH = 30;
   private static final int MIN_BASE_LENGTH = 3;
   private static final int RANDOM_LENGTH = 8;
+  private static final String FALLBACK_PREFIX = "user_";
+  private static final int MAX_FALLBACK_ATTEMPTS = 5;
   private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
-  private static final SecureRandom RANDOM = new SecureRandom();
+
+  private final Random random;
+
+  UsernameGenerator() {
+    this(new SecureRandom());
+  }
+
+  UsernameGenerator(Random random) {
+    this.random = random;
+  }
 
   String generate(String email, Predicate<String> taken) {
     return generateFrom(email.substring(0, email.indexOf('@')), taken);
@@ -22,10 +35,26 @@ class UsernameGenerator {
     return generateFrom(name, taken);
   }
 
-  private static String generateFrom(String source, Predicate<String> taken) {
-    var localPart = source.toLowerCase(Locale.ROOT);
-    var sanitized = localPart.replaceAll("[^a-z0-9_]", "_");
-    var base = sanitized.length() < MIN_BASE_LENGTH ? "user_" + randomSuffix() : sanitized;
+  String fallbackUsername() {
+    return FALLBACK_PREFIX + randomSuffix();
+  }
+
+  Optional<String> fallbackUsername(Predicate<String> taken) {
+    for (var attempt = 0; attempt < MAX_FALLBACK_ATTEMPTS; attempt++) {
+      var candidate = fallbackUsername();
+      if (!taken.test(candidate)) {
+        return Optional.of(candidate);
+      }
+    }
+    return Optional.empty();
+  }
+
+  String baseFor(String email) {
+    return truncate(baseOf(email.substring(0, email.indexOf('@'))), MAX_LENGTH);
+  }
+
+  private String generateFrom(String source, Predicate<String> taken) {
+    var base = baseOf(source);
     var candidate = truncate(base, MAX_LENGTH);
     for (var n = 2; taken.test(candidate); n++) {
       var suffix = "_" + n;
@@ -34,14 +63,19 @@ class UsernameGenerator {
     return candidate;
   }
 
+  private String baseOf(String source) {
+    var sanitized = source.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
+    return sanitized.length() < MIN_BASE_LENGTH ? FALLBACK_PREFIX + randomSuffix() : sanitized;
+  }
+
   private static String truncate(String value, int length) {
     return value.length() <= length ? value : value.substring(0, length);
   }
 
-  private static String randomSuffix() {
+  private String randomSuffix() {
     var builder = new StringBuilder(RANDOM_LENGTH);
     for (var i = 0; i < RANDOM_LENGTH; i++) {
-      builder.append(ALPHABET.charAt(RANDOM.nextInt(ALPHABET.length())));
+      builder.append(ALPHABET.charAt(random.nextInt(ALPHABET.length())));
     }
     return builder.toString();
   }
