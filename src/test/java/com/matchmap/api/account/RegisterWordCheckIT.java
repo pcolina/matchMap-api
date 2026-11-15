@@ -4,10 +4,14 @@ import static com.matchmap.api.support.GraphqlRequests.registerBody;
 import static com.matchmap.api.support.GraphqlRequests.uniqueSuffix;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.matchmap.api.TestcontainersConfiguration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -69,6 +73,30 @@ class RegisterWordCheckIT {
         .bodyJson()
         .extractingPath("$.data.register.username")
         .isEqualTo("ana" + suffix);
+  }
+
+  @Test
+  void fallbackSignUpDoesNotLogTheMatchedWordOrCandidate() {
+    insertWord("prohibited_word", "nazi", "nazi", "HATE");
+    var candidate = "nazi.fan" + uniqueSuffix();
+    var logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    var appender = new ListAppender<ILoggingEvent>();
+    appender.start();
+    logger.addAppender(appender);
+    try {
+      graphql(registerBody(candidate + "@example.com", PASSWORD));
+
+      assertThat(appender.list)
+          .allSatisfy(
+              event -> {
+                assertThat(event.getFormattedMessage())
+                    .doesNotContain(candidate)
+                    .doesNotContain("nazi");
+                assertThat(String.valueOf(event.getThrowableProxy())).doesNotContain(candidate);
+              });
+    } finally {
+      logger.detachAppender(appender);
+    }
   }
 
   private void insertWord(String table, String word, String normalized, String category) {

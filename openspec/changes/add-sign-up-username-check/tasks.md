@@ -18,7 +18,7 @@
 - [x] 3.2 Make 3.1 pass: `RegistrationService` calls `UsernameModeration.isBlocked` on the base name and uses the fallback method when it matches. Commit: `Use a fallback username when the generated name matches`
 - [x] 3.3 Add the test "Reserved prefix gets a fallback" (`support@example.com` with reserved `support`). Run it and show it failing if the reserved path is not covered yet; otherwise show it passing and record that. Commit: `Test that a reserved sign-up prefix gets a fallback`
 - [x] 3.4 Add the test "Clean generated username is kept" (`ana@example.com` with no words). It must pass before and after the change. Commit: `Test that clean sign-up usernames are kept`
-- [ ] 3.5 Add the test "Matched word is not logged": capture the log output during a sign-up that gets a fallback and assert that the generated username and the matched word do not appear. Run it and show it failing if logging does not yet comply, otherwise show it passing. Commit: `Test that the word check does not log the matched word`
+- [x] 3.5 Add the test "Matched word is not logged": capture the log output during a sign-up that gets a fallback and assert that the generated username and the matched word do not appear. Run it and show it failing if logging does not yet comply, otherwise show it passing. Commit: `Test that the word check does not log the matched word`
 
 ## 4. Decisions
 
