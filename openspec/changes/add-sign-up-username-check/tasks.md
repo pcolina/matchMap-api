@@ -5,7 +5,7 @@
 
 ## 2. Fallback username generator
 
-- [ ] 2.1 Write the failing unit test `FallbackUsernameTest` in `src/test/java/com/matchmap/api/account/`. It asserts that the fallback has the form `user_` followed by 8 characters from `a-z` and `0-9`, and that it is at most 30 characters. Run it and show it failing. Covers "Generated username contains a prohibited word". Commit: `Test the fallback username form`
+- [x] 2.1 Write the failing unit test `FallbackUsernameTest` in `src/test/java/com/matchmap/api/account/`. It asserts that the fallback has the form `user_` followed by 8 characters from `a-z` and `0-9`, and that it is at most 30 characters. Run it and show it failing. Covers "Generated username contains a prohibited word". Commit: `Test the fallback username form`
 - [ ] 2.2 Add a fallback method to `UsernameGenerator` that uses the existing alphabet and `SecureRandom`, and a constructor that accepts an injected `Random` for tests. Make 2.1 pass. Commit: `Generate fallback usernames`
 - [ ] 2.3 Write the failing test "fallback retries after a collision" with an injected random source that forces the first fallback to be taken. It asserts that the second fallback is returned. Run it and show it failing. Commit: `Test that a colliding fallback is retried`
 - [ ] 2.4 Make 2.3 pass by retrying while `taken` is true. Commit: `Retry a colliding fallback username`
