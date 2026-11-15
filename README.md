@@ -182,6 +182,23 @@ curl -X POST http://localhost:8080/graphql \
 {"data":{"apiVersion":"0.1.0-SNAPSHOT"}}
 ```
 
+### REST authentication contract (Swagger UI)
+
+The sign-in, refresh and sign-out endpoints under `/api/auth` are described in `contracts/openapi/auth.yaml`. To read that contract as an interactive page, run Swagger UI in Docker from the repository root (PowerShell). Docker Desktop must be running.
+
+```powershell
+docker run -d --name swagger-auth -p 8081:8080 -e SWAGGER_JSON=/contracts/auth.yaml -v "${PWD}\contracts\openapi:/contracts" swaggerapi/swagger-ui
+```
+
+Then open [http://localhost:8081](http://localhost:8081). Each endpoint shows its parameters, request body and responses, with the error codes each one can return. Open the root address, not `/auth.yaml`: the file on its own is raw YAML.
+
+- The page reads the contract file from the repository on every reload, so changes to `auth.yaml` show after a browser refresh.
+- To stop it: `docker stop swagger-auth`. To start it again: `docker start swagger-auth`.
+- If the name `swagger-auth` is already in use, remove the old container with `docker rm -f swagger-auth` and run the command again.
+- If port `8081` is busy, change the first `8081` in `-p` to another free port, for example `-p 8090:8080`, and open that port instead.
+
+The GraphQL operations are not part of this page. They are documented in `contracts/graphql/` and explored with GraphiQL, as described above.
+
 ### Correlation IDs
 
 Send your own ID to follow a request through the logs, or let the API generate one:

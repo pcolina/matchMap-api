@@ -22,9 +22,9 @@ class ProhibitedWordSchemaIT {
   @Autowired JdbcTemplate jdbcTemplate;
 
   @Test
-  void createsEmptyWordTables() {
+  void createsEmptyProhibitedTableAndSeededReservedTable() {
     assertThat(countRows("prohibited_word")).isZero();
-    assertThat(countRows("reserved_word")).isZero();
+    assertThat(countRows("reserved_word")).isEqualTo(13);
   }
 
   @Test
@@ -46,11 +46,16 @@ class ProhibitedWordSchemaIT {
     insert("reserved_word", "root", "root", "RESERVED");
     insert("reserved_word", "root", "root", "IMPERSONATION");
 
-    assertThat(countRows("reserved_word")).isEqualTo(2);
+    assertThat(countWhere("reserved_word", "normalized = 'root'")).isEqualTo(2);
   }
 
   private int countRows(String table) {
     return jdbcTemplate.queryForObject("select count(*) from " + table, Integer.class);
+  }
+
+  private int countWhere(String table, String condition) {
+    return jdbcTemplate.queryForObject(
+        "select count(*) from " + table + " where " + condition, Integer.class);
   }
 
   private void insert(String table, String word, String normalized, String category) {
