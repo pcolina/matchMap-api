@@ -58,6 +58,19 @@ class RegisterWordCheckIT {
         .matches("user_[a-z0-9]{8}");
   }
 
+  @Test
+  void cleanGeneratedUsernameIsKept() {
+    var suffix = uniqueSuffix();
+
+    var response = graphql(registerBody("ana" + suffix + "@example.com", PASSWORD));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .isEqualTo("ana" + suffix);
+  }
+
   private void insertWord(String table, String word, String normalized, String category) {
     var now = OffsetDateTime.now();
     jdbcTemplate.update(
