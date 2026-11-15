@@ -1,6 +1,6 @@
 ## 1. Purpose of the capability
 
-- [ ] 1.1 Replace the `## Purpose` section of `openspec/specs/username-moderation/spec.md`, which reads `TBD - created by archiving change add-prohibited-word-matcher. Update Purpose after archive.`, with the purpose text from `design.md`. Edit the file directly: the archive sync does not change the Purpose section. No requirement changes. Commit: `Describe the purpose of the username-moderation capability`
+- [x] 1.1 Replace the `## Purpose` section of `openspec/specs/username-moderation/spec.md`, which reads `TBD - created by archiving change add-prohibited-word-matcher. Update Purpose after archive.`, with the purpose text from `design.md`. Edit the file directly: the archive sync does not change the Purpose section. No requirement changes. Commit: `Describe the purpose of the username-moderation capability`
 
 ## 2. Internal error at sign-up
 

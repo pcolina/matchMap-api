@@ -1,7 +1,7 @@
 # username-moderation Specification
 
 ## Purpose
-TBD - created by archiving change add-prohibited-word-matcher. Update Purpose after archive.
+This capability decides which usernames are rejected for containing a prohibited or reserved word. It owns the two word lists, `prohibited_word` and `reserved_word`, and only their active rows are used. A candidate is normalized before matching: lowercase, diacritics removed, leetspeak and homoglyphs mapped to letters, separators and repeated letters removed. A word longer than four characters matches as a substring; a shorter word matches as the whole candidate or as one segment separated by `.`, `_`, `-` or a space. At sign-up, a generated username that matches is replaced by a fallback username, and the sign-up succeeds without returning an error.
 
 ## Requirements
 
