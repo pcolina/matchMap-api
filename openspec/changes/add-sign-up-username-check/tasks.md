@@ -1,7 +1,7 @@
 ## 1. Word check facade
 
 - [x] 1.1 Write the failing integration test `UsernameModerationIT` in `src/test/java/com/matchmap/api/moderation/`. In a transactional test it inserts an active prohibited word `nazi` and asserts that `UsernameModeration.isBlocked("nazi_fan")` is true, and that with no rows `isBlocked("nazi_fan")` is false. Run it and show it failing. Covers "Sign-up applies the word check". Commit: `Test the word check facade reads the active word lists`
-- [ ] 1.2 Add public class `UsernameModeration` with `boolean isBlocked(String username)`. It reads active rows of `prohibited_word` and `reserved_word` with `JdbcTemplate` and delegates to `ProhibitedWordMatcher`. Make 1.1 pass. Commit: `Expose the word check to the account package`
+- [x] 1.2 Add public class `UsernameModeration` with `boolean isBlocked(String username)`. It reads active rows of `prohibited_word` and `reserved_word` with `JdbcTemplate` and delegates to `ProhibitedWordMatcher`. Make 1.1 pass. Commit: `Expose the word check to the account package`
 
 ## 2. Fallback username generator
 
