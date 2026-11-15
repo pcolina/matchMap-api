@@ -32,7 +32,7 @@ class RegisterWordCheckIT {
 
   @Test
   void prohibitedPrefixGetsAFallbackUsername() {
-    insertWord("prohibited_word", "nazi", "HATE");
+    insertWord("prohibited_word", "nazi", "nazi", "HATE");
 
     var response = graphql(registerBody("nazi.fan" + uniqueSuffix() + "@example.com", PASSWORD));
 
@@ -44,7 +44,21 @@ class RegisterWordCheckIT {
         .matches("user_[a-z0-9]{8}");
   }
 
-  private void insertWord(String table, String word, String category) {
+  @Test
+  void reservedPrefixGetsAFallbackUsername() {
+    insertWord("reserved_word", "support", "suport", "RESERVED");
+
+    var response = graphql(registerBody("support" + uniqueSuffix() + "@example.com", PASSWORD));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.register.username")
+        .asString()
+        .matches("user_[a-z0-9]{8}");
+  }
+
+  private void insertWord(String table, String word, String normalized, String category) {
     var now = OffsetDateTime.now();
     jdbcTemplate.update(
         "insert into "
@@ -53,7 +67,7 @@ class RegisterWordCheckIT {
             + " values (?, ?, ?, ?, 'en', true, ?, ?)",
         UUID.randomUUID(),
         word,
-        word,
+        normalized,
         category,
         now,
         now);
