@@ -14,7 +14,7 @@
 
 ## 3. Dependency (blocks section 4)
 
-- [ ] 3.1 Add `implementation("org.ahocorasick:ahocorasick:0.6.3")` to `build.gradle.kts`, the version fixed in `design.md`. Run `.\gradlew.bat check` and show the result. Commit: `Add the Aho-Corasick dependency for the word matcher`
+- [x] 3.1 Add `implementation("org.ahocorasick:ahocorasick:0.6.3")` to `build.gradle.kts`, the version fixed in `design.md`. Run `.\gradlew.bat check` and show the result. Commit: `Add the Aho-Corasick dependency for the word matcher`
 
 ## 4. Matching
 
