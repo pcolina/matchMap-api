@@ -16,4 +16,6 @@ Each task is one commit, with `Task: <id>` in the body. TDD: write the failing t
 ## 3. Verification
 
 - [x] 3.1 Confirm every scenario of `specs/username-moderation/spec.md` (the five MODIFIED scenarios, including "Tables are created empty" and "Inactive entries are ignored", carried over from the current spec) is named by a test above.
-- [ ] 3.2 Confirm the existing moderation tests from `add-prohibited-word-matcher`, `add-sign-up-username-check` and `complete-username-moderation` still pass with no change to their expectations.
+- [x] 3.2 Confirm the existing moderation tests from `add-prohibited-word-matcher`, `add-sign-up-username-check` and `complete-username-moderation` still pass with no change to their expectations.
+
+Note on 3.2: two expectations in existing tests were updated, as approved by the user: `ProhibitedWordSchemaIT` (reserved table now seeded) and `RegisterWordCheckIT.reservedPrefixGetsAFallbackUsername` (uses the seeded name instead of inserting a duplicate). `ArchiveCheckTest.pullRequestCheckout` needs `GITHUB_HEAD_REF` and runs only in the pull request workflow.
