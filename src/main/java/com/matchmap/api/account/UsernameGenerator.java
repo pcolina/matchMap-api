@@ -2,6 +2,7 @@ package com.matchmap.api.account;
 
 import java.security.SecureRandom;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,14 @@ class UsernameGenerator {
 
   String fallbackUsername() {
     return FALLBACK_PREFIX + randomSuffix();
+  }
+
+  Optional<String> fallbackUsername(Predicate<String> taken) {
+    var candidate = fallbackUsername();
+    while (taken.test(candidate)) {
+      candidate = fallbackUsername();
+    }
+    return Optional.of(candidate);
   }
 
   private String generateFrom(String source, Predicate<String> taken) {
