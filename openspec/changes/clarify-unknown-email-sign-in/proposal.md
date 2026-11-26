@@ -4,7 +4,7 @@ No GitHub issue is linked yet. The repository owner opened this change directly.
 
 ## Why
 
-When someone signs in with an email that has no account, the API returns the same `401 invalid_credentials` as a wrong password. The screen only says the credentials are invalid, so the person cannot tell that the email is not registered and may keep retrying instead of creating an account.
+When someone tries to register with an email that is already in use, the API returns `EMAIL_TAKEN`, but the registration page shows a generic message with no path to sign in, so the person cannot tell what to do next.
 
 The `authentication` spec keeps the same response for wrong passwords, unknown emails and Google-only accounts, so that the API does not reveal which emails exist. This change keeps that rule. The clearer message is shown by the client, from the same response, so the API stays as it is.
 
@@ -12,7 +12,7 @@ Decided: option B. The API does not change. The web and mobile clients change th
 
 ## What Changes
 
-- After a failed sign-in with `invalid_credentials`, the client shows the message "No encontramos una cuenta con esos datos" together with a button or link "Crear cuenta". The wording is the client's decision and is not tied to the email being unknown.
+- The sign-in page does not change. After `invalid_credentials` it keeps its current message, "Email or password is incorrect.", and its existing link to registration.
 - When the client registers and the API returns `EMAIL_TAKEN`, the client shows "Ya tienes una cuenta con este email" and a link to sign in. This uses the error the API already returns from `register`.
 - No change in `contracts/`, no change in the API, no migration, no new dependency.
 

@@ -4,12 +4,11 @@ This change has no tasks in this repository: the API does not change (`skip_spec
 
 ## Web (pcolina/MatchMap)
 
-- [ ] 1.1 Write a component test: after `invalid_credentials` the sign-in screen shows "No encontramos una cuenta con esos datos" and a "Crear cuenta" action that opens the register screen. Show it failing; implement it.
-- [ ] 1.2 Write a component test: when `register` returns `EMAIL_TAKEN`, the register screen shows "Ya tienes una cuenta con este email" with a link to sign in. Show it failing; implement it.
+- [ ] 1.1 Write a component test: when `register` returns `EMAIL_TAKEN`, the register screen shows "Ya tienes una cuenta con este email" with a link to sign in. Show it failing; implement it.
 
 ## Mobile
 
-- [ ] 2.1 Write the same two tests for the mobile app, with the same wording. Show them failing; implement them.
+- [ ] 2.1 Write the same test for the mobile app, with the same wording. Show it failing; implement it.
 
 ## Verification
 
