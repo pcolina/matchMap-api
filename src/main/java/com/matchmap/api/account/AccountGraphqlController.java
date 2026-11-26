@@ -14,11 +14,15 @@ class AccountGraphqlController {
 
   private final RegistrationService registrationService;
   private final UserAccountRepository accounts;
+  private final FirstVisitService firstVisitService;
 
   AccountGraphqlController(
-      RegistrationService registrationService, UserAccountRepository accounts) {
+      RegistrationService registrationService,
+      UserAccountRepository accounts,
+      FirstVisitService firstVisitService) {
     this.registrationService = registrationService;
     this.accounts = accounts;
+    this.firstVisitService = firstVisitService;
   }
 
   @MutationMapping
@@ -30,6 +34,12 @@ class AccountGraphqlController {
   @PreAuthorize("isAuthenticated()")
   public UserAccount me(Principal principal) {
     return accounts.findById(UUID.fromString(principal.getName())).orElseThrow();
+  }
+
+  @MutationMapping
+  @PreAuthorize("isAuthenticated()")
+  UserAccount completeFirstVisit(Principal principal) {
+    return firstVisitService.complete(UUID.fromString(principal.getName()));
   }
 
   @SchemaMapping(typeName = "User", field = "isFirstVisit")
