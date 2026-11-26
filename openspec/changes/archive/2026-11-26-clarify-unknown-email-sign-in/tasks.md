@@ -12,5 +12,5 @@ This change has no tasks in this repository: the API does not change (`skip_spec
 
 ## Verification
 
-- [ ] 3.1 Each client repository runs its own full check and reports the summary.
-- [ ] 3.2 Confirm the API responses used by the tests are the ones in `contracts/openapi/auth.yaml` and `contracts/graphql/account.graphqls`.
+- [x] 3.1 Each client repository runs its own full check and reports the summary.
+- [x] 3.2 Confirm the API responses used by the tests are the ones in `contracts/openapi/auth.yaml` and `contracts/graphql/account.graphqls`.
