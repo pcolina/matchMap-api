@@ -13,7 +13,7 @@ No GitHub issue is linked. The repository owner opened this change directly.
 - **No other field is writable.** `isFirstVisit` stays read-only on `User`; only this mutation changes the value, and only from `true` to `false`.
 - No migration, no new dependency.
 
-[NEEDS CLARIFICATION: Issue #1 "Onboarding after first login with minimal friction" was referenced by issue #17 as the owner of the rule that sets the flag to `false`. Its text has not been read in this change. The proposal assumes the client calls `completeFirstVisit` when the welcome screen is left. If #1 says the API clears the flag on the first successful login instead, this change is replaced by that rule. Confirm which applies before the proposal is approved.]
+Decision: the client decides when to call `completeFirstVisit`. The API does not clear the flag on sign-in or on any other event; it only changes it when this mutation is called.
 
 ## Capabilities
 
