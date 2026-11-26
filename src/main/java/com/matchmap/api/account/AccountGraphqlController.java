@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
@@ -29,5 +30,10 @@ class AccountGraphqlController {
   @PreAuthorize("isAuthenticated()")
   public UserAccount me(Principal principal) {
     return accounts.findById(UUID.fromString(principal.getName())).orElseThrow();
+  }
+
+  @SchemaMapping(typeName = "User", field = "isFirstVisit")
+  boolean isFirstVisit(UserAccount account) {
+    return account.isFirstVisit();
   }
 }
