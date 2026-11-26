@@ -4,10 +4,14 @@
 
 ### Requirement: First visit flag starts as true
 
-Every account SHALL have a boolean flag `first_visit`, stored in `user_account`, that is `true` when the account is created. The `User` type SHALL expose it as `isFirstVisit: Boolean!`. The flag is not changed by this capability: no operation in this change sets it to `false`.
+Every account SHALL have a boolean flag `first_visit`, stored in `user_account`, that is `true` when the account is created, whichever path creates it: `register` or Google sign-in. The `User` type SHALL expose it as `isFirstVisit: Boolean!`. The flag is not changed by this capability: no operation in this change sets it to `false`.
 
 #### Scenario: Account created by register starts with the flag true
 - **WHEN** an anonymous client sends `register` with email `ana@example.com` and a valid password
+- **THEN** the account created in `user_account` has `first_visit = true`
+
+#### Scenario: Account created by Google sign-in starts with the flag true
+- **WHEN** a client signs in with a valid Google ID token for an email that has no account
 - **THEN** the account created in `user_account` has `first_visit = true`
 
 #### Scenario: Signed-in user reads the flag true for a new account

@@ -8,7 +8,7 @@ The web and mobile apps need to know whether an account is new, so they can show
 
 ## What Changes
 
-- **Database.** A new Flyway migration `V6__add_first_visit_to_user_accounts.sql` adds the column `first_visit boolean not null default true` to `user_account`. No existing migration is edited. The default makes every account created by `register` start with `true`.
+- **Database.** A new Flyway migration `V6__add_first_visit_to_user_accounts.sql` adds the column `first_visit boolean not null default true` to `user_account`. No existing migration is edited. Every account creation path, `register` and Google sign-in, starts with `true`.
 - **Contract.** The `User` type in `contracts/graphql/account.graphqls` gains `isFirstVisit: Boolean!`, so `me` returns the flag.
 - **Code.** The account mapping reads `first_visit` and returns it as `isFirstVisit` in `me`.
 
