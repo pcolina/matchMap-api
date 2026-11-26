@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -45,6 +46,8 @@ class MeQueryIT {
 
   @Autowired MockMvcTester mockMvc;
 
+  @Autowired JdbcTemplate jdbcTemplate;
+
   @Value("${matchmap.auth.jwt-secret}")
   String jwtSecret;
 
@@ -62,6 +65,60 @@ class MeQueryIT {
     assertThat(response).bodyJson().extractingPath("$.data.me.email").isEqualTo(email);
     assertThat(response).bodyJson().extractingPath("$.data.me.username").isEqualTo("mia" + suffix);
     assertThat(response).bodyJson().extractingPath("$.data.me.isFirstVisit").isEqualTo(true);
+  }
+
+  @Test
+  void meReturnsEmptyProfileAndFreePlan() throws Exception {
+    String email = "nora" + uniqueSuffix() + "@example.com";
+    registerAccount(email);
+
+    var response =
+        graphql(
+            body("{ me { firstName lastName subscription nationality birthCountry } }"),
+            login(email));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response).bodyJson().extractingPath("$.data.me.firstName").isNull();
+    assertThat(response).bodyJson().extractingPath("$.data.me.lastName").isNull();
+    assertThat(response).bodyJson().extractingPath("$.data.me.nationality").isNull();
+    assertThat(response).bodyJson().extractingPath("$.data.me.birthCountry").isNull();
+    assertThat(response).bodyJson().extractingPath("$.data.me.subscription").isEqualTo("FREE");
+  }
+
+  @Test
+  void storedProfileValuesAppearInMe() throws Exception {
+    String email = "olga" + uniqueSuffix() + "@example.com";
+    registerAccount(email);
+    jdbcTemplate.update(
+        "UPDATE user_account SET first_name = ?, last_name = ?, nationality = ?, birth_country = ?"
+            + " WHERE email = ?",
+        "Ana",
+        "Pérez",
+        "ES",
+        "FR",
+        email);
+
+    var response =
+        graphql(body("{ me { firstName lastName nationality birthCountry } }"), login(email));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response).bodyJson().extractingPath("$.data.me.firstName").isEqualTo("Ana");
+    assertThat(response).bodyJson().extractingPath("$.data.me.lastName").isEqualTo("Pérez");
+    assertThat(response).bodyJson().extractingPath("$.data.me.nationality").isEqualTo("ES");
+    assertThat(response).bodyJson().extractingPath("$.data.me.birthCountry").isEqualTo("FR");
+  }
+
+  @Test
+  void passwordHashIsNotQueryable() throws Exception {
+    String email = "pia" + uniqueSuffix() + "@example.com";
+    registerAccount(email);
+
+    var response = graphql(body("{ me { passwordHash } }"), login(email));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.classification")
+        .isEqualTo("ValidationError");
   }
 
   @Test
