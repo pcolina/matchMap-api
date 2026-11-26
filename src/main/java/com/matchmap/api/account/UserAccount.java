@@ -81,6 +81,10 @@ public class UserAccount {
     return createdAt;
   }
 
+  void completeFirstVisit() {
+    this.firstVisit = false;
+  }
+
   public boolean isFirstVisit() {
     return firstVisit;
   }

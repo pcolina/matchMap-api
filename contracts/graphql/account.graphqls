@@ -25,6 +25,11 @@ type Mutation {
   are allowed.
   """
   register(input: RegisterInput!): User!
+  """
+  Marks the first visit as completed for the signed-in account and returns that account.
+  It takes no arguments and requires an access token. Calling it again changes nothing.
+  """
+  completeFirstVisit: User!
 }
 
 extend type Query {
