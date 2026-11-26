@@ -1,5 +1,6 @@
 package com.matchmap.api.account;
 
+import static com.matchmap.api.support.GraphqlRequests.body;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.matchmap.api.TestcontainersConfiguration;
@@ -9,14 +10,45 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=validate")
+@AutoConfigureMockMvc
 class AccountSchemaIT {
 
   @Autowired JdbcTemplate jdbcTemplate;
+
+  @Autowired MockMvcTester mockMvc;
+
+  @Test
+  void firstVisitIsNotWritable() {
+    var response =
+        graphql(
+            body(
+                "mutation { register(input: { email: \"ana@example.com\", password:"
+                    + " \"Correcthorse1!\", isFirstVisit: false }) { id } }"));
+
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.errors[0].extensions.classification")
+        .isEqualTo("ValidationError");
+  }
+
+  private MvcTestResult graphql(String requestBody) {
+    return mockMvc
+        .post()
+        .uri("/graphql")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(requestBody)
+        .exchange();
+  }
 
   @Autowired EntityManager entityManager;
 
