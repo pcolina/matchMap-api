@@ -20,4 +20,4 @@ One task is one commit, with the task id in the body. Each task writes its faili
 ## 3. Verification
 
 - [x] 3.1 Run `.\gradlew.bat check` from `C:\workspace\pablo\matchmap-api` and paste the summary of the result (tests, coverage, format).
-- [ ] 3.2 Note in the pull request that the web and mobile repositories must run `pnpm codegen` to regenerate their types, and that the client calls `completeFirstVisit` when it chooses.
+- [x] 3.2 Note in the pull request that the web and mobile repositories must run `pnpm codegen` to regenerate their types, and that the client calls `completeFirstVisit` when it chooses.
