@@ -4,7 +4,7 @@ One task is one commit, with the task id in the body. Each task writes its faili
 
 ## 1. Tests
 
-- [ ] 1.1 Write `CompleteFirstVisitIT` in `src/test/java/com/matchmap/api/account/` with one test per scenario of "Complete first visit":
+- [x] 1.1 Write `CompleteFirstVisitIT` in `src/test/java/com/matchmap/api/account/` with one test per scenario of "Complete first visit":
   - `signedInUserCompletesFirstVisit`: a valid token for a new account; the response has no errors, `isFirstVisit` is `false`, and `user_account` has `first_visit = false`.
   - `completingAgainChangesNothing`: the mutation is sent twice; the second response has no errors and `isFirstVisit` is `false`.
   - `anonymousClientCannotComplete`: no token; the error has `extensions.classification` `UNAUTHORIZED`, and the row is unchanged.
@@ -15,9 +15,9 @@ One task is one commit, with the task id in the body. Each task writes its faili
 
 ## 2. Mutation
 
-- [ ] 2.1 Add `completeFirstVisit: User!` with its description to the `Mutation` type in `contracts/graphql/account.graphqls` (contract first). Add `completeFirstVisit()` to `UserAccount` (package-private), `FirstVisitService.complete(UUID)` annotated `@Transactional`, and the `@MutationMapping @PreAuthorize("isAuthenticated()")` method in `AccountGraphqlController` that calls the service with the id from the `Principal`. Verify all five tests in 1.1 pass, and that `GraphqlContractIT` still passes.
+- [x] 2.1 Add `completeFirstVisit: User!` with its description to the `Mutation` type in `contracts/graphql/account.graphqls` (contract first). Add `completeFirstVisit()` to `UserAccount` (package-private), `FirstVisitService.complete(UUID)` annotated `@Transactional`, and the `@MutationMapping @PreAuthorize("isAuthenticated()")` method in `AccountGraphqlController` that calls the service with the id from the `Principal`. Verify all five tests in 1.1 pass, and that `GraphqlContractIT` still passes.
 
 ## 3. Verification
 
-- [ ] 3.1 Run `.\gradlew.bat check` from `C:\workspace\pablo\matchmap-api` and paste the summary of the result (tests, coverage, format).
+- [x] 3.1 Run `.\gradlew.bat check` from `C:\workspace\pablo\matchmap-api` and paste the summary of the result (tests, coverage, format).
 - [ ] 3.2 Note in the pull request that the web and mobile repositories must run `pnpm codegen` to regenerate their types, and that the client calls `completeFirstVisit` when it chooses.
