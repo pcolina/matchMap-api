@@ -68,7 +68,11 @@ class AccountContractTest {
     assertThat(matcher.find()).isTrue();
     assertThat(matcher.group(1).strip().lines().map(String::strip).toList())
         .containsExactly(
-            "id: ID!", "email: String!", "username: String!", "createdAt: String!", "isFirstVisit: Boolean!");
+            "id: ID!",
+            "email: String!",
+            "username: String!",
+            "createdAt: String!",
+            "isFirstVisit: Boolean!");
   }
 
   @Test

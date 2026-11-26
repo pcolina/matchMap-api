@@ -56,7 +56,13 @@ class AccountSchemaIT {
   void createsAccountAndRefreshTokenTables() {
     assertThat(columnsOf("user_account"))
         .containsExactlyInAnyOrder(
-            "id", "email", "username", "password_hash", "google_subject", "created_at", "first_visit");
+            "id",
+            "email",
+            "username",
+            "password_hash",
+            "google_subject",
+            "created_at",
+            "first_visit");
     assertThat(columnsOf("refresh_token"))
         .containsExactlyInAnyOrder(
             "id",
