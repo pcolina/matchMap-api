@@ -3,6 +3,7 @@ type User {
   email: String!
   username: String!
   createdAt: String!
+  isFirstVisit: Boolean!
 }
 
 input RegisterInput {

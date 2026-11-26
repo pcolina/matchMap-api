@@ -5,6 +5,7 @@ import static com.matchmap.api.support.GraphqlRequests.uniqueSuffix;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.matchmap.api.TestcontainersConfiguration;
+import com.matchmap.api.account.UserAccountRepository;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
@@ -37,6 +38,19 @@ class GoogleSignInIT {
   @Autowired MockMvcTester mockMvc;
 
   @Autowired JdbcTemplate jdbcTemplate;
+
+  @Autowired UserAccountRepository accounts;
+
+  @Test
+  void newGoogleAccountStartsWithFirstVisitTrue() throws Exception {
+    String suffix = uniqueSuffix();
+    String subject = "g-" + suffix;
+    String email = "gina" + suffix + "@gmail.com";
+
+    signIn(googleToken(subject, email, "Gina"));
+
+    assertThat(accounts.findByGoogleSubject(subject).orElseThrow().isFirstVisit()).isTrue();
+  }
 
   @Test
   void newAccountUsernameComesFromGoogleName() throws Exception {

@@ -39,6 +39,8 @@ class MeQueryIT {
 
   private static final String PASSWORD = "Correcthorse1!";
   private static final String ME = "{ me { id email username } }";
+  private static final String ME_ALL_FIELDS = "{ me { id email username isFirstVisit } }";
+  private static final String ME_FIRST_VISIT = "{ me { isFirstVisit } }";
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired MockMvcTester mockMvc;
@@ -53,12 +55,25 @@ class MeQueryIT {
     var registered = graphql(registerBody(email, PASSWORD), null);
     String id = data(registered).at("/register/id").asString();
 
-    var response = graphql(body(ME), login(email));
+    var response = graphql(body(ME_ALL_FIELDS), login(email));
 
     assertThat(response).bodyJson().doesNotHavePath("$.errors");
     assertThat(response).bodyJson().extractingPath("$.data.me.id").isEqualTo(id);
     assertThat(response).bodyJson().extractingPath("$.data.me.email").isEqualTo(email);
     assertThat(response).bodyJson().extractingPath("$.data.me.username").isEqualTo("mia" + suffix);
+    assertThat(response).bodyJson().extractingPath("$.data.me.isFirstVisit").isEqualTo(true);
+  }
+
+  @Test
+  void signedInUserReadsFirstVisitTrue() throws Exception {
+    String suffix = uniqueSuffix();
+    String email = "vera" + suffix + "@example.com";
+    registerAccount(email);
+
+    var response = graphql(body(ME_FIRST_VISIT), login(email));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response).bodyJson().extractingPath("$.data.me.isFirstVisit").isEqualTo(true);
   }
 
   @Test
