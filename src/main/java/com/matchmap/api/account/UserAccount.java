@@ -28,6 +28,9 @@ public class UserAccount {
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
+  @Column(name = "first_visit", nullable = false)
+  private boolean firstVisit;
+
   protected UserAccount() {}
 
   UserAccount(UUID id, String email, String username, String passwordHash, Instant createdAt) {
@@ -47,6 +50,7 @@ public class UserAccount {
     this.passwordHash = passwordHash;
     this.googleSubject = googleSubject;
     this.createdAt = createdAt;
+    this.firstVisit = true;
   }
 
   public UUID getId() {
@@ -75,5 +79,9 @@ public class UserAccount {
 
   public Instant getCreatedAt() {
     return createdAt;
+  }
+
+  public boolean isFirstVisit() {
+    return firstVisit;
   }
 }
