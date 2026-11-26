@@ -72,7 +72,22 @@ class AccountContractTest {
             "email: String!",
             "username: String!",
             "createdAt: String!",
-            "isFirstVisit: Boolean!");
+            "isFirstVisit: Boolean!",
+            "firstName: String",
+            "lastName: String",
+            "subscription: SubscriptionPlan!",
+            "nationality: String",
+            "birthCountry: String");
+  }
+
+  @Test
+  void userTypeHasNoPasswordField() throws IOException {
+    String contract = Files.readString(Path.of("contracts/graphql/account.graphqls"));
+
+    Matcher matcher = USER_TYPE.matcher(contract);
+
+    assertThat(matcher.find()).isTrue();
+    assertThat(matcher.group(1).toLowerCase()).doesNotContain("password");
   }
 
   @Test

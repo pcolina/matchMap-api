@@ -42,6 +42,20 @@ class RegisterIT {
   }
 
   @Test
+  void registeredAccountHasFreeSubscriptionAndEmptyProfile() {
+    String email = "pro" + uniqueSuffix() + "@example.com";
+
+    graphql(registerBody(email, PASSWORD));
+
+    var account = accounts.findByEmail(email).orElseThrow();
+    assertThat(account.getSubscription()).isEqualTo(SubscriptionPlan.FREE);
+    assertThat(account.getFirstName()).isNull();
+    assertThat(account.getLastName()).isNull();
+    assertThat(account.getNationality()).isNull();
+    assertThat(account.getBirthCountry()).isNull();
+  }
+
+  @Test
   void successfulRegistrationGeneratesUsernameFromEmail() {
     String suffix = uniqueSuffix();
 

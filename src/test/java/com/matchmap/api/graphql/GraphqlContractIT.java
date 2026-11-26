@@ -13,6 +13,7 @@ import graphql.language.TypeDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLTypeUtil;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import java.io.IOException;
@@ -85,11 +86,13 @@ class GraphqlContractIT {
     if (type instanceof GraphQLObjectType object) {
       object
           .getFieldDefinitions()
-          .forEach(field -> fields.put(field.getName(), field.getType().toString()));
+          .forEach(
+              field -> fields.put(field.getName(), GraphQLTypeUtil.simplePrint(field.getType())));
     } else if (type instanceof GraphQLInputObjectType input) {
       input
           .getFieldDefinitions()
-          .forEach(field -> fields.put(field.getName(), field.getType().toString()));
+          .forEach(
+              field -> fields.put(field.getName(), GraphQLTypeUtil.simplePrint(field.getType())));
     }
     return fields;
   }
