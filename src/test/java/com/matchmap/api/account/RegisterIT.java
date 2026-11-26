@@ -30,6 +30,17 @@ class RegisterIT {
 
   @Autowired JdbcTemplate jdbcTemplate;
 
+  @Autowired UserAccountRepository accounts;
+
+  @Test
+  void registeredAccountStartsWithFirstVisitTrue() {
+    String email = "first" + uniqueSuffix() + "@example.com";
+
+    graphql(registerBody(email, PASSWORD));
+
+    assertThat(accounts.findByEmail(email).orElseThrow().isFirstVisit()).isTrue();
+  }
+
   @Test
   void successfulRegistrationGeneratesUsernameFromEmail() {
     String suffix = uniqueSuffix();
