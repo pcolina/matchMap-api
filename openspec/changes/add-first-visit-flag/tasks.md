@@ -21,4 +21,5 @@ One task is one commit, with the task id in the body. Each task writes its faili
 ## 4. Verification
 
 - [ ] 4.1 Run `.\gradlew.bat check` from `C:\workspace\pablo\matchmap-api` and paste the summary of the result (tests, coverage, format, lint).
-- [ ] 4.2 Confirm the `User` type in `contracts/graphql/account.graphqls` and the schema served by the API match (`GraphqlSchemaIT` passes), and note in the pull request that the client repositories must run `pnpm codegen` to regenerate their types.
+- [ ] 4.2 Confirm the `User` type in `contracts/graphql/account.graphqls` and the schema served by the API match, and note in the pull request that the client repositories must run `pnpm codegen` to regenerate their types. `GraphqlSchemaIT` only checks unknown fields, so the match is covered by task 4.3.
+- [ ] 4.3 Write `GraphqlContractIT.servedSchemaMatchesContract`: parse every `contracts/graphql/*.graphqls` file and compare the field names and types of `Query`, `Mutation`, `User` and `RegisterInput` with the schema served by the API (`GraphQlSource.schema()`), in both directions. Show it failing by adding a field to the contract temporarily, then revert that change and verify it passes.
