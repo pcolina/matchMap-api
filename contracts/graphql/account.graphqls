@@ -4,6 +4,15 @@ type User {
   username: String!
   createdAt: String!
   isFirstVisit: Boolean!
+  firstName: String
+  lastName: String
+  subscription: SubscriptionPlan!
+  nationality: String
+  birthCountry: String
+}
+
+enum SubscriptionPlan {
+  FREE
 }
 
 input RegisterInput {
