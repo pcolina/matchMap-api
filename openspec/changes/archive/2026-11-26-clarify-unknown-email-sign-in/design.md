@@ -10,15 +10,14 @@ Contract baseline: `ca97e41` (main after PR #40). This change touches no file un
 
 **D1. The API does not change.** The clients decide what to show from the codes they already receive. This keeps the `authentication` rule that sign-in failures do not reveal which accounts exist.
 
-**D2. Sign-in failure shows a create-account hint.** For `invalid_credentials`, the client shows a neutral message and a "Crear cuenta" action. The message does not claim the email is unknown, because the response cannot tell that.
+**D2. Sign-in failure keeps its message.** For `invalid_credentials`, the client keeps its neutral message, "Email or password is incorrect.". It does not claim the email is unknown, because the response cannot tell that.
 
-**D3. Registration with a taken email shows a sign-in hint.** For `EMAIL_TAKEN`, the client shows "Ya tienes una cuenta con este email" and a link to sign in.
+**D3. Registration with a taken email shows a sign-in link.** For `EMAIL_TAKEN`, the client shows "Ya tienes una cuenta con este email" and a link to sign in.
 
 **D4. Wording is in the clients.** The API returns codes, not text. Each client owns its translations.
 
 ## Risks
 
-- A person with a wrong password also sees the "Crear cuenta" hint. This is accepted: the hint is neutral and the create-account screen will reject the email if it is taken.
 - Until email verification (#26) exists, a person who forgot the password has no in-app recovery. The sign-in screen can say so, but the wording is a client decision and is not specified here.
 
 ## Later steps (not in this change)
