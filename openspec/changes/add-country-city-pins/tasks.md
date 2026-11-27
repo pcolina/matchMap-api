@@ -5,7 +5,7 @@ Every task follows TDD: write the failing test first, run it and show it failing
 ## 1. Contract
 
 - [x] 1.1 Add the types `Country`, `City`, `CityPin` and `enum PinStatus { VISITED WANT_TO_GO LIVED }` to `contracts/graphql/account.graphqls` or to a new `contracts/graphql/places.graphqls`, following the design. Test: the schema loads with the `Country.status`, `City.latitude`, `City.longitude` and `CityPin` fields (covers the GraphQL schema check used by `api-version`).
-- [ ] 1.2 Add the queries `countries` and `cityPins` and the mutations `setCityPin` and `removeCityPin` to the contract. Test: schema inspection reports no unmapped field or argument.
+- [x] 1.2 Add the queries `countries` and `cityPins` and the mutations `setCityPin` and `removeCityPin` to the contract. Test: schema introspection lists the queries `countries` and `cityPins` and the mutations `setCityPin` and `removeCityPin`, with their arguments. The check for unmapped fields moves to the tasks that implement each resolver (3.3, 3.4, 6.1, 6.7 and 7.1).
 
 ## 2. Catalog storage
 
@@ -20,8 +20,8 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 - [ ] 3.1 [NEEDS CLARIFICATION: Which public source feeds the catalog, its licence and attribution; which cities are included; the source must give a latitude and a longitude for each city. Do not start this task until these are answered.]
 - [ ] 3.2 Test: running the import twice leaves the same number of countries and cities. Covers "Re-running the import creates no duplicates". Then implement the idempotent import, which stores the coordinates of each city.
-- [ ] 3.3 Test: a GraphQL query for `countries` returns the stored data while the public source is unreachable. Covers "Requests do not call the public source". Then wire the query to the database only.
-- [ ] 3.4 Test: a query for the cities of Spain returns `Madrid` with latitude `40.4168` and longitude `-3.7038`. Covers "City coordinates are returned". Then expose `latitude` and `longitude` on `City`.
+- [ ] 3.3 Test: a GraphQL query for `countries` returns the stored data while the public source is unreachable. Covers "Requests do not call the public source". Then wire the query to the database only. Also test: schema inspection reports no unmapped field on `countries`.
+- [ ] 3.4 Test: a query for the cities of Spain returns `Madrid` with latitude `40.4168` and longitude `-3.7038`. Covers "City coordinates are returned". Then expose `latitude` and `longitude` on `City`. Also test: schema inspection reports no unmapped field on `City`.
 
 ## 4. Country names by language
 
@@ -36,18 +36,18 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 ## 6. Pin operations
 
-- [ ] 6.1 Test: a signed-in user pins `c1` as `VISITED` and has one pin with that status. Covers "Pin a city as visited". Then implement `setCityPin` as an upsert.
+- [ ] 6.1 Test: a signed-in user pins `c1` as `VISITED` and has one pin with that status. Covers "Pin a city as visited". Then implement `setCityPin` as an upsert. Also test: schema inspection reports no unmapped field or argument on `setCityPin`.
 - [ ] 6.2 Test: pinning `c1` again replaces the status and keeps one row. Covers "Pinning again replaces the status". Then keep the upsert behaviour.
 - [ ] 6.3 Test: user `bob` has no pin for `c1` after `ana` pins it. Covers "Pins are not shared between users". Then scope every pin query to the signed-in user.
 - [ ] 6.4 Test: a pin without a token is rejected. Covers "Pin without a token is rejected". Then require the access token on `setCityPin`.
 - [ ] 6.5 Test: a pin on a city that does not exist is rejected. Covers "Pin of a city that does not exist is rejected". Then validate the city before writing.
 - [ ] 6.6 Test: an unknown status is rejected. Covers "Unknown status is rejected". Then validate the status before writing.
-- [ ] 6.7 Test: removing an existing pin deletes it. Covers "Remove an existing pin". Then implement `removeCityPin`.
+- [ ] 6.7 Test: removing an existing pin deletes it. Covers "Remove an existing pin". Then implement `removeCityPin`. Also test: schema inspection reports no unmapped field or argument on `removeCityPin`.
 - [ ] 6.8 Test: removing a city without a pin leaves the pins unchanged. Covers "Remove a city without a pin". Then make the removal idempotent.
 
 ## 7. Reading pins
 
-- [ ] 7.1 Test: a user with pins on `c1` (`VISITED`) and `c2` (`WANT_TO_GO`) reads both. Covers "Read own pins". Then implement `cityPins`.
+- [ ] 7.1 Test: a user with pins on `c1` (`VISITED`) and `c2` (`WANT_TO_GO`) reads both. Covers "Read own pins". Then implement `cityPins`. Also test: schema inspection reports no unmapped field or argument on `cityPins`.
 - [ ] 7.2 Test: a new user reads an empty list. Covers "No pins for a new user". Then keep the empty list.
 - [ ] 7.3 Test: a client without a token reads no pin data. Covers "Pins are not readable without a token". Then require the token on `cityPins`.
 

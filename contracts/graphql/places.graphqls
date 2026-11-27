@@ -23,3 +23,13 @@ enum PinStatus {
   WANT_TO_GO
   LIVED
 }
+
+extend type Query {
+  countries: [Country!]!
+  cityPins: [CityPin!]!
+}
+
+extend type Mutation {
+  setCityPin(cityId: ID!, status: PinStatus!): CityPin!
+  removeCityPin(cityId: ID!): Boolean!
+}

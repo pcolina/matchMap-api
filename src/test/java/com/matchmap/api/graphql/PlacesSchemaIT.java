@@ -68,6 +68,42 @@ class PlacesSchemaIT {
         .contains("city", "status");
   }
 
+  @Test
+  void queryTypeExposesPlaceQueries() {
+    var response = query("{ __type(name: \"Query\") { fields { name } } }");
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.__type.fields[*].name")
+        .asInstanceOf(InstanceOfAssertFactories.LIST)
+        .contains("countries", "cityPins");
+  }
+
+  @Test
+  void mutationTypeExposesPinMutations() {
+    var response = query("{ __type(name: \"Mutation\") { fields { name } } }");
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.__type.fields[*].name")
+        .asInstanceOf(InstanceOfAssertFactories.LIST)
+        .contains("setCityPin", "removeCityPin");
+  }
+
+  @Test
+  void setCityPinTakesCityIdAndStatus() {
+    var response = query("{ __type(name: \"Mutation\") { fields { name args { name } } } }");
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response)
+        .bodyJson()
+        .extractingPath("$.data.__type.fields[?(@.name=='setCityPin')].args[*].name")
+        .asInstanceOf(InstanceOfAssertFactories.LIST)
+        .containsExactlyInAnyOrder("cityId", "status");
+  }
+
   private MvcTestResult query(String graphql) {
     return mockMvc
         .post()
