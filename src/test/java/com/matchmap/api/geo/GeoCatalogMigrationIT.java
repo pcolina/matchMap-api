@@ -71,4 +71,33 @@ class GeoCatalogMigrationIT {
       }
     }
   }
+
+  @Test
+  void countryCodeMustBeTwoUppercaseLetters() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "INSERT INTO country (id, code, name) VALUES"
+                            + " ('00000000-0000-0000-0000-000000000103', 'es', 'Spain')"))
+            .isInstanceOf(SQLException.class);
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "INSERT INTO country (id, code, name) VALUES"
+                            + " ('00000000-0000-0000-0000-000000000104', 'SPAIN', 'Spain')"))
+            .isInstanceOf(SQLException.class);
+      }
+    }
+  }
 }
