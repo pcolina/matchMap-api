@@ -21,10 +21,12 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 ## 3. Catalog import
 
-- [ ] 3.1 Use the three CSV files described in `design.md` (`countries.csv`, `country_names.csv`, `cities.csv`) as the only catalog source. Each city needs a latitude and a longitude. Task 3.2 starts when the loading path (one mutation per row, or one batch) is agreed.
-- [ ] 3.2 Test: running the import twice leaves the same number of countries and cities. Covers "Re-running the import creates no duplicates". Then implement the idempotent import, which stores the coordinates of each city.
+- [ ] 3.1 Use the three CSV files described in `design.md` (`countries.csv`, `country_names.csv`, `cities.csv`) as the only catalog source. Each city needs a latitude and a longitude. Single rows use the admin mutations; the initial load uses one batch import.
+- [ ] 3.2 Test: running the import twice leaves the same number of countries and cities. Covers "Re-running the import creates no duplicates". Then implement the idempotent batch import `importCatalog`, which matches cities by `city_key`, stores their coordinates, and writes nothing if any row fails, returning each row error with its line number and reason.
 - [x] 3.3 Test: a GraphQL query for `countries` returns the stored data without reading the data set. Covers "Requests do not read the data set". Then wire the query to the database only. Also test: schema inspection reports no unmapped field on `countries`.
 - [ ] 3.4 Test: a query for the cities of Spain returns `Madrid` with latitude `40.4168` and longitude `-3.7038`. Covers "City coordinates are returned". Then expose `latitude` and `longitude` on `City`. Also test: schema inspection reports no unmapped field on `City`.
+
+- [ ] 3.5 Test: after `mergeCountry`, `countries` returns the successor with the moved cities and no entry for the merged code. Covers "Merged country is returned as its successor". Then resolve merged countries to their successor in the query.
 
 ## 4. Country names by language
 

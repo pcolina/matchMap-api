@@ -54,7 +54,7 @@ The catalog SHALL be loaded only from a local data set that the administrator pr
 
 ### Requirement: Catalog is loaded once, not at request time
 
-The system SHALL load the catalog through a one-time import or a migration, not on each request. The import SHALL be repeatable without creating duplicate countries or cities. The administrator decides which cities the data set includes.
+The system SHALL load the catalog through a one-time import or a migration, not on each request. The import SHALL be repeatable without creating duplicate countries or cities. Each city SHALL be matched across imports by its city key, which is unique in the catalog. The administrator decides which cities the data set includes.
 
 #### Scenario: Invalid row rejects the whole file
 - **WHEN** an import file contains a row that breaks a stored rule, such as a country code in lowercase
@@ -126,6 +126,15 @@ A merge SHALL be recorded only when every country recognises the absorption. A t
 - **WHEN** a territory is recognised as part of another country by some countries but not by all
 - **THEN** it is stored as an independent country with its own code and cities
 - **AND** it has no successor
+
+### Requirement: Merged country is returned as its successor
+
+The `countries` query SHALL NOT return a merged country under its own code. It SHALL return the successor, with the cities that moved from the merged country.
+
+#### Scenario: Merged country is returned as its successor
+- **WHEN** a client asks for countries after country `X` is merged into country `Y`
+- **THEN** the response has no entry with the code of `X`
+- **AND** the entry for `Y` includes the cities that moved from `X`
 
 ### Requirement: No deletion of countries or cities
 

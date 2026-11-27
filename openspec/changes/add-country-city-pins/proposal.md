@@ -44,7 +44,7 @@ None. No requirement of an existing capability changes. `user-accounts` and `aut
 
 ## Open points
 
-- The loading path is open: one mutation per row, or one batch. The import depends on it.
+- The initial load is one batch import (`importCatalog`); single rows use the admin mutations.
 - The administrator decides which cities the data set includes. The API stores the cities that the data set provides.
 
 ## Impact

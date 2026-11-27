@@ -36,7 +36,7 @@ The catalog is stored in the database and loaded once through an import, not rea
 
 - `country`: `id` (UUID), `code` (ISO 3166-1 alpha-2, unique, `CHECK (code ~ '^[A-Z]{2}$')`), `name` (source language), `successor_id` (UUID, nullable, foreign key to `country`, `CHECK (successor_id IS NULL OR successor_id <> id)`), set when the country is merged into another.
 - `country_name`: `country_id`, `language`, `name`, primary key on `(country_id, language)`. Holds the names requested through `Accept-Language`, for the seven supported tags `en`, `es`, `de`, `fr`, `ja`, `zh-Hant` and `ko`. The fallback to the source name is applied in the query.
-- `city`: `id` (UUID), `country_id` (`NOT NULL`, foreign key to `country`), `name`, `latitude` and `longitude` (`numeric(9,6)`, both `NOT NULL`, with `CHECK (latitude BETWEEN -90 AND 90)` and `CHECK (longitude BETWEEN -180 AND 180)`), `active` (`boolean`, `NOT NULL`, default `true`; `false` for a retired city).
+- `city`: `id` (UUID), `country_id` (`NOT NULL`, foreign key to `country`), `name`, `latitude` and `longitude` (`numeric(9,6)`, both `NOT NULL`, with `CHECK (latitude BETWEEN -90 AND 90)` and `CHECK (longitude BETWEEN -180 AND 180)`), `active` (`boolean`, `NOT NULL`, default `true`; `false` for a retired city), `city_key` (`varchar(50)`, `NOT NULL`, unique; a stable identifier assigned by the administrator, used to match a city across imports).
 
 Alternative considered for the coordinates: a PostGIS `geography(Point)` column. Rejected for now: the map needs only points, and no spatial query is planned. It can be added later without changing the contract.
 - `user_city_pin`: `user_id` (foreign key to `user_account`), `city_id` (foreign key to `city`), `status` (`CHECK (status IN ('VISITED','WANT_TO_GO','LIVED'))`), primary key on `(user_id, city_id)`. The primary key enforces "one pin per user and city".
@@ -59,6 +59,8 @@ Proposed contract changes, to be written in `contracts/graphql/` before the impl
 - Queries: `countries: [Country!]!` (catalog with the status of the signed-in user; the status is `null` without a token or without pins), and `cityPins: [CityPin!]!` (signed-in user only).
 - Mutations: `setCityPin(cityId: ID!, status: PinStatus!): CityPin!` and `removeCityPin(cityId: ID!): Boolean!`.
 - Admin mutations, only for the `ADMIN` role: `createCountry(code: String!, name: String!): Country!`, `createCity(countryId: ID!, name: String!, latitude: Float!, longitude: Float!): City!`, `retireCity(cityId: ID!): City!` and `mergeCountry(countryId: ID!, successorId: ID!): Country!`. There is no delete mutation.
+- Batch import, for the initial load only: `importCatalog(input: CatalogImportInput!): CatalogImportResult!`. It validates the whole batch, writes nothing if any row fails, and returns each failing row with its line number and reason. Single rows use the admin mutations above.
+- `countries` returns a merged country as its successor (code and name), so clients paint the successor's shape and status. The stored row of the merged country is kept.
 
 The `cities` field of `Country` returns only `VISITED` and `LIVED` cities of the user, as stated in `travel-pins`. The catalog is changed only by administrators (`geo-catalog`), through the admin mutations above. Cities are retired and countries are merged; nothing is deleted.
 
@@ -87,4 +89,4 @@ No new dependency is added. The import reads the local data set file. Its format
 
 ## Open Questions
 
-The source is decided: the three CSV files above, prepared by the administrator. The city list is decided by the administrator. The loading path is open: one mutation per row, or one batch. Task 3.2 depends on it. Neither point changes the schema.
+The source is decided: the three CSV files above, prepared by the administrator. The city list is decided by the administrator. The loading path is decided: single rows use the admin mutations, and the initial load uses one batch import. The `city_key` column is added to `city`. Neither point changes the approach.
