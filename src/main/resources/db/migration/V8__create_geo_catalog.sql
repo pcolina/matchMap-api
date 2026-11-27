@@ -1,7 +1,8 @@
 CREATE TABLE country (
     id   uuid         PRIMARY KEY,
     code varchar(2)   NOT NULL,
-    name varchar(100) NOT NULL
+    name varchar(100) NOT NULL,
+    CONSTRAINT uk_country_code UNIQUE (code)
 );
 
 CREATE TABLE country_name (
