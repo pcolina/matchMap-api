@@ -1,0 +1,25 @@
+type Country {
+  code: String!
+  name: String!
+  status: PinStatus
+  cities: [City!]!
+}
+
+type City {
+  id: ID!
+  name: String!
+  latitude: Float!
+  longitude: Float!
+  country: Country!
+}
+
+type CityPin {
+  city: City!
+  status: PinStatus!
+}
+
+enum PinStatus {
+  VISITED
+  WANT_TO_GO
+  LIVED
+}
