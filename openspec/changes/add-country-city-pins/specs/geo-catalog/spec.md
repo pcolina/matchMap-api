@@ -24,6 +24,10 @@ The system SHALL store countries and cities in the database. Each country SHALL 
 - **WHEN** a country is inserted with the code `es` or `SPAIN`
 - **THEN** the database rejects the row
 
+#### Scenario: City key is unique
+- **WHEN** a city is inserted with a city key that another city already has
+- **THEN** the database rejects the row
+
 #### Scenario: City without latitude is rejected
 - **WHEN** a row is inserted into the city table with no latitude
 - **THEN** the database rejects the row

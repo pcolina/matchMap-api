@@ -1,10 +1,12 @@
 package com.matchmap.api.geo;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.matchmap.api.TestcontainersConfiguration;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.flywaydb.core.Flyway;
@@ -184,6 +186,37 @@ class GeoCatalogMigrationIT {
                             + " '00000000-0000-0000-0000-000000000101', 'Nowhere', 0.000000,"
                             + " 181.000000)"))
             .isInstanceOf(SQLException.class);
+      }
+    }
+  }
+
+  @Test
+  void retiredCityKeepsItsRow() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        statement.executeUpdate(
+            "INSERT INTO country (id, code, name) VALUES"
+                + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
+        statement.executeUpdate(
+            "INSERT INTO city (id, country_id, name, latitude, longitude, active) VALUES"
+                + " ('00000000-0000-0000-0000-000000000206',"
+                + " '00000000-0000-0000-0000-000000000101', 'Madrid', 40.416800, -3.703800,"
+                + " false)");
+
+        try (ResultSet rows =
+            statement.executeQuery("SELECT count(*) FROM city WHERE active = false")) {
+          assertThat(rows.next()).isTrue();
+          assertThat(rows.getInt(1)).isEqualTo(1);
+        }
       }
     }
   }

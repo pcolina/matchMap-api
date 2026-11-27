@@ -19,6 +19,7 @@ CREATE TABLE city (
     name       varchar(120) NOT NULL,
     latitude   numeric(9,6) NOT NULL,
     longitude  numeric(9,6) NOT NULL,
+    active     boolean      NOT NULL DEFAULT true,
     CONSTRAINT ck_city_latitude CHECK (latitude BETWEEN -90 AND 90),
     CONSTRAINT ck_city_longitude CHECK (longitude BETWEEN -180 AND 180)
 );

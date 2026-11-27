@@ -16,8 +16,10 @@ Every task follows TDD: write the failing test first, run it and show it failing
 - [x] 2.5 Test: a city with latitude `91` is rejected. Covers "Latitude outside the range is rejected". Then add the latitude `CHECK` in `V8`.
 - [x] 2.6 Test: a city with longitude `181` is rejected. Covers "Longitude outside the range is rejected". Then add the longitude `CHECK` in `V8`.
 
-- [ ] 2.7 Test: a city marked retired keeps its row and its pins. Covers "Retired city keeps its pins" in `geo-catalog`. Then add `active boolean NOT NULL DEFAULT true` to `city` in `V8`.
+- [x] 2.7 Test: a city marked retired keeps its row. Its pins are covered by 10.3, because the pin table does not exist yet. Covers "Retired city keeps its pins" in `geo-catalog`. Then add `active boolean NOT NULL DEFAULT true` to `city` in `V8`.
 - [ ] 2.8 Test: a country cannot be its own successor, and a successor that does not exist is rejected. Covers "Country cannot merge into itself or a missing country". Then add `successor_id` with its foreign key and `CHECK` to `country` in `V8`.
+
+- [ ] 2.9 Test: a city without a city key is rejected, and a second city with the same city key is rejected. Covers "City key is unique" in `geo-catalog`. Then add `city_key varchar(50) NOT NULL UNIQUE` to `city` in `V8`, and add a city key to the existing city inserts in the tests.
 
 ## 3. Catalog import
 
