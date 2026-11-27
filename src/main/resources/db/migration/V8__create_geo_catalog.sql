@@ -18,5 +18,6 @@ CREATE TABLE city (
     country_id uuid         NOT NULL REFERENCES country (id),
     name       varchar(120) NOT NULL,
     latitude   numeric(9,6) NOT NULL,
-    longitude  numeric(9,6) NOT NULL
+    longitude  numeric(9,6) NOT NULL,
+    CONSTRAINT ck_city_latitude CHECK (latitude BETWEEN -90 AND 90)
 );

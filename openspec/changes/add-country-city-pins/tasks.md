@@ -13,7 +13,7 @@ Every task follows TDD: write the failing test first, run it and show it failing
 - [x] 2.2 Test: a country with a duplicate code is rejected. Covers "Country codes are unique". Then add the unique constraint in `V8`.
 - [x] 2.3 Test: a country with code `es` or `SPAIN` is rejected. Covers "Country codes are two uppercase letters". Then add the `CHECK` constraint in `V8`.
 - [x] 2.4 Test: a city without latitude is rejected. Covers "City without latitude is rejected". Then add `latitude` and `longitude` as `numeric(9,6) NOT NULL` in `V8`.
-- [ ] 2.5 Test: a city with latitude `91` is rejected. Covers "Latitude outside the range is rejected". Then add the latitude `CHECK` in `V8`.
+- [x] 2.5 Test: a city with latitude `91` is rejected. Covers "Latitude outside the range is rejected". Then add the latitude `CHECK` in `V8`.
 - [ ] 2.6 Test: a city with longitude `181` is rejected. Covers "Longitude outside the range is rejected". Then add the longitude `CHECK` in `V8`.
 
 ## 3. Catalog import

@@ -129,4 +129,33 @@ class GeoCatalogMigrationIT {
       }
     }
   }
+
+  @Test
+  void cityLatitudeOutOfRangeIsRejected() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        statement.executeUpdate(
+            "INSERT INTO country (id, code, name) VALUES"
+                + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
+
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
+                            + " ('00000000-0000-0000-0000-000000000204',"
+                            + " '00000000-0000-0000-0000-000000000101', 'Nowhere', 91.000000,"
+                            + " 0.000000)"))
+            .isInstanceOf(SQLException.class);
+      }
+    }
+  }
 }
