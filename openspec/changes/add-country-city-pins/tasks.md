@@ -20,7 +20,7 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 - [ ] 3.1 [NEEDS CLARIFICATION: Which public source feeds the catalog, its licence and attribution; which cities are included; the source must give a latitude and a longitude for each city. Do not start this task until these are answered.]
 - [ ] 3.2 Test: running the import twice leaves the same number of countries and cities. Covers "Re-running the import creates no duplicates". Then implement the idempotent import, which stores the coordinates of each city.
-- [ ] 3.3 Test: a GraphQL query for `countries` returns the stored data while the public source is unreachable. Covers "Requests do not call the public source". Then wire the query to the database only. Also test: schema inspection reports no unmapped field on `countries`.
+- [x] 3.3 Test: a GraphQL query for `countries` returns the stored data while the public source is unreachable. Covers "Requests do not call the public source". Then wire the query to the database only. Also test: schema inspection reports no unmapped field on `countries`.
 - [ ] 3.4 Test: a query for the cities of Spain returns `Madrid` with latitude `40.4168` and longitude `-3.7038`. Covers "City coordinates are returned". Then expose `latitude` and `longitude` on `City`. Also test: schema inspection reports no unmapped field on `City`.
 
 ## 4. Country names by language
