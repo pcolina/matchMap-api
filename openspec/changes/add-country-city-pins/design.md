@@ -27,13 +27,16 @@ The catalog is stored in the database and loaded once through an import, not rea
 - Pins reference rows of `city` by foreign key, so a city cannot disappear or change identity between requests.
 - The map and the city lists do not depend on a network call or on the limits of an external service.
 - Alternative considered: calling a public API per request. Rejected: it adds latency and a failure point, and it cannot enforce referential integrity.
-- The source of the import and its licence are open ([NEEDS CLARIFICATION] in the spec `geo-catalog`); the import mechanism follows from that answer.
+- The source is a set of three CSV files that the administrator prepares: `countries.csv`, `country_names.csv` and `cities.csv`. The columns follow the table columns, except that `country_code` replaces `country_id` and `successor_code` replaces `successor_id`, because a UUID is not known before the import. `id` and `active` are not in the files.
+- The key of a country is its ISO code, not its name. The source language is English: `country.name` holds the English name, and `country_name` holds `es`, `de`, `fr`, `ja`, `zh-Hant` and `ko`.
+- A file with any invalid row is rejected as a whole. The import reports each invalid row with its line number and the reason.
+- `successor_code` is filled only when every country recognises the absorption. A territory that only some countries recognise stays an independent country, with no successor. The administrator decides the recognition; the API stores that decision.
 
 ### Decision: tables
 
-- `country`: `id` (UUID), `code` (ISO 3166-1 alpha-2, unique, `CHECK (code ~ '^[A-Z]{2}$')`), `name` (source language).
+- `country`: `id` (UUID), `code` (ISO 3166-1 alpha-2, unique, `CHECK (code ~ '^[A-Z]{2}$')`), `name` (source language), `successor_id` (UUID, nullable, foreign key to `country`, `CHECK (successor_id IS NULL OR successor_id <> id)`), set when the country is merged into another.
 - `country_name`: `country_id`, `language`, `name`, primary key on `(country_id, language)`. Holds the names requested through `Accept-Language`, for the seven supported tags `en`, `es`, `de`, `fr`, `ja`, `zh-Hant` and `ko`. The fallback to the source name is applied in the query.
-- `city`: `id` (UUID), `country_id` (`NOT NULL`, foreign key to `country`), `name`, `latitude` and `longitude` (`numeric(9,6)`, both `NOT NULL`, with `CHECK (latitude BETWEEN -90 AND 90)` and `CHECK (longitude BETWEEN -180 AND 180)`).
+- `city`: `id` (UUID), `country_id` (`NOT NULL`, foreign key to `country`), `name`, `latitude` and `longitude` (`numeric(9,6)`, both `NOT NULL`, with `CHECK (latitude BETWEEN -90 AND 90)` and `CHECK (longitude BETWEEN -180 AND 180)`), `active` (`boolean`, `NOT NULL`, default `true`; `false` for a retired city).
 
 Alternative considered for the coordinates: a PostGIS `geography(Point)` column. Rejected for now: the map needs only points, and no spatial query is planned. It can be added later without changing the contract.
 - `user_city_pin`: `user_id` (foreign key to `user_account`), `city_id` (foreign key to `city`), `status` (`CHECK (status IN ('VISITED','WANT_TO_GO','LIVED'))`), primary key on `(user_id, city_id)`. The primary key enforces "one pin per user and city".
@@ -55,8 +58,9 @@ Proposed contract changes, to be written in `contracts/graphql/` before the impl
 - Types: `Country { code, name, status: PinStatus, cities: [City!]! }`, `City { id, name, latitude: Float!, longitude: Float!, country: Country! }`, `CityPin { city: City!, status: PinStatus! }`, and `enum PinStatus { VISITED WANT_TO_GO LIVED }`.
 - Queries: `countries: [Country!]!` (catalog with the status of the signed-in user; the status is `null` without a token or without pins), and `cityPins: [CityPin!]!` (signed-in user only).
 - Mutations: `setCityPin(cityId: ID!, status: PinStatus!): CityPin!` and `removeCityPin(cityId: ID!): Boolean!`.
+- Admin mutations, only for the `ADMIN` role: `createCountry(code: String!, name: String!): Country!`, `createCity(countryId: ID!, name: String!, latitude: Float!, longitude: Float!): City!`, `retireCity(cityId: ID!): City!` and `mergeCountry(countryId: ID!, successorId: ID!): Country!`. There is no delete mutation.
 
-The `cities` field of `Country` returns only `VISITED` and `LIVED` cities of the user, as stated in `travel-pins`. The catalog is read-only (`geo-catalog`), so no mutation creates or changes places.
+The `cities` field of `Country` returns only `VISITED` and `LIVED` cities of the user, as stated in `travel-pins`. The catalog is changed only by administrators (`geo-catalog`), through the admin mutations above. Cities are retired and countries are merged; nothing is deleted.
 
 Alternative considered: an OpenAPI endpoint for the map. Rejected: GraphQL already fits these operations, and the project rule is GraphQL by default.
 
@@ -69,13 +73,13 @@ Migrations are append-only; `V1` already enables PostGIS, so no extension is cre
 
 ### Decision: dependencies
 
-No new dependency is added. The import reads the public source with the JDK HTTP client or reads a file prepared beforehand; the choice follows the open point on the source and needs to be confirmed in the approval of this design.
+No new dependency is added. The import reads the local data set file. Its format decides the parser; if that needs a new dependency, it is proposed in a design update before it is added.
 
 ## Risks / Trade-offs
 
-- [Source licence does not allow redistribution] → Resolve the open point before importing any data; if it fails, the catalog must be built from a source that does allow it.
+- [Licence or attribution of the local data set is not checked here] → The administrator owns the data set. This change adds no attribution; confirm the licence before the catalog is published.
 - [Catalog too large for the MVP] → The city threshold or list is an open point; the schema does not change with it.
-- [Source has no coordinates, or they are imprecise] → The source is chosen in task 3.1 only if it provides a latitude and a longitude for each city; the import rejects a city without them.
+- [Data set has no coordinates, or they are imprecise] → The data set must give a latitude and a longitude for each city; the import rejects a city without them.
 - [Source lacks some country names in the seven languages] → The import lists the missing names in its output; a missing name falls back to the source name, as the spec says.
 - [Derived status query gets slow with many pins] → One aggregate per request, filtered by `user_id`; the primary key of `user_city_pin` starts with `user_id`, so the lookup is indexed.
 - [Clients paint a country with a stale status after a pin change] → Clients refetch `countries` after a mutation; the status is never cached on the server.
@@ -83,4 +87,4 @@ No new dependency is added. The import reads the public source with the JDK HTTP
 
 ## Open Questions
 
-The source and the city list are open [NEEDS CLARIFICATION] points in the specs and in task 3.1. They change the import data, not the schema or the approach, but task 3.1 must not start until they are answered.
+The source is decided: the three CSV files above, prepared by the administrator. The city list is decided by the administrator. The loading path is open: one mutation per row, or one batch. Task 3.2 depends on it. Neither point changes the schema.

@@ -16,11 +16,14 @@ Every task follows TDD: write the failing test first, run it and show it failing
 - [x] 2.5 Test: a city with latitude `91` is rejected. Covers "Latitude outside the range is rejected". Then add the latitude `CHECK` in `V8`.
 - [x] 2.6 Test: a city with longitude `181` is rejected. Covers "Longitude outside the range is rejected". Then add the longitude `CHECK` in `V8`.
 
+- [ ] 2.7 Test: a city marked retired keeps its row and its pins. Covers "Retired city keeps its pins" in `geo-catalog`. Then add `active boolean NOT NULL DEFAULT true` to `city` in `V8`.
+- [ ] 2.8 Test: a country cannot be its own successor, and a successor that does not exist is rejected. Covers "Country cannot merge into itself or a missing country". Then add `successor_id` with its foreign key and `CHECK` to `country` in `V8`.
+
 ## 3. Catalog import
 
-- [ ] 3.1 [NEEDS CLARIFICATION: Which public source feeds the catalog, its licence and attribution; which cities are included; the source must give a latitude and a longitude for each city. Do not start this task until these are answered.]
+- [ ] 3.1 Use the three CSV files described in `design.md` (`countries.csv`, `country_names.csv`, `cities.csv`) as the only catalog source. Each city needs a latitude and a longitude. Task 3.2 starts when the loading path (one mutation per row, or one batch) is agreed.
 - [ ] 3.2 Test: running the import twice leaves the same number of countries and cities. Covers "Re-running the import creates no duplicates". Then implement the idempotent import, which stores the coordinates of each city.
-- [x] 3.3 Test: a GraphQL query for `countries` returns the stored data while the public source is unreachable. Covers "Requests do not call the public source". Then wire the query to the database only. Also test: schema inspection reports no unmapped field on `countries`.
+- [x] 3.3 Test: a GraphQL query for `countries` returns the stored data without reading the data set. Covers "Requests do not read the data set". Then wire the query to the database only. Also test: schema inspection reports no unmapped field on `countries`.
 - [ ] 3.4 Test: a query for the cities of Spain returns `Madrid` with latitude `40.4168` and longitude `-3.7038`. Covers "City coordinates are returned". Then expose `latitude` and `longitude` on `City`. Also test: schema inspection reports no unmapped field on `City`.
 
 ## 4. Country names by language
@@ -45,6 +48,8 @@ Every task follows TDD: write the failing test first, run it and show it failing
 - [ ] 6.7 Test: removing an existing pin deletes it. Covers "Remove an existing pin". Then implement `removeCityPin`. Also test: schema inspection reports no unmapped field or argument on `removeCityPin`.
 - [ ] 6.8 Test: removing a city without a pin leaves the pins unchanged. Covers "Remove a city without a pin". Then make the removal idempotent.
 
+- [ ] 6.9 Test: a pin on a retired city is rejected and writes nothing. Covers "Retired city rejects new pins" in `geo-catalog`. Then make `setCityPin` check `active` before writing.
+
 ## 7. Reading pins
 
 - [ ] 7.1 Test: a user with pins on `c1` (`VISITED`) and `c2` (`WANT_TO_GO`) reads both. Covers "Read own pins". Then implement `cityPins`. Also test: schema inspection reports no unmapped field or argument on `cityPins`.
@@ -64,3 +69,11 @@ Every task follows TDD: write the failing test first, run it and show it failing
 ## 9. Coverage of the specs
 
 - [ ] 9.1 Test: every scenario in `geo-catalog` and `travel-pins` has a test that names it. Then fix any scenario without a test.
+
+## 10. Admin catalog operations
+
+- [ ] 10.1 Test: a user without the `ADMIN` role cannot create, retire or merge. Covers "Non-admin cannot change the catalog" in `geo-catalog`. Then require `ADMIN` on the admin mutations. Depends on `matchMap-api` issue #53.
+- [ ] 10.2 Test: `createCountry` and `createCity` reject an invalid country code, a duplicate code and a latitude of `91`. Covers the stored rules in "Country and city catalog is stored in the database". Then implement `createCountry` and `createCity`.
+- [ ] 10.3 Test: `retireCity` keeps the city and its pins. Covers "Retired city keeps its pins". Then implement `retireCity`.
+- [ ] 10.4 Test: `mergeCountry` moves the cities to the successor and keeps the pins. Covers "Merged country keeps its cities". Also rejects a merge into itself or a missing country. Then implement `mergeCountry`.
+- [ ] 10.5 Test: the schema has no mutation that deletes a country or a city. Covers "No deletion of countries or cities". Then keep the schema without delete mutations.

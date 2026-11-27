@@ -44,24 +44,29 @@ The GraphQL type `City` SHALL expose `latitude: Float!` and `longitude: Float!`,
 - **WHEN** a client asks for the cities of Spain with `{ countries { code cities { name latitude longitude } } }` and `Madrid` is stored at latitude `40.4168` and longitude `-3.7038`
 - **THEN** the response contains `latitude` `40.4168` and `longitude` `-3.7038` for `Madrid`
 
-### Requirement: Catalog source and licence
+### Requirement: Catalog source
 
-The catalog SHALL be loaded from a public source and SHALL NOT be queried from that source at request time. [NEEDS CLARIFICATION: Which public source feeds the catalog, and does its licence allow storing and redistributing the data? Which attribution is required? The source must provide a latitude and a longitude for each city.]
+The catalog SHALL be loaded only from a local data set that the administrator prepares. The API SHALL NOT query any external data source at request time.
 
 #### Scenario: Source is used only by the import
 - **WHEN** the API handles any GraphQL request
-- **THEN** it does not open a connection to the public source
+- **THEN** it does not open a connection to any external data source
 
 ### Requirement: Catalog is loaded once, not at request time
 
-The system SHALL load the catalog through a one-time import or a migration, not on each request. The import SHALL be repeatable without creating duplicate countries or cities. [NEEDS CLARIFICATION: Which cities does the catalog include (all cities above a population threshold, or a fixed list)? State the threshold or list.]
+The system SHALL load the catalog through a one-time import or a migration, not on each request. The import SHALL be repeatable without creating duplicate countries or cities. The administrator decides which cities the data set includes.
+
+#### Scenario: Invalid row rejects the whole file
+- **WHEN** an import file contains a row that breaks a stored rule, such as a country code in lowercase
+- **THEN** the import writes nothing from that file
+- **AND** the import reports the line number and the reason of each invalid row
 
 #### Scenario: Re-running the import creates no duplicates
 - **WHEN** the catalog import runs twice on the same database
 - **THEN** the number of countries and cities is the same after the second run as after the first
 
-#### Scenario: Requests do not call the public source
-- **WHEN** a client sends a GraphQL query for countries while the public source is unreachable
+#### Scenario: Requests do not read the data set
+- **WHEN** a client sends a GraphQL query for countries after the import has run
 - **THEN** the response contains the catalog data stored in the database
 
 ### Requirement: Countries are returned in the language requested
@@ -80,10 +85,52 @@ Country names SHALL be returned in the language requested through the `Accept-La
 - **WHEN** a client sends `Accept-Language: ja` and asks for the name of the country with code `FR`, and then sends `Accept-Language: zh-Hant` and asks for the same country
 - **THEN** the first response contains the Japanese name of France and the second contains its Traditional Chinese name
 
-### Requirement: Catalog is read-only for users
+### Requirement: Only administrators change the catalog
 
-No user SHALL be able to create, change or delete a country or a city through the API. The catalog SHALL change only through the import.
+Countries and cities SHALL be created, retired and merged only through the API, by a user with the `ADMIN` role. No user without that role SHALL change the catalog.
 
-#### Scenario: Catalog mutations do not exist
-- **WHEN** a signed-in client sends a GraphQL mutation that creates a city
-- **THEN** the API rejects the operation because no such mutation is defined in `contracts/graphql/`
+#### Scenario: Non-admin cannot change the catalog
+- **WHEN** a signed-in user without the `ADMIN` role sends a mutation that creates, retires or merges a country or a city
+- **THEN** the API rejects the operation and changes nothing
+
+### Requirement: Cities are retired, not deleted
+
+A city that no longer exists as a place SHALL be retired. A retired city keeps its row and its identifier, and SHALL NOT accept new pins. Its existing pins SHALL remain.
+
+#### Scenario: Retired city keeps its pins
+- **WHEN** an administrator retires the city `Madrid` and a user has a pin on it
+- **THEN** the pin still exists and the city is still returned, with its coordinates, to the user who has it pinned
+
+#### Scenario: Retired city rejects new pins
+- **WHEN** a user tries to pin a retired city
+- **THEN** the API rejects the pin and writes nothing
+
+### Requirement: Countries are merged, not deleted
+
+When a country becomes part of another country, an administrator SHALL merge it into that successor. The cities of the merged country SHALL move to the successor. The merged country SHALL keep its row and its code, and SHALL point to its successor. A merged country SHALL NOT accept new cities.
+
+#### Scenario: Merged country keeps its cities
+- **WHEN** an administrator merges country `X` into country `Y`
+- **THEN** every city of `X` belongs to `Y`, and `X` keeps its code and points to `Y` as its successor
+- **AND** the pins on those cities are unchanged
+
+#### Scenario: Country cannot merge into itself or a missing country
+- **WHEN** an administrator merges a country into itself or into an identifier that does not exist
+- **THEN** the API rejects the operation and changes nothing
+
+### Requirement: Merges require universal recognition
+
+A merge SHALL be recorded only when every country recognises the absorption. A territory that only some countries recognise SHALL remain an independent country, with its own code and cities, and no successor.
+
+#### Scenario: Territory recognised by some countries stays independent
+- **WHEN** a territory is recognised as part of another country by some countries but not by all
+- **THEN** it is stored as an independent country with its own code and cities
+- **AND** it has no successor
+
+### Requirement: No deletion of countries or cities
+
+No operation in the API SHALL delete a country or a city.
+
+#### Scenario: Deletion operations do not exist
+- **WHEN** a client asks the schema for a mutation that deletes a country or a city
+- **THEN** no such mutation is defined in `contracts/graphql/`
