@@ -17,6 +17,6 @@ CREATE TABLE city (
     id         uuid         PRIMARY KEY,
     country_id uuid         NOT NULL REFERENCES country (id),
     name       varchar(120) NOT NULL,
-    latitude   numeric(9,6),
-    longitude  numeric(9,6)
+    latitude   numeric(9,6) NOT NULL,
+    longitude  numeric(9,6) NOT NULL
 );
