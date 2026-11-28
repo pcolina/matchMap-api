@@ -42,7 +42,7 @@ The system SHALL store countries and cities in the database. Each country SHALL 
 
 ### Requirement: Cities expose their coordinates
 
-The GraphQL type `City` SHALL expose `latitude: Float!` and `longitude: Float!`, with the stored values.
+The GraphQL type `City` SHALL expose `latitude: Float!` and `longitude: Float!`, with the stored values. The field `cities` of `Country` SHALL return every city of the catalog in that country, whether or not any user has pinned it.
 
 #### Scenario: City coordinates are returned
 - **WHEN** a client asks for the cities of Spain with `{ countries { code cities { name latitude longitude } } }` and `Madrid` is stored at latitude `40.4168` and longitude `-3.7038`

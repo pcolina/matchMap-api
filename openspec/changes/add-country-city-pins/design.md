@@ -55,14 +55,14 @@ Alternative considered: a stored `user_country_status` table updated on each pin
 
 Proposed contract changes, to be written in `contracts/graphql/` before the implementation:
 
-- Types: `Country { code, name, status: PinStatus, cities: [City!]! }`, `City { id, name, latitude: Float!, longitude: Float!, country: Country! }`, `CityPin { city: City!, status: PinStatus! }`, and `enum PinStatus { VISITED WANT_TO_GO LIVED }`.
+- Types: `Country { code, name, status: PinStatus, cities: [City!]!, visitedCities: [City!]! }`, `City { id, name, latitude: Float!, longitude: Float!, country: Country! }`, `CityPin { city: City!, status: PinStatus! }`, and `enum PinStatus { VISITED WANT_TO_GO LIVED }`.
 - Queries: `countries: [Country!]!` (catalog with the status of the signed-in user; the status is `null` without a token or without pins), and `cityPins: [CityPin!]!` (signed-in user only).
 - Mutations: `setCityPin(cityId: ID!, status: PinStatus!): CityPin!` and `removeCityPin(cityId: ID!): Boolean!`.
 - Admin mutations, only for the `ADMIN` role: `createCountry(code: String!, name: String!): Country!`, `createCity(countryId: ID!, name: String!, latitude: Float!, longitude: Float!): City!`, `retireCity(cityId: ID!): City!` and `mergeCountry(countryId: ID!, successorId: ID!): Country!`. There is no delete mutation.
 - Batch import, for the initial load only: `importCatalog(input: CatalogImportInput!): CatalogImportResult!`. It validates the whole batch, writes nothing if any row fails, and returns each failing row with its line number and reason. Single rows use the admin mutations above.
 - `countries` returns a merged country as its successor (code and name), so clients paint the successor's shape and status. The stored row of the merged country is kept.
 
-The `cities` field of `Country` returns only `VISITED` and `LIVED` cities of the user, as stated in `travel-pins`. The catalog is changed only by administrators (`geo-catalog`), through the admin mutations above. Cities are retired and countries are merged; nothing is deleted.
+The `cities` field of `Country` returns every catalog city of that country, as stated in `geo-catalog`. The `visitedCities` field of `Country` returns only the `VISITED` and `LIVED` cities of the signed-in user, as stated in `travel-pins`. The catalog is changed only by administrators (`geo-catalog`), through the admin mutations above. Cities are retired and countries are merged; nothing is deleted.
 
 Alternative considered: an OpenAPI endpoint for the map. Rejected: GraphQL already fits these operations, and the project rule is GraphQL by default.
 

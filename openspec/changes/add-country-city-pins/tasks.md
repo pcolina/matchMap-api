@@ -67,8 +67,8 @@ Every task follows TDD: write the failing test first, run it and show it failing
 - [ ] 8.3 Test: San Francisco `WANT_TO_GO` gives the United States `WANT_TO_GO`. Covers "Only wanted cities make the country want to go". Then add the `WANT_TO_GO` branch.
 - [ ] 8.4 Test: New York `VISITED` and Denver `LIVED` give `LIVED`. Covers "Lived beats visited in the same country". Then check the priority order.
 - [ ] 8.5 Test: a country without pins has no status. Covers "Country without pins has no status". Then return `null`.
-- [ ] 8.6 Test: the visited cities of Spain are Madrid only, while the pins still include Granada. Covers "Wanted cities are not in the visited list". Then filter `Country.cities` to `VISITED` and `LIVED`.
-- [ ] 8.7 Test: the visited cities of Spain include `Madrid` with its latitude and longitude. Covers "Visited cities come with coordinates". Then return the coordinates in `Country.cities`.
+- [ ] 8.6 Test: the visited cities of Spain are Madrid only, while the pins still include Granada. Covers "Wanted cities are not in the visited list". Then resolve `Country.visitedCities` to the cities pinned as `VISITED` and `LIVED`.
+- [ ] 8.7 Test: the visited cities of Spain include `Madrid` with its latitude and longitude. Covers "Visited cities come with coordinates". Then return the coordinates in `Country.visitedCities`.
 
 ## 9. Coverage of the specs
 
