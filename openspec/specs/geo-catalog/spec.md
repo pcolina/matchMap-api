@@ -1,9 +1,10 @@
+# geo-catalog Specification
+
 ## Purpose
 
 Holds the countries and cities that users can pin, as a copy owned by MatchMap. Each city belongs to exactly one country, and every country and city has a stable identifier that pins can reference.
 
-## ADDED Requirements
-
+## Requirements
 ### Requirement: Country and city catalog is stored in the database
 
 The system SHALL store countries and cities in the database. Each country SHALL have an identifier, an ISO 3166-1 alpha-2 code that is unique, and a name in the source language. Each city SHALL have an identifier, a name in the source language, exactly one country it belongs to, and a latitude and a longitude in decimal degrees (WGS 84).
@@ -42,7 +43,7 @@ The system SHALL store countries and cities in the database. Each country SHALL 
 
 ### Requirement: Cities expose their coordinates
 
-The GraphQL type `City` SHALL expose `latitude: Float!` and `longitude: Float!`, with the stored values.
+The GraphQL type `City` SHALL expose `latitude: Float!` and `longitude: Float!`, with the stored values. The field `cities` of `Country` SHALL return every city of the catalog in that country, whether or not any user has pinned it.
 
 #### Scenario: City coordinates are returned
 - **WHEN** a client asks for the cities of Spain with `{ countries { code cities { name latitude longitude } } }` and `Madrid` is stored at latitude `40.4168` and longitude `-3.7038`

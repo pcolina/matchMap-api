@@ -90,7 +90,7 @@ The status of a country for a user SHALL be calculated from the user's city pins
 
 ### Requirement: Map data lists the cities that the user has visited
 
-For each country, the result SHALL include the cities pinned as `VISITED` or `LIVED`, and SHALL NOT include the cities pinned as `WANT_TO_GO` in that list. The cities pinned as `WANT_TO_GO` SHALL still appear in the user's pins.
+The field `visitedCities` of `Country` SHALL include, for the signed-in user, the cities of that country pinned as `VISITED` or `LIVED`, and SHALL NOT include the cities pinned as `WANT_TO_GO` in that list. The cities pinned as `WANT_TO_GO` SHALL still appear in the user's pins.
 
 #### Scenario: Wanted cities are not in the visited list
 - **WHEN** a user has `Granada` pinned as `WANT_TO_GO` and `Madrid` pinned as `LIVED` in Spain
@@ -98,5 +98,5 @@ For each country, the result SHALL include the cities pinned as `VISITED` or `LI
 - **AND** the user's pins still include `Granada` with status `WANT_TO_GO`
 
 #### Scenario: Visited cities come with coordinates
-- **WHEN** a user has `Madrid` pinned as `LIVED`, with latitude `40.4168` and longitude `-3.7038`, and asks for the visited cities of Spain
+- **WHEN** a user has `Madrid` pinned as `LIVED`, with latitude `40.4168` and longitude `-3.7038`, and asks for the visited cities of Spain with `{ countries { code visitedCities { name latitude longitude } } }`
 - **THEN** the result contains `Madrid` with its latitude and longitude

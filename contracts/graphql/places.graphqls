@@ -1,8 +1,10 @@
 type Country {
+  id: ID!
   code: String!
   name: String!
   status: PinStatus
   cities: [City!]!
+  visitedCities: [City!]!
 }
 
 type City {
@@ -32,4 +34,32 @@ extend type Query {
 extend type Mutation {
   setCityPin(cityId: ID!, status: PinStatus!): CityPin!
   removeCityPin(cityId: ID!): Boolean!
+}
+
+input CatalogImportInput {
+  countries: String!
+  countryNames: String!
+  cities: String!
+}
+
+type CatalogImportError {
+  file: String!
+  line: Int!
+  reason: String!
+}
+
+type CatalogImportResult {
+  countriesLoaded: Int!
+  namesLoaded: Int!
+  citiesLoaded: Int!
+  missingNames: [String!]!
+  errors: [CatalogImportError!]!
+}
+
+extend type Mutation {
+  importCatalog(input: CatalogImportInput!): CatalogImportResult!
+  createCountry(code: String!, name: String!): Country!
+  createCity(countryId: ID!, cityKey: String!, name: String!, latitude: Float!, longitude: Float!): City!
+  retireCity(cityId: ID!): City!
+  mergeCountry(countryId: ID!, successorId: ID!): Country!
 }

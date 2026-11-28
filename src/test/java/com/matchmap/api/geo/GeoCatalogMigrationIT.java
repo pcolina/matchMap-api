@@ -10,12 +10,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 class GeoCatalogMigrationIT {
 
   @Test
+  @DisplayName("Every city belongs to a country")
   void cityWithoutCountryIsRejected() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -48,6 +50,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("Country codes are unique")
   void duplicateCountryCodeIsRejected() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -75,6 +78,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("Country codes are two uppercase letters")
   void countryCodeMustBeTwoUppercaseLetters() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -104,6 +108,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("City without latitude is rejected")
   void cityWithoutLatitudeIsRejected() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -133,6 +138,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("Latitude outside the range is rejected")
   void cityLatitudeOutOfRangeIsRejected() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -162,6 +168,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("Longitude outside the range is rejected")
   void cityLongitudeOutOfRangeIsRejected() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -222,6 +229,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("Country cannot merge into itself or a missing country")
   void countryCannotBeItsOwnSuccessor() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
@@ -308,6 +316,7 @@ class GeoCatalogMigrationIT {
   }
 
   @Test
+  @DisplayName("City key is unique")
   void duplicateCityKeyIsRejected() throws Exception {
     try (PostgreSQLContainer postgres =
         new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {

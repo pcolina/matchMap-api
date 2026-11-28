@@ -1,3 +1,5 @@
 package com.matchmap.api.geo;
 
-record Country(String code, String name) {}
+import java.util.UUID;
+
+record Country(UUID id, String code, String name) {}
