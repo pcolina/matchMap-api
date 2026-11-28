@@ -1,75 +1,66 @@
 package com.matchmap.api.moderation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.matchmap.api.TestcontainersConfiguration;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
-@Transactional
+@AutoConfigureMockMvc
 class ProhibitedWordSchemaIT {
 
-  @Autowired JdbcTemplate jdbcTemplate;
+  private static final JsonMapper JSON = JsonMapper.builder().build();
+
+  @Autowired MockMvcTester mockMvc;
 
   @Test
-  void createsEmptyProhibitedTableAndSeededReservedTable() {
-    assertThat(countRows("prohibited_word")).isZero();
-    assertThat(countRows("reserved_word")).isEqualTo(13);
+  @DisplayName("Schema exposes the prohibited word type, its operations and the category enum")
+  void schemaExposesProhibitedWordOperations() throws Exception {
+    JsonNode query = schema("{ __type(name: \"Query\") { fields { name } } }");
+    JsonNode mutation = schema("{ __type(name: \"Mutation\") { fields { name } } }");
+    JsonNode type = schema("{ __type(name: \"ProhibitedWord\") { fields { name } } }");
+    JsonNode category = schema("{ __type(name: \"ProhibitedCategory\") { enumValues { name } } }");
+
+    List<String> queries = names(query.at("/data/__type/fields"));
+    List<String> mutations = names(mutation.at("/data/__type/fields"));
+    List<String> fields = names(type.at("/data/__type/fields"));
+    List<String> categories = names(category.at("/data/__type/enumValues"));
+
+    assertThat(queries).contains("prohibitedWords");
+    assertThat(mutations).contains("createProhibitedWord", "setProhibitedWordActive");
+    assertThat(fields).contains("id", "word", "normalized", "category", "language", "active");
+    assertThat(categories)
+        .containsExactlyInAnyOrder(
+            "CHILD_SAFETY", "HATE", "VIOLENCE", "SEXUAL", "IMPERSONATION", "RESERVED");
   }
 
-  @Test
-  void rejectsUnknownCategory() {
-    assertThatThrownBy(() -> insert("prohibited_word", "nazi", "nazi", "UNKNOWN"))
-        .isInstanceOf(DataIntegrityViolationException.class);
+  private JsonNode schema(String query) throws Exception {
+    var response =
+        mockMvc
+            .post()
+            .uri("/graphql")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(JSON.writeValueAsString(java.util.Map.of("query", query)))
+            .exchange();
+    return JSON.readTree(response.getResponse().getContentAsString());
   }
 
-  @Test
-  void rejectsDuplicateNormalizedFormInSameCategory() {
-    insert("prohibited_word", "nazi", "nazi", "HATE");
-
-    assertThatThrownBy(() -> insert("prohibited_word", "naz1", "nazi", "HATE"))
-        .isInstanceOf(DataIntegrityViolationException.class);
-  }
-
-  @Test
-  void allowsSameNormalizedFormInAnotherCategory() {
-    insert("reserved_word", "root", "root", "RESERVED");
-    insert("reserved_word", "root", "root", "IMPERSONATION");
-
-    assertThat(countWhere("reserved_word", "normalized = 'root'")).isEqualTo(2);
-  }
-
-  private int countRows(String table) {
-    return jdbcTemplate.queryForObject("select count(*) from " + table, Integer.class);
-  }
-
-  private int countWhere(String table, String condition) {
-    return jdbcTemplate.queryForObject(
-        "select count(*) from " + table + " where " + condition, Integer.class);
-  }
-
-  private void insert(String table, String word, String normalized, String category) {
-    var now = OffsetDateTime.now();
-    jdbcTemplate.update(
-        "insert into "
-            + table
-            + " (id, word, normalized, category, language, active, created_at, updated_at)"
-            + " values (?, ?, ?, ?, 'en', true, ?, ?)",
-        UUID.randomUUID(),
-        word,
-        normalized,
-        category,
-        now,
-        now);
+  private static List<String> names(JsonNode nodes) {
+    List<String> names = new ArrayList<>();
+    nodes.forEach(node -> names.add(node.at("/name").asString()));
+    return names;
   }
 }

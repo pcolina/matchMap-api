@@ -1,0 +1,26 @@
+type ProhibitedWord {
+  id: ID!
+  word: String!
+  normalized: String!
+  category: ProhibitedCategory!
+  language: String!
+  active: Boolean!
+}
+
+enum ProhibitedCategory {
+  CHILD_SAFETY
+  HATE
+  VIOLENCE
+  SEXUAL
+  IMPERSONATION
+  RESERVED
+}
+
+extend type Query {
+  prohibitedWords: [ProhibitedWord!]!
+}
+
+extend type Mutation {
+  createProhibitedWord(word: String!, category: ProhibitedCategory!, language: String!): ProhibitedWord!
+  setProhibitedWordActive(id: ID!, active: Boolean!): ProhibitedWord!
+}
