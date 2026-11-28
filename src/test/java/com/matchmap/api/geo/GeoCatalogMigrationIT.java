@@ -220,4 +220,60 @@ class GeoCatalogMigrationIT {
       }
     }
   }
+
+  @Test
+  void countryCannotBeItsOwnSuccessor() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        statement.executeUpdate(
+            "INSERT INTO country (id, code, name) VALUES"
+                + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
+
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "UPDATE country SET successor_id = '00000000-0000-0000-0000-000000000101'"
+                            + " WHERE id = '00000000-0000-0000-0000-000000000101'"))
+            .isInstanceOf(SQLException.class)
+            .hasMessageContaining("ck_country_successor_not_self");
+      }
+    }
+  }
+
+  @Test
+  void missingSuccessorIsRejected() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        statement.executeUpdate(
+            "INSERT INTO country (id, code, name) VALUES"
+                + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
+
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "UPDATE country SET successor_id = '00000000-0000-0000-0000-000000000999'"
+                            + " WHERE id = '00000000-0000-0000-0000-000000000101'"))
+            .isInstanceOf(SQLException.class)
+            .hasMessageContaining("fk_country_successor");
+      }
+    }
+  }
 }
