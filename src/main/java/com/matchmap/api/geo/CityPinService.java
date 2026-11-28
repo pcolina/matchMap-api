@@ -33,4 +33,12 @@ class CityPinService {
   List<CityPin> pinsOf(UUID userId) {
     return pins.findByUser(userId);
   }
+
+  PinStatus statusInCountry(UUID userId, String countryCode) {
+    return pins.statusInCountry(userId, countryCode);
+  }
+
+  List<City> visitedCitiesIn(UUID userId, String countryCode) {
+    return pins.visitedCitiesIn(userId, countryCode);
+  }
 }

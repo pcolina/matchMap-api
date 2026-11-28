@@ -53,6 +53,37 @@ class CityPinRepository {
         "DELETE FROM user_city_pin WHERE user_id = ? AND city_id = ?", userId, cityId);
   }
 
+  PinStatus statusInCountry(UUID userId, String countryCode) {
+    List<String> rows =
+        jdbcTemplate.query(
+            "SELECT p.status FROM user_city_pin p"
+                + " JOIN city c ON c.id = p.city_id JOIN country co ON co.id = c.country_id"
+                + " WHERE p.user_id = ? AND co.code = ?"
+                + " ORDER BY CASE p.status WHEN 'LIVED' THEN 1 WHEN 'VISITED' THEN 2 ELSE 3 END"
+                + " LIMIT 1",
+            (rs, rowNum) -> rs.getString("status"),
+            userId,
+            countryCode);
+    return rows.isEmpty() ? null : PinStatus.valueOf(rows.get(0));
+  }
+
+  List<City> visitedCitiesIn(UUID userId, String countryCode) {
+    return jdbcTemplate.query(
+        "SELECT c.id, c.name, c.latitude, c.longitude, co.code FROM user_city_pin p"
+            + " JOIN city c ON c.id = p.city_id JOIN country co ON co.id = c.country_id"
+            + " WHERE p.user_id = ? AND co.code = ? AND p.status IN ('VISITED', 'LIVED')"
+            + " ORDER BY c.name",
+        (rs, rowNum) ->
+            new City(
+                rs.getObject("id", UUID.class),
+                rs.getString("name"),
+                rs.getBigDecimal("latitude"),
+                rs.getBigDecimal("longitude"),
+                rs.getString("code")),
+        userId,
+        countryCode);
+  }
+
   List<CityPin> findByUser(UUID userId) {
     return jdbcTemplate.query(
         "SELECT p.status, c.id, c.name, c.latitude, c.longitude, co.code"

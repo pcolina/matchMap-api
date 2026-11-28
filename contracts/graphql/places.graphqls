@@ -3,6 +3,7 @@ type Country {
   name: String!
   status: PinStatus
   cities: [City!]!
+  visitedCities: [City!]!
 }
 
 type City {
@@ -56,4 +57,8 @@ type CatalogImportResult {
 
 extend type Mutation {
   importCatalog(input: CatalogImportInput!): CatalogImportResult!
+  createCountry(code: String!, name: String!): Country!
+  createCity(countryId: ID!, cityKey: String!, name: String!, latitude: Float!, longitude: Float!): City!
+  retireCity(cityId: ID!): City!
+  mergeCountry(countryId: ID!, successorId: ID!): Country!
 }

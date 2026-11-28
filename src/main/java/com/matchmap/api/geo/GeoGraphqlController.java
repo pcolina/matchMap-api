@@ -29,6 +29,16 @@ class GeoGraphqlController {
     this.pins = pins;
   }
 
+  @SchemaMapping(typeName = "Country", field = "status")
+  PinStatus status(Country country, Principal principal) {
+    return principal == null ? null : pins.statusInCountry(userId(principal), country.code());
+  }
+
+  @SchemaMapping(typeName = "Country", field = "visitedCities")
+  List<City> visitedCities(Country country, Principal principal) {
+    return principal == null ? List.of() : pins.visitedCitiesIn(userId(principal), country.code());
+  }
+
   @QueryMapping
   @PreAuthorize("isAuthenticated()")
   List<CityPin> cityPins(Principal principal) {

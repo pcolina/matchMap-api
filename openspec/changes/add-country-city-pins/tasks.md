@@ -62,13 +62,13 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 ## 8. Derived country status
 
-- [ ] 8.1 Test: Madrid `LIVED` and Granada `WANT_TO_GO` give Spain `LIVED`. Covers "Lived city makes the country lived". Then implement the aggregate query with priority `LIVED`.
-- [ ] 8.2 Test: New York `VISITED` gives the United States `VISITED`. Covers "Visited city makes the country visited". Then add the `VISITED` branch.
-- [ ] 8.3 Test: San Francisco `WANT_TO_GO` gives the United States `WANT_TO_GO`. Covers "Only wanted cities make the country want to go". Then add the `WANT_TO_GO` branch.
-- [ ] 8.4 Test: New York `VISITED` and Denver `LIVED` give `LIVED`. Covers "Lived beats visited in the same country". Then check the priority order.
-- [ ] 8.5 Test: a country without pins has no status. Covers "Country without pins has no status". Then return `null`.
-- [ ] 8.6 Test: the visited cities of Spain are Madrid only, while the pins still include Granada. Covers "Wanted cities are not in the visited list". Then resolve `Country.visitedCities` to the cities pinned as `VISITED` and `LIVED`.
-- [ ] 8.7 Test: the visited cities of Spain include `Madrid` with its latitude and longitude. Covers "Visited cities come with coordinates". Then return the coordinates in `Country.visitedCities`.
+- [x] 8.1 Test: Madrid `LIVED` and Granada `WANT_TO_GO` give Spain `LIVED`. Covers "Lived city makes the country lived". Then implement the aggregate query with priority `LIVED`.
+- [x] 8.2 Test: New York `VISITED` gives the United States `VISITED`. Covers "Visited city makes the country visited". Then add the `VISITED` branch.
+- [x] 8.3 Test: San Francisco `WANT_TO_GO` gives the United States `WANT_TO_GO`. Covers "Only wanted cities make the country want to go". Then add the `WANT_TO_GO` branch.
+- [x] 8.4 Test: New York `VISITED` and Denver `LIVED` give `LIVED`. Covers "Lived beats visited in the same country". Then check the priority order.
+- [x] 8.5 Test: a country without pins has no status. Covers "Country without pins has no status". Then return `null`.
+- [x] 8.6 Test: the visited cities of Spain are Madrid only, while the pins still include Granada. Covers "Wanted cities are not in the visited list". Then resolve `Country.visitedCities` to the cities pinned as `VISITED` and `LIVED`.
+- [x] 8.7 Test: the visited cities of Spain include `Madrid` with its latitude and longitude. Covers "Visited cities come with coordinates". Then return the coordinates in `Country.visitedCities`.
 
 ## 9. Coverage of the specs
 
