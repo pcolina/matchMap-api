@@ -16,10 +16,10 @@ class CityPinService {
   CityPin setPin(UUID userId, UUID cityId, PinStatus status) {
     Boolean active = pins.cityActive(cityId);
     if (active == null) {
-      throw PinException.cityNotFound();
+      throw GeoException.cityNotFound();
     }
     if (!active) {
-      throw PinException.cityRetired();
+      throw GeoException.cityRetired();
     }
     pins.upsert(userId, cityId, status);
     return new CityPin(pins.findCity(cityId), status);

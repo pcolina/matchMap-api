@@ -18,15 +18,52 @@ class GeoGraphqlController {
   private final CatalogImportService catalogImport;
   private final CityPinService pins;
 
+  private final CatalogAdminService admin;
+
   GeoGraphqlController(
       CountryCatalog countries,
       CityCatalog cities,
       CatalogImportService catalogImport,
-      CityPinService pins) {
+      CityPinService pins,
+      CatalogAdminService admin) {
     this.countries = countries;
     this.cities = cities;
     this.catalogImport = catalogImport;
     this.pins = pins;
+    this.admin = admin;
+  }
+
+  @MutationMapping
+  Country createCountry(@Argument String code, @Argument String name) {
+    return admin.createCountry(code, name);
+  }
+
+  @MutationMapping
+  City createCity(
+      @Argument String countryId,
+      @Argument String cityKey,
+      @Argument String name,
+      @Argument Double latitude,
+      @Argument Double longitude) {
+    return admin.createCity(parseId(countryId, "countryId"), cityKey, name, latitude, longitude);
+  }
+
+  @MutationMapping
+  City retireCity(@Argument String cityId) {
+    return admin.retireCity(parseId(cityId, "cityId"));
+  }
+
+  @MutationMapping
+  Country mergeCountry(@Argument String countryId, @Argument String successorId) {
+    return admin.mergeCountry(parseId(countryId, "countryId"), parseId(successorId, "successorId"));
+  }
+
+  private static UUID parseId(String value, String field) {
+    try {
+      return UUID.fromString(value);
+    } catch (IllegalArgumentException e) {
+      throw GeoException.invalid(field, "Invalid id");
+    }
   }
 
   @SchemaMapping(typeName = "Country", field = "status")
@@ -65,7 +102,7 @@ class GeoGraphqlController {
     try {
       return UUID.fromString(value);
     } catch (IllegalArgumentException e) {
-      throw PinException.invalidCityId();
+      throw GeoException.invalidCityId();
     }
   }
 

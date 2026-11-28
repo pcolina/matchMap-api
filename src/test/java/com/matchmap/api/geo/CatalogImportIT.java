@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,7 @@ class CatalogImportIT {
   private static final String COUNTRY_NAMES =
       """
       code,lang,name
-      ES,es,España
+      ES,es,EspaÃ±a
       FR,es,Francia
       """;
 
@@ -48,6 +49,7 @@ class CatalogImportIT {
 
   @BeforeEach
   void clearCatalog() {
+    jdbcTemplate.update("DELETE FROM user_city_pin");
     jdbcTemplate.update("DELETE FROM city");
     jdbcTemplate.update("DELETE FROM country_name");
     jdbcTemplate.update("DELETE FROM country");
@@ -59,6 +61,7 @@ class CatalogImportIT {
   }
 
   @Test
+  @DisplayName("Re-running the import creates no duplicates")
   void runningTheImportTwiceLeavesTheSameCountsOfCountriesAndCities() {
     signInAs(insertAccount("ADMIN"));
 
@@ -73,6 +76,7 @@ class CatalogImportIT {
   }
 
   @Test
+  @DisplayName("Invalid row rejects the whole file")
   void invalidRowWritesNothingAndReportsItsLine() {
     signInAs(insertAccount("ADMIN"));
     String countriesWithLowercaseCode =
@@ -98,6 +102,7 @@ class CatalogImportIT {
   }
 
   @Test
+  @DisplayName("Non-admin cannot change the catalog")
   void nonAdministratorCannotImportTheCatalog() {
     signInAs(insertAccount("USER"));
 

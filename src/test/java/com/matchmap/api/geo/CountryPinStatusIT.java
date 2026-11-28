@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,14 +55,25 @@ class CountryPinStatusIT {
             + " ('00000000-0000-0000-0000-000000000912', 'FR', 'France')");
     jdbcTemplate.update(
         "INSERT INTO city (id, city_key, country_id, name, latitude, longitude) VALUES"
-            + " ('" + MADRID + "', 'es-madrid', '00000000-0000-0000-0000-000000000910', 'Madrid', 40.416800, -3.703800),"
-            + " ('" + GRANADA + "', 'es-granada', '00000000-0000-0000-0000-000000000910', 'Granada', 37.176400, -3.598600),"
-            + " ('" + NEW_YORK + "', 'us-new-york', '00000000-0000-0000-0000-000000000911', 'New York', 40.712800, -74.006000),"
-            + " ('" + DENVER + "', 'us-denver', '00000000-0000-0000-0000-000000000911', 'Denver', 39.739200, -104.990300),"
-            + " ('" + SAN_FRANCISCO + "', 'us-san-francisco', '00000000-0000-0000-0000-000000000911', 'San Francisco', 37.774900, -122.419400)");
+            + " ('"
+            + MADRID
+            + "', 'es-madrid', '00000000-0000-0000-0000-000000000910', 'Madrid', 40.416800, -3.703800),"
+            + " ('"
+            + GRANADA
+            + "', 'es-granada', '00000000-0000-0000-0000-000000000910', 'Granada', 37.176400, -3.598600),"
+            + " ('"
+            + NEW_YORK
+            + "', 'us-new-york', '00000000-0000-0000-0000-000000000911', 'New York', 40.712800, -74.006000),"
+            + " ('"
+            + DENVER
+            + "', 'us-denver', '00000000-0000-0000-0000-000000000911', 'Denver', 39.739200, -104.990300),"
+            + " ('"
+            + SAN_FRANCISCO
+            + "', 'us-san-francisco', '00000000-0000-0000-0000-000000000911', 'San Francisco', 37.774900, -122.419400)");
   }
 
   @Test
+  @DisplayName("Lived city makes the country lived")
   void livedCityMakesTheCountryLived() throws Exception {
     String token = newUser("lived");
     pin(token, MADRID, "LIVED");
@@ -71,6 +83,7 @@ class CountryPinStatusIT {
   }
 
   @Test
+  @DisplayName("Visited city makes the country visited")
   void visitedCityMakesTheCountryVisited() throws Exception {
     String token = newUser("visited");
     pin(token, NEW_YORK, "VISITED");
@@ -79,6 +92,7 @@ class CountryPinStatusIT {
   }
 
   @Test
+  @DisplayName("Only wanted cities make the country want to go")
   void wantToGoCityMakesTheCountryWantToGo() throws Exception {
     String token = newUser("wish");
     pin(token, SAN_FRANCISCO, "WANT_TO_GO");
@@ -87,6 +101,7 @@ class CountryPinStatusIT {
   }
 
   @Test
+  @DisplayName("Lived beats visited in the same country")
   void livedBeatsVisitedInTheSameCountry() throws Exception {
     String token = newUser("priority");
     pin(token, NEW_YORK, "VISITED");
@@ -96,6 +111,7 @@ class CountryPinStatusIT {
   }
 
   @Test
+  @DisplayName("Country without pins has no status")
   void countryWithoutPinsHasNoStatus() throws Exception {
     String token = newUser("none");
 
@@ -103,6 +119,7 @@ class CountryPinStatusIT {
   }
 
   @Test
+  @DisplayName("Wanted cities are not in the visited list")
   void visitedCitiesOfSpainAreMadridOnly() throws Exception {
     String token = newUser("visitedlist");
     pin(token, MADRID, "VISITED");
@@ -112,6 +129,7 @@ class CountryPinStatusIT {
   }
 
   @Test
+  @DisplayName("Visited cities come with coordinates")
   void visitedCitiesCarryTheirCoordinates() throws Exception {
     String token = newUser("coordinates");
     pin(token, MADRID, "LIVED");
@@ -123,8 +141,16 @@ class CountryPinStatusIT {
 
   private String newUser(String name) throws Exception {
     String email = name + uniqueSuffix() + "@example.com";
-    graphql("mutation { register(input: { email: \"" + email + "\", password: \"" + PASSWORD + "\" }) { id } }", null);
-    String id = jdbcTemplate.queryForObject("SELECT id::text FROM user_account WHERE email = ?", String.class, email);
+    graphql(
+        "mutation { register(input: { email: \""
+            + email
+            + "\", password: \""
+            + PASSWORD
+            + "\" }) { id } }",
+        null);
+    String id =
+        jdbcTemplate.queryForObject(
+            "SELECT id::text FROM user_account WHERE email = ?", String.class, email);
     return login(email, id);
   }
 
@@ -142,8 +168,9 @@ class CountryPinStatusIT {
   }
 
   private void pin(String token, String cityId, String status) throws Exception {
-    String userId = jdbcTemplate.queryForObject(
-        "SELECT id::text FROM user_account WHERE email = ?", String.class, emailOf(token));
+    String userId =
+        jdbcTemplate.queryForObject(
+            "SELECT id::text FROM user_account WHERE email = ?", String.class, emailOf(token));
     jdbcTemplate.update(
         "INSERT INTO user_city_pin (user_id, city_id, status, created_at, updated_at)"
             + " VALUES (?::uuid, ?::uuid, ?, now(), now())",
@@ -153,9 +180,10 @@ class CountryPinStatusIT {
   }
 
   private String emailOf(String token) throws Exception {
-    var response =
-        graphql("{ me { email } }", token);
-    return JSON.readTree(response.getResponse().getContentAsString()).at("/data/me/email").asString();
+    var response = graphql("{ me { email } }", token);
+    return JSON.readTree(response.getResponse().getContentAsString())
+        .at("/data/me/email")
+        .asString();
   }
 
   private String statusOf(String code, String token) throws Exception {
@@ -176,7 +204,8 @@ class CountryPinStatusIT {
 
   private JsonNode countryNode(String code, String token) throws Exception {
     var response = graphql(COUNTRIES, token);
-    JsonNode countries = JSON.readTree(response.getResponse().getContentAsString()).at("/data/countries");
+    JsonNode countries =
+        JSON.readTree(response.getResponse().getContentAsString()).at("/data/countries");
     JsonNode found = null;
     for (JsonNode country : countries) {
       if (code.equals(country.at("/code").asString())) {

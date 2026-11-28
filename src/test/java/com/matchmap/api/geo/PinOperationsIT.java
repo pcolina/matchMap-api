@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.matchmap.api.TestcontainersConfiguration;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,6 +70,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Pin a city as visited")
   void pinningACityAsVisitedStoresOneVisitedPin() throws Exception {
     String token = newUser();
 
@@ -81,6 +83,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Pinning again replaces the status")
   void pinningAgainReplacesTheStatusAndKeepsOneRow() throws Exception {
     String token = newUser();
     graphql(SET_PIN, Map.of("cityId", MADRID, "status", "WANT_TO_GO"), token);
@@ -92,6 +95,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Pins are not shared between users")
   void pinsAreNotSharedBetweenUsers() throws Exception {
     String ana = newUser();
     String bob = newUser();
@@ -103,6 +107,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Pin without a token is rejected")
   void pinWithoutATokenIsRejectedAsUnauthorized() throws Exception {
     var response = graphql(SET_PIN, Map.of("cityId", MADRID, "status", "VISITED"), null);
 
@@ -114,6 +119,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Pin of a city that does not exist is rejected")
   void pinOfACityThatDoesNotExistIsRejected() throws Exception {
     String token = newUser();
 
@@ -131,6 +137,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Unknown status is rejected")
   void unknownStatusIsRejectedAndNothingIsStored() throws Exception {
     String token = newUser();
 
@@ -145,6 +152,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Remove an existing pin")
   void removingAnExistingPinDeletesIt() throws Exception {
     String token = newUser();
     graphql(SET_PIN, Map.of("cityId", MADRID, "status", "VISITED"), token);
@@ -156,6 +164,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Remove a city without a pin")
   void removingACityWithoutAPinLeavesThePinsUnchanged() throws Exception {
     String token = newUser();
     graphql(SET_PIN, Map.of("cityId", MADRID, "status", "VISITED"), token);
@@ -167,6 +176,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Retired city rejects new pins")
   void pinOfARetiredCityIsRejectedAndWritesNothing() throws Exception {
     String token = newUser();
 
@@ -177,6 +187,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Read own pins")
   void cityPinsReturnsOwnPinsWithTheirStatuses() throws Exception {
     String token = newUser();
     graphql(SET_PIN, Map.of("cityId", MADRID, "status", "VISITED"), token);
@@ -188,6 +199,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("No pins for a new user")
   void newUserReadsAnEmptyList() throws Exception {
     String token = newUser();
 
@@ -197,6 +209,7 @@ class PinOperationsIT {
   }
 
   @Test
+  @DisplayName("Pins are not readable without a token")
   void cityPinsWithoutATokenIsRejectedAsUnauthorized() throws Exception {
     var response = graphql(CITY_PINS, null, null);
 

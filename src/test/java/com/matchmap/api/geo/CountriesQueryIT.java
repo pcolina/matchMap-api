@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.matchmap.api.TestcontainersConfiguration;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,12 +26,14 @@ class CountriesQueryIT {
 
   @BeforeEach
   void clearCatalog() {
+    jdbcTemplate.update("DELETE FROM user_city_pin");
     jdbcTemplate.update("DELETE FROM city");
     jdbcTemplate.update("DELETE FROM country_name");
     jdbcTemplate.update("DELETE FROM country");
   }
 
   @Test
+  @DisplayName("Catalog data is read from the database; Requests do not read the data set")
   void countriesAreReadFromTheDatabase() {
     jdbcTemplate.update(
         "INSERT INTO country (id, code, name) VALUES (?, 'FR', 'France')",

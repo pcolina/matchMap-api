@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,7 @@ class MergedCountryQueryIT {
 
   @BeforeEach
   void mergeXaIntoXb() {
+    jdbcTemplate.update("DELETE FROM user_city_pin");
     jdbcTemplate.update("DELETE FROM city");
     jdbcTemplate.update("DELETE FROM country_name");
     jdbcTemplate.update("DELETE FROM country");
@@ -48,6 +50,7 @@ class MergedCountryQueryIT {
   }
 
   @Test
+  @DisplayName("Merged country is returned as its successor")
   void mergedCountryIsNotReturnedAndTheSuccessorHoldsItsCities() throws Exception {
     var response =
         mockMvc

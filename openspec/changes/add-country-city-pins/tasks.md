@@ -1,4 +1,4 @@
-﻿# Tasks
+# Tasks
 
 Every task follows TDD: write the failing test first, run it and show it failing, write the minimum code that makes it pass, then refactor. Each task is one commit with `Task: <id>` in the body.
 
@@ -72,12 +72,12 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 ## 9. Coverage of the specs
 
-- [ ] 9.1 Test: every scenario in `geo-catalog` and `travel-pins` has a test that names it. Then fix any scenario without a test.
+- [x] 9.1 Test: every scenario in `geo-catalog` and `travel-pins` has a test that names it. Then fix any scenario without a test.
 
 ## 10. Admin catalog operations
 
-- [ ] 10.1 Test: a user without the `ADMIN` role cannot create, retire or merge. Covers "Non-admin cannot change the catalog" in `geo-catalog`. Then require `ADMIN` on the admin mutations. Depends on `matchMap-api` issue #53.
-- [ ] 10.2 Test: `createCountry` and `createCity` reject an invalid country code, a duplicate code and a latitude of `91`. Covers the stored rules in "Country and city catalog is stored in the database". Then implement `createCountry` and `createCity`.
-- [ ] 10.3 Test: `retireCity` keeps the city and its pins. Covers "Retired city keeps its pins". Then implement `retireCity`.
-- [ ] 10.4 Test: `mergeCountry` moves the cities to the successor and keeps the pins. Covers "Merged country keeps its cities". Also rejects a merge into itself or a missing country. Then implement `mergeCountry`.
-- [ ] 10.5 Test: the schema has no mutation that deletes a country or a city. Covers "No deletion of countries or cities". Then keep the schema without delete mutations.
+- [x] 10.1 Test: a user without the `ADMIN` role cannot create, retire or merge. Covers "Non-admin cannot change the catalog" in `geo-catalog`. Then require `ADMIN` on the admin mutations. Depends on `matchMap-api` issue #53.
+- [x] 10.2 Test: `createCountry` and `createCity` reject an invalid country code, a duplicate code and a latitude of `91`. Covers the stored rules in "Country and city catalog is stored in the database". Then implement `createCountry` and `createCity`.
+- [x] 10.3 Test: `retireCity` keeps the city and its pins. Covers "Retired city keeps its pins". Then implement `retireCity`.
+- [x] 10.4 Test: `mergeCountry` moves the cities to the successor and keeps the pins. Covers "Merged country keeps its cities". Also rejects a merge into itself or a missing country. Then implement `mergeCountry`.
+- [x] 10.5 Test: the schema has no mutation that deletes a country or a city. Covers "No deletion of countries or cities". Then keep the schema without delete mutations.

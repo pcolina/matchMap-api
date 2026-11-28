@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.matchmap.api.TestcontainersConfiguration;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,7 @@ class CityCoordinatesIT {
 
   @BeforeEach
   void loadMadrid() {
+    jdbcTemplate.update("DELETE FROM user_city_pin");
     jdbcTemplate.update("DELETE FROM city");
     jdbcTemplate.update("DELETE FROM country_name");
     jdbcTemplate.update("DELETE FROM country");
@@ -42,6 +44,7 @@ class CityCoordinatesIT {
   }
 
   @Test
+  @DisplayName("City coordinates are returned")
   void cityCoordinatesAreReturnedForTheCitiesOfACountry() throws Exception {
     var response = query("{ countries { code cities { name latitude longitude } } }");
 

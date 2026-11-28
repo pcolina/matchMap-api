@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +34,7 @@ class CountryNameLanguageIT {
 
   @BeforeEach
   void loadFrance() {
+    jdbcTemplate.update("DELETE FROM user_city_pin");
     jdbcTemplate.update("DELETE FROM city");
     jdbcTemplate.update("DELETE FROM country_name");
     jdbcTemplate.update("DELETE FROM country");
@@ -42,24 +44,27 @@ class CountryNameLanguageIT {
     jdbcTemplate.update(
         "INSERT INTO country_name (country_id, language, name) VALUES"
             + " ('00000000-0000-0000-0000-000000000601', 'es', 'Francia'),"
-            + " ('00000000-0000-0000-0000-000000000601', 'ja', 'フランス'),"
-            + " ('00000000-0000-0000-0000-000000000601', 'zh-Hant', '法國')");
+            + " ('00000000-0000-0000-0000-000000000601', 'ja', 'ãƒ•ãƒ©ãƒ³ã‚¹'),"
+            + " ('00000000-0000-0000-0000-000000000601', 'zh-Hant', 'æ³•åœ‹')");
   }
 
   @Test
+  @DisplayName("Country name in the requested language")
   void spanishNameIsReturnedForSpanish() throws Exception {
     assertThat(franceName("es")).isEqualTo("Francia");
   }
 
   @Test
+  @DisplayName("Fallback to the source language")
   void sourceNameIsReturnedWhenTheLanguageHasNoName() throws Exception {
     assertThat(franceName("de")).isEqualTo("France");
   }
 
   @Test
+  @DisplayName("Japanese and Traditional Chinese names")
   void japaneseAndTraditionalChineseNamesAreReturned() throws Exception {
-    assertThat(franceName("ja")).isEqualTo("フランス");
-    assertThat(franceName("zh-Hant")).isEqualTo("法國");
+    assertThat(franceName("ja")).isEqualTo("ãƒ•ãƒ©ãƒ³ã‚¹");
+    assertThat(franceName("zh-Hant")).isEqualTo("æ³•åœ‹");
   }
 
   private String franceName(String acceptLanguage) throws Exception {

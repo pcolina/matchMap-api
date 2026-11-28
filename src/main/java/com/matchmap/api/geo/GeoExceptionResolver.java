@@ -14,17 +14,17 @@ class GeoExceptionResolver extends DataFetcherExceptionResolverAdapter {
 
   @Override
   protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
-    if (!(ex instanceof PinException pinException)) {
+    if (!(ex instanceof GeoException geoException)) {
       return null;
     }
     Map<String, Object> extensions = new LinkedHashMap<>();
-    extensions.put("code", pinException.code());
-    if (pinException.field() != null) {
-      extensions.put("field", pinException.field());
+    extensions.put("code", geoException.code());
+    if (geoException.field() != null) {
+      extensions.put("field", geoException.field());
     }
     return GraphqlErrorBuilder.newError(env)
         .errorType(ErrorType.BAD_REQUEST)
-        .message(pinException.getMessage())
+        .message(geoException.getMessage())
         .extensions(extensions)
         .build();
   }
