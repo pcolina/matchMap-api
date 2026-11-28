@@ -10,7 +10,7 @@ Every task follows TDD: write the failing test first, run it and show it failing
 ## 2. Role check
 
 - [x] 2.1 Test: an `ADMIN` account can call a catalog-changing operation. Covers "Administrator changes the catalog". Then add the role check.
-- [ ] 2.2 Test: a non-administrator is rejected with `FORBIDDEN` and no row changes. Covers "Non-administrator changes the catalog". Then return the error defined in the spec.
+- [x] 2.2 Test: a non-administrator is rejected with `FORBIDDEN` and no row changes. Covers "Non-administrator changes the catalog". Then return the error defined in the spec.
 
 ## 3. First administrator
 
