@@ -18,4 +18,11 @@ class CountryCatalog {
         "SELECT code, name FROM country ORDER BY code",
         (rs, rowNum) -> new Country(rs.getString("code"), rs.getString("name")));
   }
+
+  Country findByCode(String code) {
+    return jdbcTemplate.queryForObject(
+        "SELECT code, name FROM country WHERE code = ?",
+        (rs, rowNum) -> new Country(rs.getString("code"), rs.getString("name")),
+        code);
+  }
 }
