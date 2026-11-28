@@ -67,7 +67,8 @@ class AccountSchemaIT {
             "last_name",
             "nationality",
             "birth_country",
-            "subscription");
+            "subscription",
+            "role");
     assertThat(columnsOf("refresh_token"))
         .containsExactlyInAnyOrder(
             "id",
