@@ -77,7 +77,8 @@ class AccountContractTest {
             "lastName: String",
             "subscription: SubscriptionPlan!",
             "nationality: String",
-            "birthCountry: String");
+            "birthCountry: String",
+            "role: UserRole!");
   }
 
   @Test
