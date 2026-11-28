@@ -49,6 +49,10 @@ public class UserAccount {
   @Column(name = "subscription", nullable = false, length = 20)
   private SubscriptionPlan subscription;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role", nullable = false, length = 10)
+  private UserRole role;
+
   protected UserAccount() {}
 
   UserAccount(UUID id, String email, String username, String passwordHash, Instant createdAt) {
@@ -70,6 +74,11 @@ public class UserAccount {
     this.createdAt = createdAt;
     this.firstVisit = true;
     this.subscription = SubscriptionPlan.FREE;
+    this.role = UserRole.USER;
+  }
+
+  public UserRole getRole() {
+    return role;
   }
 
   public UUID getId() {

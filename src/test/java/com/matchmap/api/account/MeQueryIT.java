@@ -68,6 +68,17 @@ class MeQueryIT {
   }
 
   @Test
+  void meReturnsRoleOfSignedInAccount() throws Exception {
+    String email = "rita" + uniqueSuffix() + "@example.com";
+    registerAccount(email);
+
+    var response = graphql(body("{ me { role } }"), login(email));
+
+    assertThat(response).bodyJson().doesNotHavePath("$.errors");
+    assertThat(response).bodyJson().extractingPath("$.data.me.role").isEqualTo("USER");
+  }
+
+  @Test
   void meReturnsEmptyProfileAndFreePlan() throws Exception {
     String email = "nora" + uniqueSuffix() + "@example.com";
     registerAccount(email);

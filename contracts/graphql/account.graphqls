@@ -9,10 +9,16 @@ type User {
   subscription: SubscriptionPlan!
   nationality: String
   birthCountry: String
+  role: UserRole!
 }
 
 enum SubscriptionPlan {
   FREE
+}
+
+enum UserRole {
+  ADMIN
+  USER
 }
 
 input RegisterInput {

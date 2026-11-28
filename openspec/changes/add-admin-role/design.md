@@ -1,6 +1,6 @@
 # Design
 
-Contract baseline for the Definition of Done check: the commit that proposes this change, recorded when it is committed.
+Contract baseline for the Definition of Done check: `defb537`, the commit where this change was proposed.
 
 ## Decisions
 

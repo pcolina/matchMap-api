@@ -5,7 +5,7 @@ Every task follows TDD: write the failing test first, run it and show it failing
 ## 1. Role storage
 
 - [x] 1.1 Test: a new account has the role `USER`. Covers "New account gets the default role". Then add `V8_3__add_user_role.sql` with the `role` column, its default and its check constraint.
-- [ ] 1.2 Test: `me` returns the role of the signed-in account. Covers "Me returns the role". Then expose `role` on `User` in `contracts/graphql/account.graphqls` and return it.
+- [x] 1.2 Test: `me` returns the role of the signed-in account. Covers "Me returns the role". Then expose `role` on `User` in `contracts/graphql/account.graphqls` and return it.
 
 ## 2. Role check
 
