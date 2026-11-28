@@ -33,6 +33,7 @@ None. No requirement of an existing capability changes. `user-accounts` and `aut
 - Comparison of maps between users (friends, Jaccard score).
 - Calls to any external data source at request time. The local data set is used only by the import.
 - Changes to the web or mobile clients, which live in another repository.
+- The border geometry of the map. The API stores no polygons; the client keeps them as its own asset and joins them to the catalog by the ISO 3166-1 alpha-2 country code.
 
 ## Depends on
 
@@ -41,6 +42,7 @@ None. No requirement of an existing capability changes. `user-accounts` and `aut
 - Frontend issue #17 (https://github.com/pcolina/MatchMap/issues/17): source of the seven languages. Its backend part is included in this change.
 - `matchmap-control-panel` issue #2 (https://github.com/pcolina/matchmap-control-panel/issues/2): the panel the administrator uses to manage catalog rows through the API.
 - `matchMap-api` issue #53 (https://github.com/pcolina/matchMap-api/issues/53): the `ADMIN` role that authorises catalog changes.
+- Frontend issue `pcolina/MatchMap#68` (https://github.com/pcolina/MatchMap/issues/68): client work that reads country names and city points from this catalog instead of bundled data. It is separate from this change and does not block it.
 
 ## Open points
 
