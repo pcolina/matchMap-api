@@ -1,10 +1,13 @@
 package com.matchmap.api.geo;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -13,12 +16,47 @@ class GeoGraphqlController {
   private final CountryCatalog countries;
   private final CityCatalog cities;
   private final CatalogImportService catalogImport;
+  private final CityPinService pins;
 
   GeoGraphqlController(
-      CountryCatalog countries, CityCatalog cities, CatalogImportService catalogImport) {
+      CountryCatalog countries,
+      CityCatalog cities,
+      CatalogImportService catalogImport,
+      CityPinService pins) {
     this.countries = countries;
     this.cities = cities;
     this.catalogImport = catalogImport;
+    this.pins = pins;
+  }
+
+  @QueryMapping
+  @PreAuthorize("isAuthenticated()")
+  List<CityPin> cityPins(Principal principal) {
+    return pins.pinsOf(userId(principal));
+  }
+
+  @MutationMapping
+  @PreAuthorize("isAuthenticated()")
+  CityPin setCityPin(Principal principal, @Argument String cityId, @Argument PinStatus status) {
+    return pins.setPin(userId(principal), cityId(cityId), status);
+  }
+
+  @MutationMapping
+  @PreAuthorize("isAuthenticated()")
+  boolean removeCityPin(Principal principal, @Argument String cityId) {
+    return pins.removePin(userId(principal), cityId(cityId));
+  }
+
+  private static UUID userId(Principal principal) {
+    return UUID.fromString(principal.getName());
+  }
+
+  private static UUID cityId(String value) {
+    try {
+      return UUID.fromString(value);
+    } catch (IllegalArgumentException e) {
+      throw PinException.invalidCityId();
+    }
   }
 
   @QueryMapping

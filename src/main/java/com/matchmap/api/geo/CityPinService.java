@@ -1,0 +1,36 @@
+package com.matchmap.api.geo;
+
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+
+@Service
+class CityPinService {
+
+  private final CityPinRepository pins;
+
+  CityPinService(CityPinRepository pins) {
+    this.pins = pins;
+  }
+
+  CityPin setPin(UUID userId, UUID cityId, PinStatus status) {
+    Boolean active = pins.cityActive(cityId);
+    if (active == null) {
+      throw PinException.cityNotFound();
+    }
+    if (!active) {
+      throw PinException.cityRetired();
+    }
+    pins.upsert(userId, cityId, status);
+    return new CityPin(pins.findCity(cityId), status);
+  }
+
+  boolean removePin(UUID userId, UUID cityId) {
+    pins.delete(userId, cityId);
+    return true;
+  }
+
+  List<CityPin> pinsOf(UUID userId) {
+    return pins.findByUser(userId);
+  }
+}

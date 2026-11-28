@@ -1,4 +1,4 @@
-# Tasks
+﻿# Tasks
 
 Every task follows TDD: write the failing test first, run it and show it failing, write the minimum code that makes it pass, then refactor. Each task is one commit with `Task: <id>` in the body.
 
@@ -38,27 +38,27 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 ## 5. Pins storage
 
-- [ ] 5.1 Test: a pin with a status other than the three allowed values is rejected by the database. Covers part of "Unknown status is rejected". Then add migration `V9__create_user_city_pin.sql` with `user_city_pin`, the primary key `(user_id, city_id)` and the `CHECK` on `status`.
-- [ ] 5.2 Test: a second pin on the same user and city is rejected by the primary key. Then confirm the constraint in `V9`.
+- [x] 5.1 Test: a pin with a status other than the three allowed values is rejected by the database. Covers part of "Unknown status is rejected". Then add migration `V9__create_user_city_pin.sql` with `user_city_pin`, the primary key `(user_id, city_id)` and the `CHECK` on `status`.
+- [x] 5.2 Test: a second pin on the same user and city is rejected by the primary key. Then confirm the constraint in `V9`.
 
 ## 6. Pin operations
 
-- [ ] 6.1 Test: a signed-in user pins `c1` as `VISITED` and has one pin with that status. Covers "Pin a city as visited". Then implement `setCityPin` as an upsert. Also test: schema inspection reports no unmapped field or argument on `setCityPin`.
-- [ ] 6.2 Test: pinning `c1` again replaces the status and keeps one row. Covers "Pinning again replaces the status". Then keep the upsert behaviour.
-- [ ] 6.3 Test: user `bob` has no pin for `c1` after `ana` pins it. Covers "Pins are not shared between users". Then scope every pin query to the signed-in user.
-- [ ] 6.4 Test: a pin without a token is rejected. Covers "Pin without a token is rejected". Then require the access token on `setCityPin`.
-- [ ] 6.5 Test: a pin on a city that does not exist is rejected. Covers "Pin of a city that does not exist is rejected". Then validate the city before writing.
-- [ ] 6.6 Test: an unknown status is rejected. Covers "Unknown status is rejected". Then validate the status before writing.
-- [ ] 6.7 Test: removing an existing pin deletes it. Covers "Remove an existing pin". Then implement `removeCityPin`. Also test: schema inspection reports no unmapped field or argument on `removeCityPin`.
-- [ ] 6.8 Test: removing a city without a pin leaves the pins unchanged. Covers "Remove a city without a pin". Then make the removal idempotent.
+- [x] 6.1 Test: a signed-in user pins `c1` as `VISITED` and has one pin with that status. Covers "Pin a city as visited". Then implement `setCityPin` as an upsert. Also test: schema inspection reports no unmapped field or argument on `setCityPin`.
+- [x] 6.2 Test: pinning `c1` again replaces the status and keeps one row. Covers "Pinning again replaces the status". Then keep the upsert behaviour.
+- [x] 6.3 Test: user `bob` has no pin for `c1` after `ana` pins it. Covers "Pins are not shared between users". Then scope every pin query to the signed-in user.
+- [x] 6.4 Test: a pin without a token is rejected. Covers "Pin without a token is rejected". Then require the access token on `setCityPin`.
+- [x] 6.5 Test: a pin on a city that does not exist is rejected. Covers "Pin of a city that does not exist is rejected". Then validate the city before writing.
+- [x] 6.6 Test: an unknown status is rejected. Covers "Unknown status is rejected". Then validate the status before writing.
+- [x] 6.7 Test: removing an existing pin deletes it. Covers "Remove an existing pin". Then implement `removeCityPin`. Also test: schema inspection reports no unmapped field or argument on `removeCityPin`.
+- [x] 6.8 Test: removing a city without a pin leaves the pins unchanged. Covers "Remove a city without a pin". Then make the removal idempotent.
 
-- [ ] 6.9 Test: a pin on a retired city is rejected and writes nothing. Covers "Retired city rejects new pins" in `geo-catalog`. Then make `setCityPin` check `active` before writing.
+- [x] 6.9 Test: a pin on a retired city is rejected and writes nothing. Covers "Retired city rejects new pins" in `geo-catalog`. Then make `setCityPin` check `active` before writing.
 
 ## 7. Reading pins
 
-- [ ] 7.1 Test: a user with pins on `c1` (`VISITED`) and `c2` (`WANT_TO_GO`) reads both. Covers "Read own pins". Then implement `cityPins`. Also test: schema inspection reports no unmapped field or argument on `cityPins`.
-- [ ] 7.2 Test: a new user reads an empty list. Covers "No pins for a new user". Then keep the empty list.
-- [ ] 7.3 Test: a client without a token reads no pin data. Covers "Pins are not readable without a token". Then require the token on `cityPins`.
+- [x] 7.1 Test: a user with pins on `c1` (`VISITED`) and `c2` (`WANT_TO_GO`) reads both. Covers "Read own pins". Then implement `cityPins`. Also test: schema inspection reports no unmapped field or argument on `cityPins`.
+- [x] 7.2 Test: a new user reads an empty list. Covers "No pins for a new user". Then keep the empty list.
+- [x] 7.3 Test: a client without a token reads no pin data. Covers "Pins are not readable without a token". Then require the token on `cityPins`.
 
 ## 8. Derived country status
 
