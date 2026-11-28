@@ -14,4 +14,4 @@ Every task follows TDD: write the failing test first, run it and show it failing
 
 ## 3. First administrator
 
-- [ ] 3.1 Test: the documented database command sets `ADMIN` on one account. Covers "First administrator is set by the database command". Then write the command in the operator documentation.
+- [x] 3.1 Test: the documented database command sets `ADMIN` on one account. Covers "First administrator is set by the database command". Then write the command in the operator documentation.
