@@ -19,7 +19,7 @@ Every task follows TDD: write the failing test first, run it and show it failing
 - [x] 2.7 Test: a city marked retired keeps its row. Its pins are covered by 10.3, because the pin table does not exist yet. Covers "Retired city keeps its pins" in `geo-catalog`. Then add `active boolean NOT NULL DEFAULT true` to `city` in `V8`.
 - [ ] 2.8 Test: a country cannot be its own successor, and a successor that does not exist is rejected. Covers "Country cannot merge into itself or a missing country". Then add migration `V8_1__add_country_successor.sql` with `successor_id` (foreign key `fk_country_successor` to `country`) and the `CHECK` `ck_country_successor_not_self` (`successor_id <> id`) to `country`. Do not edit `V8`, which is already applied in the local database.
 
-- [ ] 2.9 Test: a city without a city key is rejected, and a second city with the same city key is rejected. Covers "City key is unique" in `geo-catalog`. Then add `city_key varchar(50) NOT NULL UNIQUE` to `city` in `V8`, and add a city key to the existing city inserts in the tests.
+- [ ] 2.9 Test: a city without a city key is rejected, and a second city with the same city key is rejected. Covers "City key is unique" in `geo-catalog`. Then add migration `V8_2__add_city_key.sql` with `city_key varchar(50) NOT NULL` and the unique constraint `uk_city_key` on `city`, and add a city key to the existing city inserts in the tests. Do not edit `V8`, which is already applied in the local database.
 
 ## 3. Catalog import
 
