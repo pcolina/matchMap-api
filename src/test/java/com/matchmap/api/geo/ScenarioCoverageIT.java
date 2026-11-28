@@ -13,7 +13,10 @@ import org.junit.jupiter.api.Test;
 
 class ScenarioCoverageIT {
 
-  private static final Path SPECS = Path.of("openspec/changes/add-country-city-pins/specs");
+  private static final List<Path> SPECS =
+      List.of(
+          Path.of("openspec/specs/geo-catalog/spec.md"),
+          Path.of("openspec/specs/travel-pins/spec.md"));
   private static final Path TESTS = Path.of("src/test/java");
 
   @Test
@@ -32,12 +35,10 @@ class ScenarioCoverageIT {
 
   private static List<String> scenarioTitles() throws IOException {
     List<String> titles = new ArrayList<>();
-    try (Stream<Path> files = Files.walk(SPECS)) {
-      for (Path file : files.filter(path -> path.toString().endsWith("spec.md")).toList()) {
-        for (String line : Files.readAllLines(file)) {
-          if (line.startsWith("#### Scenario: ")) {
-            titles.add(line.substring("#### Scenario: ".length()).trim());
-          }
+    for (Path file : SPECS) {
+      for (String line : Files.readAllLines(file)) {
+        if (line.startsWith("#### Scenario: ")) {
+          titles.add(line.substring("#### Scenario: ".length()).trim());
         }
       }
     }
