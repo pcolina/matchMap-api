@@ -32,16 +32,16 @@ class GeoCatalogMigrationIT {
             "INSERT INTO country (id, code, name) VALUES"
                 + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
         statement.executeUpdate(
-            "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
-                + " ('00000000-0000-0000-0000-000000000201',"
+            "INSERT INTO city (id, city_key, country_id, name, latitude, longitude) VALUES"
+                + " ('00000000-0000-0000-0000-000000000201', 'madrid-es',"
                 + " '00000000-0000-0000-0000-000000000101', 'Madrid', 40.416800, -3.703800)");
 
         assertThatThrownBy(
                 () ->
                     statement.executeUpdate(
-                        "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
-                            + " ('00000000-0000-0000-0000-000000000202', NULL, 'Nowhere',"
-                            + " 0.000000, 0.000000)"))
+                        "INSERT INTO city (id, city_key, country_id, name, latitude, longitude)"
+                            + " VALUES ('00000000-0000-0000-0000-000000000202', 'nowhere-none',"
+                            + " NULL, 'Nowhere', 0.000000, 0.000000)"))
             .isInstanceOf(SQLException.class);
       }
     }
@@ -123,8 +123,8 @@ class GeoCatalogMigrationIT {
         assertThatThrownBy(
                 () ->
                     statement.executeUpdate(
-                        "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
-                            + " ('00000000-0000-0000-0000-000000000203',"
+                        "INSERT INTO city (id, city_key, country_id, name, latitude, longitude)"
+                            + " VALUES ('00000000-0000-0000-0000-000000000203', 'madrid-nolat',"
                             + " '00000000-0000-0000-0000-000000000101', 'Madrid', NULL,"
                             + " -3.703800)"))
             .isInstanceOf(SQLException.class);
@@ -152,8 +152,8 @@ class GeoCatalogMigrationIT {
         assertThatThrownBy(
                 () ->
                     statement.executeUpdate(
-                        "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
-                            + " ('00000000-0000-0000-0000-000000000204',"
+                        "INSERT INTO city (id, city_key, country_id, name, latitude, longitude)"
+                            + " VALUES ('00000000-0000-0000-0000-000000000204', 'nowhere-lat91',"
                             + " '00000000-0000-0000-0000-000000000101', 'Nowhere', 91.000000,"
                             + " 0.000000)"))
             .isInstanceOf(SQLException.class);
@@ -181,8 +181,8 @@ class GeoCatalogMigrationIT {
         assertThatThrownBy(
                 () ->
                     statement.executeUpdate(
-                        "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
-                            + " ('00000000-0000-0000-0000-000000000205',"
+                        "INSERT INTO city (id, city_key, country_id, name, latitude, longitude)"
+                            + " VALUES ('00000000-0000-0000-0000-000000000205', 'nowhere-lon181',"
                             + " '00000000-0000-0000-0000-000000000101', 'Nowhere', 0.000000,"
                             + " 181.000000)"))
             .isInstanceOf(SQLException.class);
@@ -207,8 +207,8 @@ class GeoCatalogMigrationIT {
             "INSERT INTO country (id, code, name) VALUES"
                 + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
         statement.executeUpdate(
-            "INSERT INTO city (id, country_id, name, latitude, longitude, active) VALUES"
-                + " ('00000000-0000-0000-0000-000000000206',"
+            "INSERT INTO city (id, city_key, country_id, name, latitude, longitude, active)"
+                + " VALUES ('00000000-0000-0000-0000-000000000206', 'madrid-retired',"
                 + " '00000000-0000-0000-0000-000000000101', 'Madrid', 40.416800, -3.703800,"
                 + " false)");
 
@@ -273,6 +273,70 @@ class GeoCatalogMigrationIT {
                             + " WHERE id = '00000000-0000-0000-0000-000000000101'"))
             .isInstanceOf(SQLException.class)
             .hasMessageContaining("fk_country_successor");
+      }
+    }
+  }
+
+  @Test
+  void cityWithoutCityKeyIsRejected() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        statement.executeUpdate(
+            "INSERT INTO country (id, code, name) VALUES"
+                + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
+
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "INSERT INTO city (id, country_id, name, latitude, longitude) VALUES"
+                            + " ('00000000-0000-0000-0000-000000000207',"
+                            + " '00000000-0000-0000-0000-000000000101', 'Madrid', 40.416800,"
+                            + " -3.703800)"))
+            .isInstanceOf(SQLException.class)
+            .hasMessageContaining("city_key");
+      }
+    }
+  }
+
+  @Test
+  void duplicateCityKeyIsRejected() throws Exception {
+    try (PostgreSQLContainer postgres =
+        new PostgreSQLContainer(TestcontainersConfiguration.POSTGIS_IMAGE)) {
+      postgres.start();
+      String url = postgres.getJdbcUrl();
+      String user = postgres.getUsername();
+      String password = postgres.getPassword();
+
+      Flyway.configure().dataSource(url, user, password).load().migrate();
+
+      try (Connection connection = DriverManager.getConnection(url, user, password);
+          Statement statement = connection.createStatement()) {
+        statement.executeUpdate(
+            "INSERT INTO country (id, code, name) VALUES"
+                + " ('00000000-0000-0000-0000-000000000101', 'ES', 'Spain')");
+        statement.executeUpdate(
+            "INSERT INTO city (id, city_key, country_id, name, latitude, longitude) VALUES"
+                + " ('00000000-0000-0000-0000-000000000208', 'madrid-es',"
+                + " '00000000-0000-0000-0000-000000000101', 'Madrid', 40.416800, -3.703800)");
+
+        assertThatThrownBy(
+                () ->
+                    statement.executeUpdate(
+                        "INSERT INTO city (id, city_key, country_id, name, latitude, longitude)"
+                            + " VALUES ('00000000-0000-0000-0000-000000000209', 'madrid-es',"
+                            + " '00000000-0000-0000-0000-000000000101', 'Madrid again',"
+                            + " 40.416800, -3.703800)"))
+            .isInstanceOf(SQLException.class)
+            .hasMessageContaining("uk_city_key");
       }
     }
   }
