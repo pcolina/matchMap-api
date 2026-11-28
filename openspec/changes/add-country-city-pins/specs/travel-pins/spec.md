@@ -22,7 +22,7 @@ The signed-in user SHALL be able to pin a city of the catalog with one status: `
 
 ### Requirement: Pins require a signed-in user and an existing city
 
-Pin operations SHALL require a valid access token. A pin SHALL reference a city that exists in the catalog. The status SHALL be one of the three allowed values. [NEEDS CLARIFICATION: Which error codes and messages are returned for an unknown city, an invalid status and a missing token? Use the existing error code style of `user-accounts` unless told otherwise.]
+Pin operations SHALL require a valid access token. A protected operation called without a token SHALL fail with `extensions.classification` `UNAUTHORIZED`, as defined in `authentication`. A pin SHALL reference a city that exists in the catalog; a pin on a city that does not exist SHALL fail with `extensions.code` `VALIDATION_FAILED` and `extensions.field` `cityId`. The status SHALL be one of the three allowed values; a status outside them SHALL fail with `extensions.code` `VALIDATION_FAILED` and `extensions.field` `status`. No pin SHALL be stored when any of these requests fails.
 
 #### Scenario: Pin without a token is rejected
 - **WHEN** a client without an access token pins the city `c1`
