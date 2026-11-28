@@ -15,7 +15,7 @@ class CountryCatalog {
 
   List<Country> findAll() {
     return jdbcTemplate.query(
-        "SELECT code, name FROM country ORDER BY code",
+        "SELECT code, name FROM country WHERE successor_id IS NULL ORDER BY code",
         (rs, rowNum) -> new Country(rs.getString("code"), rs.getString("name")));
   }
 
