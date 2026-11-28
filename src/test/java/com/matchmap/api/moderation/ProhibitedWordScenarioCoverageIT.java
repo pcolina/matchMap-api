@@ -13,8 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class ProhibitedWordScenarioCoverageIT {
 
-  private static final Path SPEC =
-      Path.of("openspec/changes/add-prohibited-word-admin/specs/prohibited-word-admin/spec.md");
+  private static final Path SPEC = Path.of("openspec/specs/prohibited-word-admin/spec.md");
   private static final Path TESTS = Path.of("src/test/java");
 
   @Test
